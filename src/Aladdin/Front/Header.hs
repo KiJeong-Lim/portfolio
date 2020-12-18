@@ -2,6 +2,9 @@ module Aladdin.Front.Header where
 
 import Aladdin.Back.Base.Constant
 import Aladdin.Back.Base.Identifier
+import qualified Data.List as List
+import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import Data.Unique
 import Lib.Base
 
@@ -18,6 +21,10 @@ type IVar = Unique
 type TVar = SmallId
 
 type MetaTVar = Unique
+
+type KindEnv = Map.Map SmallId KindExpr
+
+type TypeEnv = Map.Map SmallId PolyType
 
 data SLoc
     = SLoc
@@ -57,6 +64,10 @@ data TermExpr dcon annot
     | DCon annot dcon 
     | IApp annot (TermExpr dcon annot) (TermExpr dcon annot)
     | IAbs annot IVar (TermExpr dcon annot)
+    deriving ()
+
+data ModuleBody term
+    = ModuleBody { _KindDecls :: KindEnv, _TypeDecls :: TypeEnv, _FactDecls :: [term] }
     deriving ()
 
 class HasSLoc a where

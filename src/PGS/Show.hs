@@ -144,7 +144,7 @@ genParser blocks = go where
                     , ppunc ", "
                         [ case Map.lookup (substituteNS (zip params_name (snd (unFoldNSApp ns1))) ns) id_env of
                             Nothing -> error "makeGuard"
-                            Just num -> strstr ", " . showsPrec 0 num
+                            Just num -> showsPrec 0 num
                         | (idx, NS ns) <- zipped_sym
                         ]
                     , strstr "]"
@@ -191,7 +191,7 @@ genParser blocks = go where
         checkTerminalOccurence (Set.fromList [ ts | (lhs, Just pairs) <- cache', (rhs, prec) <- pairs, TS ts <- rhs ]) (Set.fromList [ tsym | TerminalInfo patn tsym prec assoc <- terminal_infos ])
         lalr1 <- getLALR1 (CFGrammar { getStartSym = start_symbol, getTerminalSyms = terminal_symbols, getProductionRules = production_rules })
         fmap (strcat . snd) $ runWriterT $ do
-            tellLine (ppunc " " (map strstr hs_head))
+            tellLine (ppunc "\n" (map strstr hs_head))
             tellLine (strstr "import qualified Control.Monad.Trans.Class as Y")
             tellLine (strstr "import qualified Control.Monad.Trans.Except as Y")
             tellLine (strstr "import qualified Control.Monad.Trans.State.Strict as Y")
