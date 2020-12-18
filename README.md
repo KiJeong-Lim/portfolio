@@ -14,7 +14,7 @@
 
 - 명제논리의 건전성과 완전성 그리고 컴팩트성에 대한 증명입니다. 가정한 공리는 `exclusive_middle : forall P : Prop, P \/ ~ P` 뿐입니다.
 
-- 완전성 정리를 증명할 때, Danko Ilik님의 논문 `Constructive Completeness Proofs and Delimited Control`을 기반으로 만들었습니다.
+- 완전성 정리를 증명할 때, Danko Ilik님의 논문 `Constructive Completeness Proofs and Delimited Control`을 참고하였습니다.
 
 - 손태승( https://github.com/paulsohn )님께서 비형식적 아이디어를 주시고, 장준영( https://github.com/Ailrun )님께서 Coq 다루는 법을 알려주셨습니다. 두 분께 감사의 말씀을 드립니다.
 
@@ -30,6 +30,6 @@
 
 - 느긋한 순수 함수형 언어입니다.
 
-- Simon Loftus Peyton Jones님과 David Lester님의 저작물 `Implementing functional languages: a tutorial` 중 읽고 만들었습니다.
+- Simon Loftus Peyton Jones님과 David Lester님의 출판물 `Implementing functional languages: a tutorial`을 읽고 만들었습니다.
 
 - 소스 파일에 있는 람다식은 lift되지만, repl에 친 람다식은 그대로 람다식입니다.
