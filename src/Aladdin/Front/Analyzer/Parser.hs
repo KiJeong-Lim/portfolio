@@ -685,7 +685,7 @@ runParser = fmap (getEither getQuery (getSequence getDecl)) . runLR1 theLR1Parse
             , ((72,7),Reduce (17,[TS 7,NS 15,TS 8]))
             , ((72,8),Reduce (17,[TS 7,NS 15,TS 8]))
             , ((72,2),Reduce (17,[TS 7,NS 15,TS 8]))
-            , ((0,0),Reduce (11,[]))
+            , ((72,18),Reduce (17,[TS 7,NS 15,TS 8]))
             ]
         , getReduceTable = YMap.fromAscList 
             [ ((0,12),1)
@@ -776,7 +776,7 @@ runParser = fmap (getEither getQuery (getSequence getDecl)) . runLR1 theLR1Parse
             , ((64,14),40)
             , ((68,15),71)
             , ((68,16),44)
-            , ((0,12),1)
+            , ((68,17),45)
             ]
         }
 

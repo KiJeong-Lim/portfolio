@@ -84,7 +84,7 @@ plist :: Indentation -> [String -> String] -> String -> String
 plist space [] = strstr "[]"
 plist space (delta : deltas) = nl . pindent space . strstr "[ " . loop delta deltas where
     loop :: (String -> String) -> [String -> String] -> String -> String
-    loop delta1 [] = delta . nl . pindent space . strstr "]"
+    loop delta1 [] = delta1 . nl . pindent space . strstr "]"
     loop delta1 (delta2 : deltas) = delta1 . nl . pindent space . strstr ", " . loop delta2 deltas
 
 split' :: (a -> a -> Bool) -> [a] -> [[a]]
