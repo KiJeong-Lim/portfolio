@@ -68,29 +68,6 @@ executable Aladdin
     build-depends: base >= 4.7 && < 5, containers >= 0.6, transformers >= 0.5, pretty-terminal >= 0.1.0.0
     main-is: Aladdin/Main.hs
     other-modules:
-        Aladdin.Back.BackEnd
-        Aladdin.Back.Base.Constant
-        Aladdin.Back.Base.Identifier
-        Aladdin.Back.Base.Labeling
-        Aladdin.Back.Base.TermNode
-        Aladdin.Back.Base.TermNode.Read
-        Aladdin.Back.Base.TermNode.Show
-        Aladdin.Back.Base.TermNode.Util
-        Aladdin.Back.Base.VarBinding
-        Aladdin.Back.Kernel.Disagreement
-        Aladdin.Back.Kernel.HOPU
-        Aladdin.Back.Kernel.HOPU.Bind
-        Aladdin.Back.Kernel.HOPU.MkSubst
-        Aladdin.Back.Kernel.HOPU.Select
-        Aladdin.Back.Kernel.HOPU.Simplify
-        Aladdin.Back.Kernel.HOPU.Util
-        Aladdin.Back.Kernel.KernelErr
-        Aladdin.Back.Kernel.Runtime
-        Aladdin.Back.Kernel.Runtime.LogicalOperator
-        Aladdin.Back.Kernel.Runtime.Instantiation
-        Aladdin.Back.Kernel.Runtime.Transition
-        Aladdin.Back.Kernel.Runtime.Util
-        Aladdin.Front.Header
         Lib.Base
 executable Butterfly
     hs-source-dirs: src
