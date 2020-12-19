@@ -373,7 +373,7 @@ genParser blocks = go where
                             ]
                 | ((q, tsym), action) <- Map.toAscList (getActionTable lalr1)
                 ]
-            tellLine (strstr "        , getActionTable = YMap.fromAscList " . plist 12 table1)
+            tellLine (strstr "        , getActionTable = YMap.fromList " . plist 12 table1)
             table2 <- lift $ sequence
                 [ do
                     nsym_id <- getNSymId nsym
@@ -388,6 +388,6 @@ genParser blocks = go where
                         ]
                 | ((q, nsym), p) <- Map.toAscList (getReduceTable lalr1)
                 ]
-            tellLine (strstr "        , getReduceTable = YMap.fromAscList " . plist 12 table2)
+            tellLine (strstr "        , getReduceTable = YMap.fromList " . plist 12 table2)
             tellLine (strstr "        }")
             tellLine (strstr "")

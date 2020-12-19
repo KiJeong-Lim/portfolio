@@ -90,12 +90,6 @@ executable Aladdin
         Aladdin.Back.Kernel.Runtime.Instantiation
         Aladdin.Back.Kernel.Runtime.Transition
         Aladdin.Back.Kernel.Runtime.Util
-        Aladdin.Front.Analyzer.Grammar
-        Aladdin.Front.Analyzer.Lexer
-        Aladdin.Front.Analyzer.Parser
-        Aladdin.Front.Desugarer.DsHelper
-        Aladdin.Front.Desugarer.DsProgram
-        Aladdin.Front.Desugarer.DsQuery
         Aladdin.Front.Header
         Lib.Base
 executable Butterfly

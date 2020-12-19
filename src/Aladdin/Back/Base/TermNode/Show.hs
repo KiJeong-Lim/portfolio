@@ -38,6 +38,7 @@ instance Show TermViewer where
         go (TVarViewer var) = parenthesize 10 (strstr var)
         go (IAbsViewer var viewer1) = parenthesize 0 (strstr "W_" . showsPrec 0 var . strstr "\\ " . showsPrec 0 viewer1)
         go (IAppViewer viewer1 viewer2) = parenthesize 9 (showsPrec 9 viewer1 . strstr " " . showsPrec 10 viewer2)
+        go (TAppViewer viewer1 viewer2) = parenthesize 9 (showsPrec 9 viewer1 . strstr " " . showsPrec 10 viewer2)
         go (ChrLViewer chr) = parenthesize 10 (showsPrec 0 chr)
         go (StrLViewer str) = parenthesize 10 (showsPrec 0 str)
         go (NatLViewer nat) = parenthesize 10 (showsPrec 0 nat)
@@ -52,6 +53,16 @@ instance Show TermViewer where
                 | [viewer1] <- viewers -> parenthesize precedence (showsPrec precedence viewer1)
             ID_Name str
                 | [] <- viewers -> parenthesize 10 (strstr str)
+        go (TConViewer iden viewers) = case iden of
+                ID_InfixOperator associativity precedence str
+                    | [viewer1, viewer2] <- viewers -> case associativity of
+                        A_left -> parenthesize precedence (showsPrec precedence viewer1 . strstr str . showsPrec (precedence + 1) viewer2)
+                        A_right -> parenthesize precedence (showsPrec (precedence + 1) viewer1 . strstr str . showsPrec precedence viewer2)
+                        A_none -> parenthesize precedence (showsPrec (precedence + 1) viewer1 . strstr str . showsPrec (precedence + 1) viewer2)
+                ID_PrefixOperator precedence str
+                    | [viewer1] <- viewers -> parenthesize precedence (showsPrec precedence viewer1)
+                ID_Name str
+                    | [] <- viewers -> parenthesize 10 (strstr str)
 
 instance Show TermNode where
     showList = ppunc "\n" . map (showsPrec 0)
