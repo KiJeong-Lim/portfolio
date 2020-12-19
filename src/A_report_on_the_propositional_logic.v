@@ -1,8 +1,8 @@
-Require Export Bool.
-Require Export PeanoNat.
-Require Export Peano_dec.
-Require Export List.
-Require Export Lia.
+From Coq Require Export Bool.
+From Coq Require Export PeanoNat.
+From Coq Require Export Peano_dec.
+From Coq Require Export List.
+From Coq Require Export Lia.
 
 Module Helper.
 
@@ -10,7 +10,7 @@ Module Helper.
 
   Section NaturalNumber.
 
-    Lemma div_mod_property :
+    Lemma div_mod_uniqueness :
       forall a : nat,
       forall b : nat,
       forall q : nat,
