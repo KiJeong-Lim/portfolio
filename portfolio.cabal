@@ -75,3 +75,4 @@ executable Butterfly
     build-depends: base >= 4.7 && < 5, containers >= 0.6, transformers >= 0.5, pretty-terminal >= 0.1.0.0
     main-is: Butterfly/Main.hs
     other-modules:
+        Lib.Base
