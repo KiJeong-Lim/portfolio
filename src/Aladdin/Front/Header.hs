@@ -13,6 +13,14 @@ type SPos = (Int, Int)
 
 type Identifier = Unique
 
+type LargeId = String
+
+type SmallId = String
+
+type Keyword = String
+
+type LexicalEnv = Map.Map SmallId (Fixity, Precedence)
+
 data SLoc
     = SLoc
         { _BegPos :: SPos
@@ -27,6 +35,12 @@ newtype Unique
 newtype UniqueGenT m a
     = UniqueGenT { unUniqueGenT :: StateT Integer m a }
     deriving ()
+
+data Literal
+    = NatL Integer
+    | ChrL Char
+    | StrL String
+    deriving (Eq, Ord)
 
 data Fixity
     = Prefix

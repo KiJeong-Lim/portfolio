@@ -52,5 +52,5 @@ sortByMerging = go where
     merge lt [] ys = ys
     merge lt xs [] = xs
     merge lt (x : xs) (y : ys)
-        | x `lt` y = x : merge lt (x : xs) ys
-        | otherwise = y : merge lt xs (y : ys)
+        | x `lt` y = x : merge lt (y : xs) ys
+        | otherwise = y : merge lt xs (x : ys)
