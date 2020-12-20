@@ -1,12 +1,12 @@
 -- natural deduction checker
 
-kind parity (* -> * -> *).
+kind parity (type -> type -> type).
 type pair (A -> B -> parity A B).
 
-kind term (*).
+kind term (type).
 type fapp (string -> list term -> term).
 
-kind formula (*).
+kind formula (type).
 type atom (string -> list term -> formula).
 type contradiction (formula).
 type negation (formula -> formula).
@@ -19,15 +19,15 @@ type existential ((term -> formula) -> formula).
 type equation (term -> term -> formula).
 type papp (property -> list term -> formula).
 
-kind property (*).
+kind property (type).
 type primitive_property (formula -> property).
 type prime_property ((term -> property) -> property).
 
-kind scheme (*).
+kind scheme (type).
 type primitive_scheme (formula -> scheme).
 type prime_scheme ((property -> scheme) -> scheme).
 
-kind proof (*).
+kind proof (type).
 type by_axiom (string -> formula -> proof).
 type by_assumption (formula -> proof).
 type bottom_intro (formula -> proof -> proof -> proof).
@@ -53,7 +53,7 @@ type eqn_intro (formula -> proof).
 type eqn_elim1 (formula -> proof -> proof -> proof).
 type eqn_elim2 (formula -> proof -> proof -> proof).
 
-kind meta_proof (*).
+kind meta_proof (type).
 type mono_proof (proof -> meta_proof).
 type poly_proof ((property -> meta_proof) -> meta_proof).
 

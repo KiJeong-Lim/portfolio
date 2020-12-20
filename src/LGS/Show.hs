@@ -112,6 +112,9 @@ genLexer xblocks = do
     hstail <- case maybe_head [ hscode | HsTail hscode <- xblocks ] of
         Nothing -> throwE "a hshead block required."
         Just hscode -> return hscode
+    if getInitialQOfDFA theDFA `Set.member` Map.keysSet (getFinalQsOfDFA theDFA)
+        then throwE "the empty string is acceptable."
+        else return ()
     fmap (strcat . snd) $ runWriterT $ do
         tellLine (ppunc "\n" (map strstr hshead))
         tellLine (strstr "import qualified Control.Monad.Trans.State.Strict as XState")
