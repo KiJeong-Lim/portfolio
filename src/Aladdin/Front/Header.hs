@@ -93,8 +93,5 @@ instance MonadTrans UniqueGenT where
 instance MonadIO m => MonadIO (UniqueGenT m) where
     liftIO = UniqueGenT . liftIO
 
-instance Show NameClass where
-    showsPrec _ = const id
-
 runUniqueGenT :: Functor m => UniqueGenT m a -> m a
 runUniqueGenT = fmap fst . flip runStateT 0 . unUniqueGenT

@@ -35,17 +35,13 @@ addLoc = go 1 1 where
 mkErrMsg :: Src -> (ParserErr, LocStr) -> ErrMsg
 mkErrMsg src (err, lstr) = renderDoc err_msg where
     splitBy :: Char -> String -> [String]
-    splitBy ch = go . loop where
+    splitBy ch = loop where
         loop :: String -> [String]
         loop [] = [""]
         loop (ch1 : str1)
             | ch == ch1 = "" : loop str1
             | otherwise = case loop str1 of
                 str : strs -> (ch1 : str) : strs
-        go :: [String] -> [String]
-        go [""] = [""]
-        go ("" : strs) = strs
-        go strs = strs
     stuck_row :: Row
     stuck_row = case lstr of
         [] -> length (filter (\lch -> snd lch == '\n') lstr) + 1
