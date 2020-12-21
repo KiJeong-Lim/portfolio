@@ -12,19 +12,19 @@ makeTypeEnv kind_env = go where
     applyModusPonens :: KindExpr -> KindExpr -> Either ErrMsg KindExpr
     applyModusPonens (kin1 `KArr` kin2) kin3
         | kin1 == kin3 = Right kin2
-    modus_ponens (kin1 `KArr` kin2) kin3 = Left ("couldn't solve `" ++ pprint 0 kin1 ("\' ~ `" ++ pprint 0 kin3 "\'"))
-    modus_ponens Star kin1 = Left ("coudln't solve `type\' ~ `" ++ pprint 1 kin1 " -> _\'")
+    modus_ponens (kin1 `KArr` kin2) kin3 = Left ("  ? couldn't solve `" ++ pprint 0 kin1 ("\' ~ `" ++ pprint 0 kin3 "\'"))
+    modus_ponens Star kin1 = Left ("  ? coudln't solve `type\' ~ `" ++ pprint 1 kin1 " -> _\'")
     unRep :: TypeRep -> Either ErrMsg (KindExpr, MonoType LargeId)
     unRep trep = case trep of
         RTyVar loc tvrep -> return (Star, TyVar tvrep)
         RTyCon loc type_constructor -> case Map.lookup type_constructor kind_env of
-            Nothing -> Left ("desugaring-error[" ++ pprint 0 loc ("]: the type constructor `" ++ showsPrec 0 type_constructor "hasn't declared."))
+            Nothing -> Left ("desugaring-error[" ++ pprint 0 loc ("]:\n  ? the type constructor `" ++ showsPrec 0 type_constructor "hasn't declared.\n"))
             Just kin -> return (kin, TyCon (TCon type_constructor kin))
         RTyApp loc trep1 trep2 -> do
             (kin1, typ1) <- unRep trep1
             (kin2, typ2) <- unRep trep2
             case modus_ponens kin1 kin2 of
-                Left msg -> Left ("desugaring-error[" ++ pprint 0 loc ("]: " ++ msg ++ "."))
+                Left msg -> Left ("desugaring-error[" ++ pprint 0 loc ("]:\n " ++ msg ++ ".\n"))
                 Right kin -> return (kin, TyApp typ1 typ2)
         RTyPrn loc trep -> unRep trep
     generalize :: MonoType LargeId -> PolyType
@@ -60,6 +60,6 @@ makeTypeEnv kind_env = go where
             if kin == Star
                 then if hasValidHead typ
                     then go triples (Map.insert con (generalize typ) type_env)
-                    else Left ("desugaring-error[" ++ pprint 0 loc ("]: the type of `" ++ showsPrec 0 con "\' is invalid."))
-                else Left ("desugaring-error[" ++ pprint 0 loc ("]: couldn't solve `" ++ pprint 0 kin "\' ~ `type\'."))
-        _ -> Left ("desugaring-error[" ++ pprint 0 loc ("]: it is wrong to redeclare the already declared constant `" ++ showsPrec 0 con "\'."))
+                    else Left ("desugaring-error[" ++ pprint 0 loc ("]:\n  ? the type of `" ++ showsPrec 0 con "\' is invalid.\n"))
+                else Left ("desugaring-error[" ++ pprint 0 loc ("]:\n  ? couldn't solve `" ++ pprint 0 kin "\' ~ `type\'.\n"))
+        _ -> Left ("desugaring-error[" ++ pprint 0 loc ("]:\n  ? it is wrong to redeclare the already declared constant `" ++ showsPrec 0 con "\'.\n"))

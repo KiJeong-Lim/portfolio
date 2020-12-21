@@ -77,6 +77,8 @@ executable Aladdin
         Aladdin.Front.Desugarer.ForType
         Aladdin.Front.Desugarer.Main
         Aladdin.Front.Header
+        Aladdin.Front.TypeChecker.Main
+        Aladdin.Front.TypeChecker.Util
         Lib.Base
 executable Butterfly
     hs-source-dirs: src

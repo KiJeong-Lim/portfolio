@@ -119,7 +119,6 @@ class HasSLoc a where
 
 class HasAnnot f where
     getAnnot :: f a -> a
-    putAnnot :: a -> f a -> f a
 
 class Monad m => GenUniqueM m where
     getNewUnique :: m Unique
@@ -228,6 +227,12 @@ instance Ord TCon where
 
 instance Outputable TCon where
     pprint _ (TCon type_constructor _) = showsPrec 0 type_constructor
+
+instance HasAnnot (TermExpr dcon) where
+    getAnnot (IVar annot _) = annot
+    getAnnot (DCon annot _) = annot
+    getAnnot (IApp annot _ _) = annot
+    getAnnot (IAbs annot _ _) = annot
 
 runUniqueGenT :: Functor m => UniqueGenT m a -> m a
 runUniqueGenT = fmap fst . flip runStateT 0 . unUniqueGenT

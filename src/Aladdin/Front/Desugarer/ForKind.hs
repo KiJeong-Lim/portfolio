@@ -24,12 +24,12 @@ makeKindEnv = go where
                 kin <- unRep krep
                 return (kin, loc)
         if getRank kin > 1
-            then Left ("desugaring-error[" ++ pprint 0 loc "]: the higher-order kind expression is not allowed.")
+            then Left ("desugaring-error[" ++ pprint 0 loc "]:\n  ? the higher-order kind expression is not allowed.\n")
             else return kin
     go :: [(SLoc, (TypeConstructor, KindRep))] -> KindEnv -> Either ErrMsg KindEnv
     go [] kind_env = return kind_env
     go ((loc, (tcon, krep)) : triples) kind_env = case Map.lookup tcon kind_env of
-        Just _ -> Left ("desugaring-error[" ++ pprint 0 loc "]: it is wrong to redeclare an already declared type construtor.")
+        Just _ -> Left ("desugaring-error[" ++ pprint 0 loc "]:\n  ? it is wrong to redeclare an already declared type construtor.\n")
         Nothing -> do
             kin <- unRep krep
             go triples (Map.insert tcon kin kind_env)
