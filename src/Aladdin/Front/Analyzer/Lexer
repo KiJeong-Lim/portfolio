@@ -1,0 +1,76 @@
+\hshead {
+    module Aladdin.Front.Analyzer.Lexer where
+
+    import Aladdin.Front.Analyzer.Grammar
+    import Aladdin.Front.Header
+}
+
+\target {
+    token-type: "Token"
+    lexer-name: "runAladdinLexer"    
+}
+
+\define $small_letter = 'a'-'z'
+\define $big_letter = 'A'-'Z'
+\define $digit = '0'-'9'
+\define $Char = [. \ '\n' \ '\\' \ '\"'] + "\\n" + "\\\\" + "\\\"" + "\\\'" + "\\t"
+\define $SmallId = [$small_letter] [$small_letter $digit '_' $big_letter]*
+\define $LargeId = [$big_letter] [$small_letter $digit '_' $big_letter]* + "_"
+
+\xmatch ".":
+    T_dot (SLoc (row1, col1) (row2, col2))
+\xmatch "->":
+    T_arrow (SLoc (row1, col1) (row2, col2))
+\xmatch "=>":
+    T_fatarrow (SLoc (row1, col1) (row2, col2))
+\xmatch "(":
+    T_lparen (SLoc (row1, col1) (row2, col2))
+\xmatch ")":
+    T_rparen (SLoc (row1, col1) (row2, col2))
+\xmatch "[":
+    T_lbracket (SLoc (row1, col1) (row2, col2))
+\xmatch "]":
+    T_rbracket (SLoc (row1, col1) (row2, col2))
+\xmatch "?-":
+    T_quest (SLoc (row1, col1) (row2, col2))
+\xmatch ",":
+    T_comma (SLoc (row1, col1) (row2, col2))
+\xmatch "=>":
+    T_fatarrow (SLoc (row1, col1) (row2, col2))
+\xmatch ":-":
+    T_if (SLoc (row1, col1) (row2, col2))
+\xmatch "S":
+    T_succ (SLoc (row1, col1) (row2, col2))
+\xmatch "pi":
+    T_pi (SLoc (row1, col1) (row2, col2))
+\xmatch "sigma":
+    T_sigma (SLoc (row1, col1) (row2, col2))
+\xmatch "!":
+    T_cut (SLoc (row1, col1) (row2, col2))
+\xmatch "true":
+    T_true (SLoc (row1, col1) (row2, col2))
+\xmatch "fail":
+    T_fail (SLoc (row1, col1) (row2, col2))
+\xmatch "\\":
+    T_bslash (SLoc (row1, col1) (row2, col2))
+\xmatch "::":
+    T_cons (SLoc (row1, col1) (row2, col2))
+\xmatch "kind":
+    T_kind (SLoc (row1, col1) (row2, col2))
+\xmatch "type":
+    T_type (SLoc (row1, col1) (row2, col2))
+\xmatch $SmallId:
+    T_smallid (SLoc (row1, col1) (row2, col2)) this
+\xmatch $LargeId:
+    T_largeid (SLoc (row1, col1) (row2, col2)) this
+\xmatch [$digit]+:
+    T_nat_lit (SLoc (row1, col1) (row2, col2)) (read this)
+\xmatch "\"" $Char* "\"":
+    T_str_lit (SLoc (row1, col1) (row2, col2)) (read this)
+\xmatch "\'" $Char "\'":
+    T_chr_lit (SLoc (row1, col1) (row2, col2)) (read this)
+\xmatch [' ' '\n']+: skip
+\xmatch "--" [. \ '\n']*: skip
+
+\hstail {
+}

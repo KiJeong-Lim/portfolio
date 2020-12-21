@@ -94,5 +94,5 @@ parserOfRegularExpression regex_rep = go maybeRegEx where
     go :: Maybe RegEx -> ParserBase ParserErr LocChr String
     go Nothing = error ("wrong regex: " ++ show regex_rep)
     go (Just regex) = PAct $ \lstr0 -> case sortByMerging orderResult (runRegEx regex lstr0) of
-        [] -> PAlt (Set.singleton ("regexPM " ++ show regex_rep)) []
+        [] -> PAlt (Set.singleton ("`regexPM " ++ show regex_rep ++ "\' failed.")) []
         (str1, lstr1) : _ -> PAlt Set.empty [(PVal str1, lstr1)]

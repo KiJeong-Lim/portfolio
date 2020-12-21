@@ -20,17 +20,17 @@ import Lib.Text.PC.Expansion
 runLGS :: FilePath -> IO ()
 runLGS dir = do
     x_src <- readFile dir
-    case runPC (many (readBlock <* many lend)) x_src of
+    case runPC (many (readBlock <* many lend) <* eofPC) x_src of
         Left err -> putStrLn err
         Right xblocks -> case runIdentity (runExceptT (genLexer xblocks)) of
             Left err -> putStrLn err
             Right delta -> do
                 writeFile (dir ++ ".hs") (delta "")
-                putStrLn "the lexer has been generated."
+                putStrLn "The lexer has been generated."
                 return ()
 
 main :: IO ()
 main = do
-    putStrLn "enter the path:"
+    putStrLn "Enter the path:"
     dir <- getLine
     runLGS dir

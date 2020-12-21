@@ -1,0 +1,188 @@
+\hshead {
+    module Aladdin.Front.Analyzer.Parser where
+
+    import Aladdin.Front.Analyzer.Grammar
+    import Aladdin.Front.Header
+}
+
+\target {
+    token-type: "Token"
+    parser-name: "runAladdinParser"
+    result-type: "Either TermRep [DeclRep]"
+    start: $Either $Query ($Sequence $Decl)
+    terminals:
+        "T_dot loc": $dot 0 none
+        "T_arrow loc": $arrow 0 none
+        "T_lparen loc": $lparen 0 none
+        "T_rparen loc": $rparen 0 none
+        "T_lbracket loc": $lbracket 0 none
+        "T_rbracket loc": $rbracket 0 none
+        "T_quest loc": $quest 0 none
+        "T_if loc": $if 0 none
+        "T_comma loc": $comma 0 none
+        "T_semicolon loc": $semicolon 0 none
+        "T_fatarrow loc": $fatarrow 0 none
+        "T_pi loc": $pi 0 none
+        "T_sigma loc": $sigma 0 none
+        "T_succ loc": $succ 0 none
+        "T_cut loc": $cut 0 none
+        "T_true loc": $true 0 none
+        "T_fail loc": $fail 0 none
+        "T_bslash loc": $bslash 0 none
+        "T_cons loc": $cons 0 none
+        "T_kind loc": $kind 0 none
+        "T_type loc": $type 0 none
+        "T_smallid loc contents": $smallid 0 none
+        "T_largeid loc contents": $largeid 0 none
+        "T_nat_lit loc contents": $natlit 0 none
+        "T_chr_lit loc contents": $chrlit 0 none
+        "T_str_lit loc contents": $strlit 0 none
+}
+
+\define $Query : "TermRep" {
+    10 [$quest, $TermRep0, $dot]:
+        $2
+}
+
+\define $Decl : "DeclRep" {
+    10 [$kind, $smallid, $KindRep0, $dot]:
+        RKindDecl ($1.loc <> $4.loc) (TC_Named $2.contents) $3
+    10 [$type, $smallid, $TypeRep0, $dot]:
+        RTypeDecl ($1.loc <> $4.loc) (DC_Named $2.contents) $3
+    10 [$TermRep0, $dot]:
+        RFactDecl (getSLoc $1 <> $2.loc) $1
+}
+
+\define $KindRep0 : "KindRep" {
+    10 [$KindRep1, $arrow, $KindRep0]:
+        RKArr (getSLoc $1 <> getSLoc $3) $1 $3
+    10 [$KindRep1]:
+        $1
+}
+
+\define $KindRep1 : "KindRep" {
+    15 [$type]:
+        RStar $1.loc
+    15 [$lparen, $KindRep0, $rparen]:
+        RKPrn ($1.loc <> $3.loc) $2
+}
+
+\define $TypeRep0 : "TypeRep" {
+    10 [$TypeRep1, $arrow, $TypeRep0]:
+        RTyApp (getSLoc $1 <> getSLoc $3) (RTyApp (getSLoc $1 <> $2.loc) (RTyCon $2.loc TC_Arrow) $1) $3
+    10 [$TypeRep1]:
+        $1
+}
+
+\define $TypeRep1 : "TypeRep" {
+    15 [$TypeRep1, $TypeRep2]:
+        RTyApp (getSLoc $1 <> getSLoc $2) $1 $2
+    15 [$TypeRep2]:
+        $1
+}
+
+\define $TypeRep2 : "TypeRep" {
+    20 [$largeid]:
+        RTyVar $1.loc $1.contents
+    20 [$smallid]:
+        RTyCon $1.loc (TC_Named $1.contents)
+    20 [$lparen, $TypeRep0, $rparen]:
+        RTyPrn ($1.loc <> $3.loc) $2
+}
+
+\define $TermRep0 : "TermRep" {
+    10 [$largeid, $bslash, $TermRep0]:
+        RAbs ($1.loc <> getSLoc $3) $1.contents $3
+    10 [$TermRep1, $if, $TermRep0]:
+        RApp (getSLoc $1 <> getSLoc $3) (RApp (getSLoc $1 <> $2.loc) (RCon $2.loc (DC_LO LO_if)) $1) $3
+    10 [$TermRep1]:
+        $1
+}
+
+\define $TermRep1 : "TermRep" {
+    15 [$TermRep1, $semicolon, $TermRep2]:
+        RApp (getSLoc $1 <> getSLoc $3) (RApp (getSLoc $1 <> $2.loc) (RCon $2.loc (DC_LO LO_or)) $1) $3
+    15 [$TermRep2]:
+        $1
+}
+
+\define $TermRep2 : "TermRep" {
+    20 [$TermRep3, $fatarrow, $TermRep2]:
+        RApp (getSLoc $1 <> getSLoc $3) (RApp (getSLoc $1 <> $2.loc) (RCon $2.loc (DC_LO LO_imply)) $1) $3
+    20 [$TermRep3]:
+        $1
+}
+
+\define $TermRep3 : "TermRep" {
+    25 [$TermRep3, $comma, $TermRep4]:
+        RApp (getSLoc $1 <> getSLoc $3) (RApp (getSLoc $1 <> $2.loc) (RCon $2.loc (DC_LO LO_and)) $1) $3
+    25 [$TermRep4]:
+        $1
+}
+
+\define $TermRep4 : "TermRep" {
+    30 [$TermRep5, $cons, $TermRep4]:
+        RApp (getSLoc $1 <> getSLoc $3) (RApp (getSLoc $1 <> $2.loc) (RCon $2.loc DC_Cons) $1) $3
+    30 [$TermRep5]:
+        $1
+}
+
+\define $TermRep5 : "TermRep" {
+    10 [$pi, $TermRep5]:
+        RApp ($1.loc <> getSLoc $2) (RCon $1.loc (DC_LO LO_pi)) $2
+    10 [$sigma, $TermRep5]:
+        RApp ($1.loc <> getSLoc $2) (RCon $1.loc (DC_LO LO_sigma)) $2
+    35 [$TermRep5, $TermRep6]:
+        RApp (getSLoc $1 <> getSLoc $2) $1 $2
+    35 [$TermRep6]:
+        $1
+}
+
+\define $TermRep6 : "TermRep" {
+    40 [$lparen, $TermRep0, $rparen]:
+        RPrn ($1.loc <> $3.loc) $2
+    40 [$cut]:
+        RCon $1.loc (DC_LO LO_cut)
+    40 [$true]:
+        RCon $1.loc (DC_LO LO_true)
+    40 [$fail]:
+        RCon $1.loc (DC_LO LO_fail)
+    40 [$smallid]:
+        RCon $1.loc (DC_Named $1.contents)
+    40 [$largeid]:
+        RVar $1.loc $1.contents
+    40 [$natlit]:
+        mkNatLit $1.loc $1.contents
+    40 [$strlit]:
+        mkStrLit $1.loc $1.contents
+    40 [$chrlit]:
+        mkChrLit $1.loc $1.contents
+    40 [$lbracket, $rbracket]:
+        RCon ($1.loc <> $2.loc) DC_Nil
+    40 [$lbracket, $ListBody, $rbracket]:
+        RPrn ($1.loc <> $3.loc) $2
+}
+
+\define $Sequence ($Elem : "a") : "[a]" {
+    50 []:
+        []
+    50 [$Elem, $Sequence $Elem]:
+        $1 : $2
+}
+
+\define $Either ($Left : "a") ($Right : "b") : "Either a b" {
+    50 [$Left]:
+        Left $1
+    50 [$Right]:
+        Right $1
+}
+
+\define $ListBody : "TermRep" {
+    90 [$TermRep5]:
+        RApp (getSLoc $1) (RApp (getSLoc $1) (RCon (getSLoc $1) DC_Cons) $1) (RCon (getSLoc $1) DC_Nil)
+    90 [$TermRep5, $comma, $ListBody]:
+        RApp (getSLoc $1 <> getSLoc $3) (RApp (getSLoc $1 <> $2.loc) (RCon $2.loc DC_Cons) $1) $3
+}
+
+\hstail {
+}

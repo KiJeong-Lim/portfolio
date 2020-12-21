@@ -26,11 +26,11 @@ runPGS dir = do
             Left err -> putStrLn err
             Right delta -> do
                 writeFile (dir ++ ".hs") (delta "")
-                putStrLn "the parser has been generated."
+                putStrLn "The parser has been generated."
                 return ()
 
 main :: IO ()
 main = do
-    putStrLn "enter the path:"
+    putStrLn "Enter the path:"
     dir <- getLine
     runPGS dir

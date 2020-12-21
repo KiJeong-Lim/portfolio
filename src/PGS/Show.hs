@@ -267,18 +267,23 @@ genParser blocks = go where
                                 ]
                             sequence
                                 [ do
+                                    let mkIndexErr idx = "the length of rhs is " ++ showsPrec 0 (length syms) (", but the index " ++ showsPrec 0 idx " is greater than or equal to it.")
                                     des_rep <- fmap strcat $ sequence
                                         [ return (strstr "            ")
                                         , lift $ fmap strcat $ sequence
                                             [ case de of
                                                 DsStrLit str -> return (showsPrec 0 str)
                                                 DsSource hs_src -> return (strstr hs_src)
-                                                DsNSPatn idx -> case syms !! (idx - 1) of
-                                                    NS ns -> return (strstr "(" . getGetRep ns . strstr " " . patNsIdx idx . strstr ")")
-                                                    TS ts -> throwE ("a DsTSPatn must be matched to a nonterminal symbol.")
-                                                DsTSPatn idx field -> case syms !! (idx - 1) of
-                                                    NS ns -> throwE ("a DsTSPatn must be matched to a terminal symbol.")
-                                                    TS ts -> return (strstr "(" . patTsIdx idx field . strstr ")") 
+                                                DsNSPatn idx
+                                                    | idx <= length syms -> case syms !! (idx - 1) of
+                                                        NS ns -> return (strstr "(" . getGetRep ns . strstr " " . patNsIdx idx . strstr ")")
+                                                        TS ts -> throwE ("a DsTSPatn must be matched to a nonterminal symbol.")
+                                                    | otherwise -> throwE (mkIndexErr idx)
+                                                DsTSPatn idx field
+                                                    | idx <= length syms -> case syms !! (idx - 1) of
+                                                        NS ns -> throwE ("a DsTSPatn must be matched to a terminal symbol.")
+                                                        TS ts -> return (strstr "(" . patTsIdx idx field . strstr ")")
+                                                    | otherwise -> throwE (mkIndexErr idx)
                                             | de <- des
                                             ]
                                         ]

@@ -9,6 +9,8 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Lib.Base
 
+type ErrMsg = String
+
 type SPos = (Int, Int)
 
 type Identifier = Unique
@@ -48,6 +50,41 @@ data Fixity
     | InfixR
     | InfixN
     deriving (Eq, Ord)
+
+data LogicalOperator
+    = LO_ty_pi
+    | LO_if
+    | LO_true
+    | LO_fail
+    | LO_cut
+    | LO_and
+    | LO_or
+    | LO_imply
+    | LO_pi
+    | LO_sigma
+    deriving (Eq, Ord, Show)
+
+data DataConstructor
+    = DC_LO LogicalOperator
+    | DC_Named SmallId
+    | DC_Unique Unique
+    | DC_Nil
+    | DC_Cons
+    | DC_ChrL Char
+    | DC_NatL Integer
+    | DC_Succ
+    deriving (Eq, Ord, Show)
+
+data TypeConstructor
+    = TC_Arrow
+    | TC_Named SmallId
+    | TC_Unique Unique
+    deriving (Eq, Ord, Show)
+
+data Constant
+    = DC DataConstructor
+    | TC TypeConstructor
+    deriving (Eq, Ord, Show)
 
 class HasSLoc a where
     getSLoc :: a -> SLoc
