@@ -2,7 +2,8 @@ module Aladdin.Front.Header where
 
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Control.Monad.Trans.State
+import Control.Monad.Trans.Except
+import Control.Monad.Trans.State.Strict
 import Data.Functor.Identity
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
@@ -20,6 +21,12 @@ type SmallId = String
 type Keyword = String
 
 type MetaTVar = Unique
+
+type IVar = Unique
+
+type KindEnv = Map.Map TypeConstructor KindExpr
+
+type TypeEnv = Map.Map DataConstructor PolyType
 
 data SLoc
     = SLoc
@@ -93,10 +100,18 @@ data PolyType
     deriving ()
 
 data TermExpr dcon annot
-    = IVar annot LargeId
+    = IVar annot IVar
     | DCon annot dcon 
     | IApp annot (TermExpr dcon annot) (TermExpr dcon annot)
-    | IAbs annot LargeId (TermExpr dcon annot)
+    | IAbs annot IVar (TermExpr dcon annot)
+    deriving ()
+
+data Program term
+    = Program
+        { _KindDecls :: KindEnv
+        , _TypeDecls :: TypeEnv
+        , _FactDecls :: [term]
+        }
     deriving ()
 
 class HasSLoc a where
@@ -114,6 +129,19 @@ instance Semigroup SLoc where
 
 instance Show SLoc where
     showsPrec _ = const id
+
+instance Outputable SLoc where
+    pprint _ (SLoc (row1, col1) (row2, col2)) = strcat
+        [ strstr "("
+        , showsPrec 0 row1
+        , strstr ","
+        , showsPrec 0 col1
+        , strstr ") - ("
+        , showsPrec 0 row2
+        , strstr ","
+        , showsPrec 0 col2
+        , strstr ")"
+        ]
 
 instance Show Unique where
     showsPrec _ = showsPrec 0 . unUnique
@@ -136,6 +164,12 @@ instance Monad m => GenUniqueM (UniqueGenT m) where
             let n' = n + 1
             n' `seq` put n'
             return (Unique n')
+
+instance GenUniqueM m => GenUniqueM (ExceptT s m) where
+    getNewUnique = lift getNewUnique
+
+instance GenUniqueM m => GenUniqueM (StateT s m) where
+    getNewUnique = lift getNewUnique
 
 instance MonadTrans UniqueGenT where
     lift = UniqueGenT . lift
@@ -173,11 +207,42 @@ instance Show TypeConstructor where
         TC_Named name -> strstr name
         TC_Unique unique -> showsPrec 0 (unUnique unique)
 
+instance Read KindExpr where
+    readsPrec 0 str0 = [ (kin1 `KArr` kin2, str2) | (kin1, ' ' : '-' : '>' : ' ' : str1) <- readsPrec 1 str0, (kin2, str2) <- readsPrec 0 str1 ] ++ readsPrec 1 str0
+    readsPrec 1 ('*' : str0) = [(Star, str0)]
+    readsPrec 1 ('(' : str0) = [ (kin, str1) | (kin, ')' : str1) <- readsPrec 0 str0 ]
+    readList = undefined
+
+instance Outputable KindExpr where
+    pprint 0 (kin1 `KArr` kin2) = pprint 1 kin1 . strstr " -> " . pprint 0 kin2
+    pprint 0 kin1 = pprint 1 kin1
+    pprint 1 Star = strstr "type"
+    pprint 1 kin1 = pprint 2 kin1
+    pprint _ kin1 = strstr "(" . pprint 0 kin1 . strstr ")"
+
 instance Eq TCon where
     TCon type_constructor_1 _ == TCon type_constructor_2 _ = type_constructor_1 == type_constructor_2
 
 instance Ord TCon where
     TCon type_constructor_1 _ `compare` TCon type_constructor_2 _ = type_constructor_1 `compare` type_constructor_2
 
+instance Outputable TCon where
+    pprint _ (TCon type_constructor _) = showsPrec 0 type_constructor
+
 runUniqueGenT :: Functor m => UniqueGenT m a -> m a
 runUniqueGenT = fmap fst . flip runStateT 0 . unUniqueGenT
+
+mkTyList :: MonoType tvar -> MonoType tvar
+mkTyList typ1 = TyApp (TyCon (TCon (TC_Named "list") (read "* -> *"))) typ1
+
+mkTyChr :: MonoType tvar
+mkTyChr = TyCon (TCon (TC_Named "char") (read "*"))
+
+mkTyNat :: MonoType tvar
+mkTyNat = TyCon (TCon (TC_Named "nat") (read "*"))
+
+mkTyO :: MonoType tvar
+mkTyO = TyCon (TCon (TC_Named "o") (read "*"))
+
+mkTyArrow :: MonoType tvar -> MonoType tvar -> MonoType tvar
+typ1 `mkTyArrow` typ2 = TyApp (TyApp (TyCon (TCon TC_Arrow (read "* -> * -> *"))) typ1) typ2
