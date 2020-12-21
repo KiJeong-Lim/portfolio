@@ -12,7 +12,7 @@ module Lib.Text.Ppr
     , blue
     , red
     , indent
-    , pprint
+    , putDoc
     , renderDoc
     ) where
 
@@ -124,8 +124,8 @@ indent n docs1
     | null docs1 = empty
     | otherwise = white n <> vconcat docs1
 
-pprint :: Show a => Precedence -> a -> Doc
-pprint prec = DT . showsPrec prec
+putDoc :: Show a => Precedence -> a -> Doc
+putDoc prec = DT . showsPrec prec
 
 renderDoc :: Doc -> String
 renderDoc = render . toViewer . reduce where

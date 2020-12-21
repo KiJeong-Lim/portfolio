@@ -182,11 +182,11 @@ genParser blocks = go where
                 ]
             getTSymId TSEOF = return 0
             getTSymId (TSVar tsv) = case [ n | (n, TerminalInfo patn ts prec assoc) <- zip naturals terminal_infos, ts == TSVar tsv ] of
-                [] -> throwE ("the terminal symbol " ++ makeOutput 0 (TSVar tsv) " hasn't declared.")
+                [] -> throwE ("the terminal symbol " ++ pprint 0 (TSVar tsv) " hasn't declared.")
                 [n] -> return n
-                _ -> throwE ("the terminal symbol " ++ makeOutput 0 (TSVar tsv) " has declared twice or more.")
+                _ -> throwE ("the terminal symbol " ++ pprint 0 (TSVar tsv) " has declared twice or more.")
             getNSymId nsym = case Map.lookup nsym id_env of
-                Nothing -> throwE ("the terminal symbol " ++ makeOutput 0 nsym " hasn't declared.")
+                Nothing -> throwE ("the terminal symbol " ++ pprint 0 nsym " hasn't declared.")
                 Just n -> return n
         checkTerminalOccurence (Set.fromList [ ts | (lhs, Just pairs) <- cache', (rhs, prec) <- pairs, TS ts <- rhs ]) (Set.fromList [ tsym | TerminalInfo patn tsym prec assoc <- terminal_infos ])
         lalr1 <- getLALR1 (CFGrammar { getStartSym = start_symbol, getTerminalSyms = terminal_symbols, getProductionRules = production_rules })

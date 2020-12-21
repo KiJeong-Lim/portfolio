@@ -13,52 +13,52 @@ import Lib.Base
 import PGS.Util
 
 instance Outputable Associativity where
-    makeOutput _ ALeft = strstr "left"
-    makeOutput _ ARight = strstr "right"
-    makeOutput _ ANone = strstr "none"
+    pprint _ ALeft = strstr "left"
+    pprint _ ARight = strstr "right"
+    pprint _ ANone = strstr "none"
 
 instance Outputable NSym where
-    makeOutput 0 (NSApp ns1 ns2) = makeOutput 0 ns1 . strstr " " . makeOutput 1 ns2
-    makeOutput 0 ns1 = makeOutput 1 ns1
-    makeOutput 1 (NSVar nsv) = strstr nsv
-    makeOutput 1 ns1 = makeOutput 2 ns1
-    makeOutput _ ns1 = strstr "(" . makeOutput 0 ns1 . strstr ")"
+    pprint 0 (NSApp ns1 ns2) = pprint 0 ns1 . strstr " " . pprint 1 ns2
+    pprint 0 ns1 = pprint 1 ns1
+    pprint 1 (NSVar nsv) = strstr nsv
+    pprint 1 ns1 = pprint 2 ns1
+    pprint _ ns1 = strstr "(" . pprint 0 ns1 . strstr ")"
 
 instance Outputable TSym where
-    makeOutput _ (TSEOF) = strstr "\\$"
-    makeOutput _ (TSVar tsv) = strstr tsv
+    pprint _ (TSEOF) = strstr "\\$"
+    pprint _ (TSVar tsv) = strstr tsv
 
 instance Outputable Sym where
-    makeOutput _ (NS ns) = strstr "<" . makeOutput 0 ns . strstr ">"
-    makeOutput _ (TS ts) = strstr "`" . makeOutput 0 ts . strstr "\'"
+    pprint _ (NS ns) = strstr "<" . pprint 0 ns . strstr ">"
+    pprint _ (TS ts) = strstr "`" . pprint 0 ts . strstr "\'"
 
 instance Outputable CFGrammar where
-    makeOutput _ (CFGrammar start terminals productions) = strcat
-        [ strstr "start-symbol: " . makeOutput 0 start . nl
-        , strstr "terminal-symbols: " . plist 2 [ makeOutput 0 (TS t) . strstr " : " . makeOutput 0 assoc . strstr ", " . strstr (reverse (take 2 ("0" ++ reverse (show prec)))) | (t, (assoc, prec)) <- Map.toList terminals ] . nl
-        , strstr "production-rules: " . plist 2 [ makeOutput 0 (NS lhs) . strstr " ::= " . ppunc " " (map (makeOutput 0) rhs) . strstr "; " . strstr (reverse (take 2 (reverse ("0" ++ show prec)))) | ((lhs, rhs), prec) <- Map.toList productions ] . nl
+    pprint _ (CFGrammar start terminals productions) = strcat
+        [ strstr "start-symbol: " . pprint 0 start . nl
+        , strstr "terminal-symbols: " . plist 2 [ pprint 0 (TS t) . strstr " : " . pprint 0 assoc . strstr ", " . strstr (reverse (take 2 ("0" ++ reverse (show prec)))) | (t, (assoc, prec)) <- Map.toList terminals ] . nl
+        , strstr "production-rules: " . plist 2 [ pprint 0 (NS lhs) . strstr " ::= " . ppunc " " (map (pprint 0) rhs) . strstr "; " . strstr (reverse (take 2 (reverse ("0" ++ show prec)))) | ((lhs, rhs), prec) <- Map.toList productions ] . nl
         ]
 
 instance Outputable LR0Item where
-    makeOutput _ (LR0Item lhs left right) = makeOutput 0 (NS lhs) . strstr " ::= " . ppunc " " (map (makeOutput 0) left) . strstr " . " . ppunc " " (map (makeOutput 0) right) . strstr ";"
+    pprint _ (LR0Item lhs left right) = pprint 0 (NS lhs) . strstr " ::= " . ppunc " " (map (pprint 0) left) . strstr " . " . ppunc " " (map (pprint 0) right) . strstr ";"
 
 instance Outputable Cannonical0 where
-    makeOutput _ (Cannonical0 vertices root edges) = strcat
-        [ strstr "vertices: " . plist 2 [ showsPrec 0 q . strstr ": " . plist 4 (map (makeOutput 0) (Set.toList items)) | (items, q) <- Map.toList vertices ] . nl
+    pprint _ (Cannonical0 vertices root edges) = strcat
+        [ strstr "vertices: " . plist 2 [ showsPrec 0 q . strstr ": " . plist 4 (map (pprint 0) (Set.toList items)) | (items, q) <- Map.toList vertices ] . nl
         , strstr "root: " . showsPrec 0 root . nl
-        , strstr "edges: " . plist 2 [ strstr "(" . showsPrec 0 q . strstr ", " . makeOutput 0 sym . strstr ") +-> " . showsPrec 0 p | ((q, sym), p) <- Map.toList edges ] . nl
+        , strstr "edges: " . plist 2 [ strstr "(" . showsPrec 0 q . strstr ", " . pprint 0 sym . strstr ") +-> " . showsPrec 0 p | ((q, sym), p) <- Map.toList edges ] . nl
         ]
 
 instance Outputable Action where
-    makeOutput _ (Shift p) = strstr "SHIFT: " . showsPrec 0 p . strstr ";"
-    makeOutput _ (Reduce (lhs, rhs)) = strstr "REDUCE: <" . makeOutput 0 lhs . strstr "> ::= " . ppunc " " (map (makeOutput 0) rhs) . strstr ";"
-    makeOutput _ (Accept) = strstr "ACCEPT;"
+    pprint _ (Shift p) = strstr "SHIFT: " . showsPrec 0 p . strstr ";"
+    pprint _ (Reduce (lhs, rhs)) = strstr "REDUCE: <" . pprint 0 lhs . strstr "> ::= " . ppunc " " (map (pprint 0) rhs) . strstr ";"
+    pprint _ (Accept) = strstr "ACCEPT;"
 
 instance Outputable LR1Parser where
-    makeOutput _ (LR1Parser initS actionT reduceT) = strcat
+    pprint _ (LR1Parser initS actionT reduceT) = strcat
         [ strstr "initS: " . showsPrec 0 initS . nl
-        , strstr "actionT: " . plist 2 [ strstr "(" . showsPrec 0 q . strstr ", " . makeOutput 0 (TS t) . strstr ") +-> " . makeOutput 0 action | ((q, t), action) <- Map.toList actionT ] . nl
-        , strstr "reduceT: " . plist 2 [ strstr "(" . showsPrec 0 q . strstr ", " . makeOutput 0 (NS nt) . showsPrec 0 p . strstr ";" | ((q, nt), p) <- Map.toList reduceT ] . nl
+        , strstr "actionT: " . plist 2 [ strstr "(" . showsPrec 0 q . strstr ", " . pprint 0 (TS t) . strstr ") +-> " . pprint 0 action | ((q, t), action) <- Map.toList actionT ] . nl
+        , strstr "reduceT: " . plist 2 [ strstr "(" . showsPrec 0 q . strstr ", " . pprint 0 (NS nt) . showsPrec 0 p . strstr ";" | ((q, nt), p) <- Map.toList reduceT ] . nl
         ]
 
 getLALR1 :: CFGrammar -> ExceptT String Identity LR1Parser
@@ -213,10 +213,10 @@ getLALR1 (CFGrammar start terminals productions) = makeLALR1 where
                     | assoc == ARight -> Right getActionT
                 _ -> Left $ strcat
                     [ strstr "cannot resolve conflict: {" . nl
-                    , strstr "  (" . showsPrec 0 q . strstr ", " . makeOutput 0 (TS t) . strstr ") +-> " . makeOutput 0 (Shift p) . nl
-                    , strstr "  (" . showsPrec 0 q . strstr ", " . makeOutput 0 (TS t) . strstr ") +-> " . makeOutput 0 (Reduce production) . nl
+                    , strstr "  (" . showsPrec 0 q . strstr ", " . pprint 0 (TS t) . strstr ") +-> " . pprint 0 (Shift p) . nl
+                    , strstr "  (" . showsPrec 0 q . strstr ", " . pprint 0 (TS t) . strstr ") +-> " . pprint 0 (Reduce production) . nl
                     , strstr "}" . nl
-                    , makeOutput 0 getCannonical0
+                    , pprint 0 getCannonical0
                     ]
             (Just (Reduce production'), ra) -> case (Map.lookup production' productions', Map.lookup production productions') of
                 (Just prec1, Just prec2)
@@ -224,10 +224,10 @@ getLALR1 (CFGrammar start terminals productions) = makeLALR1 where
                     | prec1 < prec2 -> Right (Map.update (const (Just ra)) (q, t) getActionT)
                 _ -> Left $ strcat
                     [ strstr "cannot resolve conflict: {" . nl
-                    , strstr "  (" . showsPrec 0 q . strstr ", " . makeOutput 0 (TS t) . strstr ") +-> " . makeOutput 0 (Reduce production) . nl
-                    , strstr "  (" . showsPrec 0 q . strstr ", " . makeOutput 0 (TS t) . strstr ") +-> " . makeOutput 0 (Reduce production') . nl
+                    , strstr "  (" . showsPrec 0 q . strstr ", " . pprint 0 (TS t) . strstr ") +-> " . pprint 0 (Reduce production) . nl
+                    , strstr "  (" . showsPrec 0 q . strstr ", " . pprint 0 (TS t) . strstr ") +-> " . pprint 0 (Reduce production') . nl
                     , strstr "}" . nl
-                    , makeOutput 0 getCannonical0
+                    , pprint 0 getCannonical0
                     ]
     makeLALR1 :: ExceptT String Identity LR1Parser
     makeLALR1 = case resolveConflicts of

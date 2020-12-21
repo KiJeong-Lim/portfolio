@@ -54,11 +54,11 @@ mkErrMsg src (err, lstr) = renderDoc err_msg where
         ((r, c), _) : _ -> c
     err_msg :: Doc
     err_msg = vconcat
-        [ blue (text "parsing error at " <> pprint 0 stuck_row <> text ":" <> pprint 0 stuck_col <> text ".")
+        [ blue (text "parsing error at " <> putDoc 0 stuck_row <> text ":" <> putDoc 0 stuck_col <> text ".")
         , hconcat
             [ vconcat
                 [ text ""
-                , blue (text " " <> pprint 0 stuck_row <> text " ")
+                , blue (text " " <> putDoc 0 stuck_row <> text " ")
                 , text ""
                 ]
             , blue mkBeam

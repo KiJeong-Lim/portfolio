@@ -12,7 +12,7 @@ newtype PM output
     deriving ()
 
 class Outputable a where
-    makeOutput :: Int -> a -> String -> String
+    pprint :: Precedence -> a -> String -> String
 
 instance Functor PM where
     fmap a2b fa = PM $ \str -> [ (a2b a, str') | (a, str') <- fa `runPM` str ]
@@ -94,5 +94,5 @@ split' cond (x1 : x2 : xs)
         y : ys -> (x1 : y) : ys
 split' cond (x1 : xs) = [x1] : split' cond xs
 
-viewOutput :: Outputable a => a -> String
-viewOutput = flip (makeOutput 0) ""
+printPretty :: Outputable a => a -> String
+printPretty = flip (pprint 0) ""
