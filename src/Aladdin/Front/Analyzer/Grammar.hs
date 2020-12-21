@@ -2,8 +2,6 @@ module Aladdin.Front.Analyzer.Grammar where
 
 import Aladdin.Front.Header
 
-type AnalyzerOuput = Either TermRep [DeclRep]
-
 data Token
     = T_dot SLoc
     | T_arrow SLoc

@@ -19,6 +19,8 @@ type SmallId = String
 
 type Keyword = String
 
+type MetaTVar = Unique
+
 data SLoc
     = SLoc
         { _BegPos :: SPos
@@ -40,13 +42,6 @@ data Literal
     | StrL String
     deriving (Eq, Ord)
 
-data Fixity
-    = Prefix
-    | InfixL
-    | InfixR
-    | InfixN
-    deriving (Eq, Ord)
-
 data LogicalOperator
     = LO_ty_pi
     | LO_if
@@ -58,7 +53,7 @@ data LogicalOperator
     | LO_imply
     | LO_pi
     | LO_sigma
-    deriving (Eq, Ord, Show)
+    deriving (Eq, Ord)
 
 data DataConstructor
     = DC_LO LogicalOperator
@@ -69,18 +64,40 @@ data DataConstructor
     | DC_ChrL Char
     | DC_NatL Integer
     | DC_Succ
-    deriving (Eq, Ord, Show)
+    deriving (Eq, Ord)
 
 data TypeConstructor
     = TC_Arrow
     | TC_Named SmallId
     | TC_Unique Unique
-    deriving (Eq, Ord, Show)
+    deriving (Eq, Ord)
 
-data Constant
-    = DC DataConstructor
-    | TC TypeConstructor
-    deriving (Eq, Ord, Show)
+data KindExpr
+    = Star
+    | KArr KindExpr KindExpr
+    deriving (Eq)
+
+data TCon
+    = TCon TypeConstructor KindExpr
+    deriving ()
+
+data MonoType tvar
+    = TyVar tvar
+    | TyCon TCon
+    | TyApp (MonoType tvar) (MonoType tvar)
+    | TyMTV MetaTVar
+    deriving (Eq)
+
+data PolyType
+    = Forall [SmallId] (MonoType Int)
+    deriving ()
+
+data TermExpr dcon annot
+    = IVar annot LargeId
+    | DCon annot dcon 
+    | IApp annot (TermExpr dcon annot) (TermExpr dcon annot)
+    | IAbs annot LargeId (TermExpr dcon annot)
+    deriving ()
 
 class HasSLoc a where
     getSLoc :: a -> SLoc
@@ -125,6 +142,42 @@ instance MonadTrans UniqueGenT where
 
 instance MonadIO m => MonadIO (UniqueGenT m) where
     liftIO = UniqueGenT . liftIO
+
+instance Show LogicalOperator where
+    showsPrec _ logical_operator = case logical_operator of
+        LO_ty_pi -> strstr "^"
+        LO_if -> strstr ":-"
+        LO_true -> strstr "true"
+        LO_fail -> strstr "fail"
+        LO_cut -> strstr "!"
+        LO_and -> strstr ","
+        LO_or -> strstr ";"
+        LO_imply -> strstr "=>"
+        LO_pi -> strstr "pi"
+        LO_sigma -> strstr "sigma"
+
+instance Show DataConstructor where
+    showsPrec _ data_constructor = case data_constructor of
+        DC_LO logical_operator -> showsPrec 0 logical_operator
+        DC_Named name -> strstr name
+        DC_Unique unique -> showsPrec 0 (unUnique unique)
+        DC_Nil -> strstr "[]"
+        DC_Cons -> strstr "::"
+        DC_ChrL chr -> showsPrec 0 chr
+        DC_NatL nat -> showsPrec 0 nat
+        DC_Succ -> strstr "S"
+
+instance Show TypeConstructor where
+    showsPrec _ type_constructor = case type_constructor of
+        TC_Arrow -> strstr "->"
+        TC_Named name -> strstr name
+        TC_Unique unique -> showsPrec 0 (unUnique unique)
+
+instance Eq TCon where
+    TCon type_constructor_1 _ == TCon type_constructor_2 _ = type_constructor_1 == type_constructor_2
+
+instance Ord TCon where
+    TCon type_constructor_1 _ `compare` TCon type_constructor_2 _ = type_constructor_1 `compare` type_constructor_2
 
 runUniqueGenT :: Functor m => UniqueGenT m a -> m a
 runUniqueGenT = fmap fst . flip runStateT 0 . unUniqueGenT

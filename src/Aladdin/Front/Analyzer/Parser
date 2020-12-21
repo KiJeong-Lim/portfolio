@@ -128,38 +128,45 @@
 }
 
 \define $TermRep5 : "TermRep" {
-    10 [$pi, $TermRep5]:
+    35 [$pi, $TermRep5]:
         RApp ($1.loc <> getSLoc $2) (RCon $1.loc (DC_LO LO_pi)) $2
-    10 [$sigma, $TermRep5]:
+    35 [$sigma, $TermRep5]:
         RApp ($1.loc <> getSLoc $2) (RCon $1.loc (DC_LO LO_sigma)) $2
-    35 [$TermRep5, $TermRep6]:
-        RApp (getSLoc $1 <> getSLoc $2) $1 $2
     35 [$TermRep6]:
         $1
 }
 
 \define $TermRep6 : "TermRep" {
-    40 [$lparen, $TermRep0, $rparen]:
+    40 [$TermRep6, $TermRep7]:
+        RApp (getSLoc $1 <> getSLoc $2) $1 $2
+    40 [$TermRep7]:
+        $1
+    40 [$succ]:
+        RCon $1.loc DC_Succ
+}
+
+\define $TermRep7 : "TermRep" {
+    45 [$lparen, $TermRep0, $rparen]:
         RPrn ($1.loc <> $3.loc) $2
-    40 [$cut]:
+    45 [$cut]:
         RCon $1.loc (DC_LO LO_cut)
-    40 [$true]:
+    45 [$true]:
         RCon $1.loc (DC_LO LO_true)
-    40 [$fail]:
+    45 [$fail]:
         RCon $1.loc (DC_LO LO_fail)
-    40 [$smallid]:
+    45 [$smallid]:
         RCon $1.loc (DC_Named $1.contents)
-    40 [$largeid]:
+    45 [$largeid]:
         RVar $1.loc $1.contents
-    40 [$natlit]:
+    45 [$natlit]:
         mkNatLit $1.loc $1.contents
-    40 [$strlit]:
+    45 [$strlit]:
         mkStrLit $1.loc $1.contents
-    40 [$chrlit]:
+    45 [$chrlit]:
         mkChrLit $1.loc $1.contents
-    40 [$lbracket, $rbracket]:
+    45 [$lbracket, $rbracket]:
         RCon ($1.loc <> $2.loc) DC_Nil
-    40 [$lbracket, $ListBody, $rbracket]:
+    45 [$lbracket, $ListBody, $rbracket]:
         RPrn ($1.loc <> $3.loc) $2
 }
 

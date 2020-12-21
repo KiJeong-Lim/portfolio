@@ -68,6 +68,14 @@ executable Aladdin
     build-depends: base >= 4.7 && < 5, containers >= 0.6, transformers >= 0.5, QuickCheck >= 2.13, checkers >= 0.5, pretty-terminal >= 0.1.0.0
     main-is: Aladdin/Main.hs
     other-modules:
+        Aladdin.Front.Analyzer.Grammar
+        Aladdin.Front.Analyzer.Lexer
+        Aladdin.Front.Analyzer.Main
+        Aladdin.Front.Analyzer.Parser
+        Aladdin.Front.Desugarer.ForKind
+        Aladdin.Front.Desugarer.ForTerm
+        Aladdin.Front.Desugarer.ForType
+        Aladdin.Front.Desugarer.Main
         Aladdin.Front.Header
         Lib.Base
 executable Butterfly
