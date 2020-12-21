@@ -227,7 +227,6 @@ runAladdinParser = fmap (getEither getQuery (getSequence getDecl)) . runLR1 theL
     toTerminal (T_nat_lit loc contents) = 24
     toTerminal (T_chr_lit loc contents) = 25
     toTerminal (T_str_lit loc contents) = 26
-    toTerminal _ = -1
     runLR1 :: LR1Parser -> [Token] -> Either (Maybe (Token)) ParsingTree
     runLR1 (LR1Parser getInitS getActionT getReduceT) = go where
         loop inputs = do

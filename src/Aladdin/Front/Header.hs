@@ -13,15 +13,11 @@ type ErrMsg = String
 
 type SPos = (Int, Int)
 
-type Identifier = Unique
-
 type LargeId = String
 
 type SmallId = String
 
 type Keyword = String
-
-type LexicalEnv = Map.Map SmallId (Fixity, Precedence)
 
 data SLoc
     = SLoc

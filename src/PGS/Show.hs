@@ -304,7 +304,6 @@ genParser blocks = go where
                     tellLine (strstr "    toTerminal (" . strstr patn . strstr ") = " . showsPrec 0 tsym_id)
                 | TerminalInfo patn tsym prec assoc <- terminal_infos
                 ]
-            tellLine (strstr "    toTerminal _ = -1")
             tellLine (strstr "    runLR1 :: LR1Parser -> [" . strstr token_type . strstr "] -> Either (Maybe (" . strstr token_type . strstr ")) ParsingTree")
             tellLine (strstr "    runLR1 (LR1Parser getInitS getActionT getReduceT) = go where")
             tellLine (strstr "        loop inputs = do")
