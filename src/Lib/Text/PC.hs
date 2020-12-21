@@ -97,5 +97,5 @@ runPC :: PC val -> Src -> Either ErrMsg val
 runPC p str0 = case runPB (unPC p) (addLoc str0) of
     Left pair -> Left (mkErrMsg str0 pair)
     Right pairs -> case [ val | (val, lstr1) <- pairs, null lstr1 ] of
-        [] -> Left (mkErrMsg str0 (Set.singleton "must be EOF.", head (sortByMerging (\lstr1 -> \lstr2 -> length lstr1 < length lstr2) (map snd pairs))))
+        [] -> Left (mkErrMsg str0 (Set.singleton "must be EOF.", head (sortByMerging (\lstr1 -> \lstr2 -> length lstr1 <= length lstr2) (map snd pairs))))
         val : _ -> Right val

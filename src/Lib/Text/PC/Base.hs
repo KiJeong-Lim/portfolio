@@ -96,7 +96,7 @@ negPB p1 = PAct $ \str0 -> case unPB p1 str0 of
 runPB :: Monoid err => ParserBase err chr val -> [chr] -> Either (err, [chr]) [(val, [chr])]
 runPB = flip go (mempty, []) where
     findShortest :: [(err, [chr])] -> (err, [chr])
-    findShortest = head . sortByMerging (\x1 -> \x2 -> length (snd x1) < length (snd x2))
+    findShortest = head . sortByMerging (\x1 -> \x2 -> length (snd x1) <= length (snd x2))
     go :: Monoid err => ParserBase err chr val -> (err, [chr]) -> [chr] -> Either (err, [chr]) [(val, [chr])]
     go (PVal val1) (err0, es0) str0 = Right [(val1, str0)]
     go (PAlt err1 alts1) (err0, es0) str0

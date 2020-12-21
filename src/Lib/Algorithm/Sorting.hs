@@ -43,14 +43,14 @@ getTSortedSCCs = runIdentity . go where
 sortByMerging :: (a -> a -> Bool) -> [a] -> [a]
 sortByMerging = go where
     go :: (a -> a -> Bool) -> [a] -> [a]
-    go lt [] = []
-    go lt [x] = [x]
-    go lt xs = case (take (length xs `div` 2) xs, drop (length xs `div` 2) xs) of
-        (left, right) -> merge lt (go lt left) (go lt right)
+    go leq [] = []
+    go leq [x] = [x]
+    go leq xs = case (take (length xs `div` 2) xs, drop (length xs `div` 2) xs) of
+        (left, right) -> merge leq (go leq left) (go leq right)
     merge :: (a -> a -> Bool) -> [a] -> [a] -> [a]
-    merge lt [] [] = []
-    merge lt [] ys = ys
-    merge lt xs [] = xs
-    merge lt (x : xs) (y : ys)
-        | x `lt` y = x : merge lt (y : xs) ys
-        | otherwise = y : merge lt xs (x : ys)
+    merge leq [] [] = []
+    merge leq [] ys = ys
+    merge leq xs [] = xs
+    merge leq (x : xs) (y : ys)
+        | x `leq` y = x : merge leq xs (y : ys)
+        | otherwise = y : merge leq (x : xs) ys
