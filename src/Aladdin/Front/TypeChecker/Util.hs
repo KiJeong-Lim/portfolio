@@ -190,7 +190,7 @@ showMonoType name_env = go 0 where
         = strstr "#" . showsPrec 0 var
     go prec (TyMTV mtv)
         = case Map.lookup mtv name_env of
-            Nothing -> strstr "mtv_" . showsPrec 0 (unUnique mtv)
+            Nothing -> strstr "mtv_" . showsPrec 0 mtv
             Just name -> strstr name
 
 instantiateScheme :: GenUniqueM m => PolyType -> StateT (Map.Map MetaTVar LargeId) (ExceptT ErrMsg m) ([MetaTVar], MonoType Int)
@@ -229,7 +229,7 @@ zonkMTV theta = go where
     go (IApp (loc, typ) term1 term2) = IApp (loc, substMTVars theta typ) (go term1) (go term2)
     go (IAbs (loc, typ) var term) = IAbs (loc, substMTVars theta typ) var (go term)
 
-mkTyErr :: Map.Map MetaTVar SmallId -> SLoc -> ((MonoType Int, MonoType Int), TypeError) -> ErrMsg
+mkTyErr :: Map.Map MetaTVar LargeId -> SLoc -> ((MonoType Int, MonoType Int), TypeError) -> ErrMsg
 mkTyErr used_mtvs loc ((actual_typ, expected_typ), typ_error) = case typ_error of
     KindsAreMismatched (typ1, kin1) (typ2, kin2) -> concat
         [ "typechecking-error[" ++ pprint 0 loc "]:\n"

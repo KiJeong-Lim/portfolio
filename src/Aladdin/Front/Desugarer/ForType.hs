@@ -17,6 +17,7 @@ makeTypeEnv kind_env = go where
     unRep :: TypeRep -> Either ErrMsg (KindExpr, MonoType LargeId)
     unRep trep = case trep of
         RTyVar loc tvrep -> return (Star, TyVar tvrep)
+        RTyCon loc (TC_Named "string") -> return (Star, mkTyList mkTyChr)
         RTyCon loc type_constructor -> case Map.lookup type_constructor kind_env of
             Nothing -> Left ("desugaring-error[" ++ pprint 0 loc ("]:\n  ? the type constructor `" ++ showsPrec 0 type_constructor "hasn't declared.\n"))
             Just kin -> return (kin, TyCon (TCon type_constructor kin))

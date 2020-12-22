@@ -68,6 +68,17 @@ executable Aladdin
     build-depends: base >= 4.7 && < 5, containers >= 0.6, transformers >= 0.5, QuickCheck >= 2.13, checkers >= 0.5, pretty-terminal >= 0.1.0.0
     main-is: Aladdin/Main.hs
     other-modules:
+        Aladdin.Back.BackEnd
+        Aladdin.Back.Base.Constant
+        Aladdin.Back.Base.Labeling
+        Aladdin.Back.Base.TermNode
+        Aladdin.Back.Base.TermNode.Read
+        Aladdin.Back.Base.TermNode.Show
+        Aladdin.Back.Base.TermNode.Util
+        Aladdin.Back.Base.VarBinding
+        Aladdin.Back.Converter.Main
+        Aladdin.Back.Converter.Scheme
+        Aladdin.Back.Converter.Util
         Aladdin.Front.Analyzer.Grammar
         Aladdin.Front.Analyzer.Lexer
         Aladdin.Front.Analyzer.Main
