@@ -10,6 +10,7 @@ import Data.Functor.Identity
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import Lib.Algorithm.Sorting
 import Lib.Base
 import Lib.Text.PC
 import Lib.Text.PC.Expansion
@@ -154,6 +155,12 @@ genParser blocks = go where
                 ]
             , strstr "]"
             ]
+    formatTable :: Ord a => [((a, b), c)] -> [(a, [(b, c)])]
+    formatTable = sortByMerging (\pair1 -> \pair2 -> fst pair1 <= fst pair2) . loop where
+        loop :: Eq a => [((a, b), c)] -> [(a, [(b, c)])]
+        loop [] = []
+        loop (((x, y), z) : triples) = case List.partition (\triple -> fst (fst triple) == x) triples of
+            (triples1, triples2) -> (x, (y, z) : [ (y, z) | ((_, y), z) <- triples1 ]) : loop triples2
     go :: ExceptT ErrMsg Identity (String -> String)
     go = do
         hs_head <- getHsHead
@@ -330,69 +337,82 @@ genParser blocks = go where
             tellLine (strstr "    theLR1Parser :: LR1Parser")
             tellLine (strstr "    theLR1Parser = LR1Parser")
             tellLine (strstr "        { getInitialS = " . showsPrec 0 (getInitialS lalr1))
-            table1 <- lift $ sequence
-                [ case action of
-                    Shift p -> do
-                        tsym_id <- getTSymId tsym
-                        return $ strcat
+            action_table_rep <- lift $ sequence
+                [ fmap (ppunc ", ") $ do
+                    pairs' <- sequence
+                        [ do
+                            tsym_id <- getTSymId tsym
+                            return (tsym_id, action)
+                        | (tsym, action) <- pairs
+                        ]
+                    sequence
+                        [ case action of
+                            Shift p -> return $ strcat
+                                [ strstr "(("
+                                , showsPrec 0 q
+                                , strstr ", "
+                                , showsPrec 0 tsym_id
+                                , strstr "), Shift "
+                                , showsPrec 0 p
+                                , strstr ")"
+                                ]
+                            Reduce (lhs, rhs) -> do
+                                lhs_rep <- getNSymId lhs
+                                rhs_rep <- sequence
+                                    [ case sym of
+                                        NS ns -> do
+                                            ns_rep <- getNSymId ns
+                                            return (strstr "NS " . showsPrec 0 ns_rep)
+                                        TS ts -> do
+                                            ts_rep <- getTSymId ts
+                                            return (strstr "TS " . showsPrec 0 ts_rep)
+                                    | sym <- rhs
+                                    ]
+                                return $ strcat
+                                    [ strstr "(("
+                                    , showsPrec 0 q
+                                    , strstr ", "
+                                    , showsPrec 0 tsym_id
+                                    , strstr "), Reduce ("
+                                    , showsPrec 0 lhs_rep
+                                    , strstr ", ["
+                                    , ppunc ", " rhs_rep
+                                    , strstr "]))"
+                                    ]
+                            Accept -> return $ strcat
+                                [ strstr "(("
+                                , showsPrec 0 q
+                                , strstr ", "
+                                , showsPrec 0 tsym_id
+                                , strstr "), Accept)"
+                                ]
+                        | (tsym_id, action) <- sortByMerging (\pair1 -> \pair2 -> fst pair1 <= fst pair2) pairs'
+                        ]
+                | (q, pairs) <- formatTable (Map.toAscList (getActionTable lalr1))
+                ]
+            tellLine (strstr "        , getActionTable = YMap.fromAscList " . plist 12 action_table_rep)
+            table2 <- lift $ sequence
+                [ fmap (ppunc ", ") $ do
+                    pairs' <- sequence
+                        [ do
+                            nsym_id <- getNSymId nsym
+                            return (nsym_id, p)
+                        | (nsym, p) <- pairs
+                        ]
+                    return
+                        [ strcat
                             [ strstr "(("
                             , showsPrec 0 q
-                            , strstr ","
-                            , showsPrec 0 tsym_id
-                            , strstr "),Shift "
+                            , strstr ", "
+                            , showsPrec 0 nsym_id
+                            , strstr "), "
                             , showsPrec 0 p
                             , strstr ")"
                             ]
-                    Reduce (lhs, rhs) -> do
-                        tsym_id <- getTSymId tsym
-                        lhs_rep <- getNSymId lhs
-                        rhs_rep <- sequence
-                            [ case sym of
-                                NS ns -> do
-                                    ns_rep <- getNSymId ns
-                                    return (strstr "NS " . showsPrec 0 ns_rep)
-                                TS ts -> do
-                                    ts_rep <- getTSymId ts
-                                    return (strstr "TS " . showsPrec 0 ts_rep)
-                            | sym <- rhs
-                            ]
-                        return $ strcat
-                            [ strstr "(("
-                            , showsPrec 0 q
-                            , strstr ","
-                            , showsPrec 0 tsym_id
-                            , strstr "),Reduce ("
-                            , showsPrec 0 lhs_rep
-                            , strstr ",["
-                            , ppunc "," rhs_rep
-                            , strstr "]))"
-                            ]
-                    Accept -> do
-                        tsym_id <- getTSymId tsym
-                        return $ strcat
-                            [ strstr "(("
-                            , showsPrec 0 q
-                            , strstr ","
-                            , showsPrec 0 tsym_id
-                            , strstr "),Accept)"
-                            ]
-                | ((q, tsym), action) <- Map.toAscList (getActionTable lalr1)
-                ]
-            tellLine (strstr "        , getActionTable = YMap.fromList " . plist 12 table1)
-            table2 <- lift $ sequence
-                [ do
-                    nsym_id <- getNSymId nsym
-                    return $ strcat
-                        [ strstr "(("
-                        , showsPrec 0 q
-                        , strstr ","
-                        , showsPrec 0 nsym_id
-                        , strstr "),"
-                        , showsPrec 0 p
-                        , strstr ")"
+                        | (nsym_id, p) <- sortByMerging (\pair1 -> \pair2 -> fst pair1 <= fst pair2) pairs'
                         ]
-                | ((q, nsym), p) <- Map.toAscList (getReduceTable lalr1)
+                | (q, pairs) <- formatTable (Map.toAscList (getReduceTable lalr1))
                 ]
-            tellLine (strstr "        , getReduceTable = YMap.fromList " . plist 12 table2)
+            tellLine (strstr "        , getReduceTable = YMap.fromAscList " . plist 12 table2)
             tellLine (strstr "        }")
             tellLine (strstr "")
