@@ -1,6 +1,6 @@
 # portfolio
 
-- 이 레포지토리는 제 작업의 통합본입니다.
+- 이 레포지토리는 제 작업들의 통합본입니다.
 
 # LGS/PGS
 
@@ -24,7 +24,7 @@
 
 - Xiaochu Qi님의 논문 `An Implementation of the Language Lambda Prolog Organized around Higher-Order Pattern Unification`을 읽고 만들었습니다.
 
-- 이 언어로 1차 논리 자연 연역 검증기를 구현할 수 있고, 그게 `ndc.aladdin`입니다.
+- 이 언어로 `ndc.aladdin`과 같이 자연 연역을 검증하는 프로그램을 구현할 수 있습니다.
 
 # Butterfly
 
