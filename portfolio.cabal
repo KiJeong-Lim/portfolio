@@ -79,6 +79,12 @@ executable Aladdin
         Aladdin.Back.Converter.Main
         Aladdin.Back.Converter.Scheme
         Aladdin.Back.Converter.Util
+        Aladdin.Back.HOPU.Bind
+        Aladdin.Back.HOPU.Main
+        Aladdin.Back.HOPU.MkSubst
+        Aladdin.Back.HOPU.Select
+        Aladdin.Back.HOPU.Simplify
+        Aladdin.Back.HOPU.Util
         Aladdin.Front.Analyzer.Grammar
         Aladdin.Front.Analyzer.Lexer
         Aladdin.Front.Analyzer.Main
