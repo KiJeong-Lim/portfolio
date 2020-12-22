@@ -27,4 +27,4 @@ convertProgram used_mtvs assumptions = fmap makeUniversalClosure . convertWithCh
 convertQuery :: GenUniqueM m => Map.Map MetaTVar SmallId -> Map.Map IVar (MonoType Int) -> FreeVariableEnv -> TermExpr (DataConstructor, [MonoType Int]) (SLoc, MonoType Int) -> ExceptT ErrMsg m TermNode
 convertQuery used_mtvs assumptions var_name_env query
     | Map.null used_mtvs = convertWithChecking var_name_env [] "query" query
-    | otherwise = throwE ("converting-error[" ++ pprint 0 (fst (getAnnot query)) ("]:\n  ? query must have no free type variables.\n"))
+    | otherwise = throwE ("converting-error\n  ? query must have no free type variables.\n")

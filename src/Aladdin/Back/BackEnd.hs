@@ -40,10 +40,14 @@ runREPL program = lift (newIORef False) >>= go where
             if debugging
                 then do
                     putStrLn str
+                    putStrLn "Press the enter key to go to next state:"
                     response <- getLine
                     case response of
                         ":q" -> quitWithMsg ""
-                        ":d" -> modifyIORef isDebugging not
+                        ":d" -> do
+                            modifyIORef isDebugging not
+                            debugging <- readIORef isDebugging
+                            putStrLn ("Debugging mode " ++ (if debugging then "on" else "off") ++ ".")
                         _ -> return ()
                 else return ()
         printAnswer :: Context -> IO RunMore
@@ -92,7 +96,7 @@ runREPL program = lift (newIORef False) >>= go where
         query0 <- lift $ getLine
         case query0 of
             "" -> lift $ quitWithMsg ""
-            ":q" -> lift $ quitWithMsg "bye."
+            ":q" -> lift $ quitWithMsg "Bye~"
             ":d" -> do
                 lift $ do
                     modifyIORef isDebugging not
@@ -123,5 +127,5 @@ runREPL program = lift (newIORef False) >>= go where
                                     Right sat -> lift $ putStrLn (if sat then "yes." else "no.")
                                 go isDebugging
                     Right src1 -> do
-                        lift $ putStrLn "parsing-error: it is not a query!"
+                        lift $ putStrLn "parsing-error: it is not a query."
                         go isDebugging
