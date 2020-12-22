@@ -72,8 +72,8 @@ runREPL program = lift (newIORef False) >>= go where
                     putStrLn "Find more solutions?"
                     str <- getLine
                     if str == "Y" || str == "y"
-                        then return False
-                        else return True
+                        then return True
+                        else return False
                 printDisagreements :: IO ()
                 printDisagreements = do
                     putStrLn "The remaining disagreements are:"
