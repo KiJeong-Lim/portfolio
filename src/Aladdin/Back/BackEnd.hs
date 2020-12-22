@@ -46,9 +46,9 @@ runREPL program = lift (newIORef False) >>= go where
                         ":d" -> modifyIORef isDebugging not
                         _ -> return ()
                 else return ()
-        printAnswer :: Context -> IO Satisfied
+        printAnswer :: Context -> IO RunMore
         printAnswer final_ctx
-            | isShort && isClear = return True
+            | isShort && isClear = return False
             | isShort = do
                 printDisagreements
                 askToRunMore
@@ -67,13 +67,13 @@ runREPL program = lift (newIORef False) >>= go where
                 isShort = Set.null (getFreeLVs query)
                 isClear :: Bool
                 isClear = List.null (_LeftConstraints final_ctx)
-                askToRunMore :: IO Bool
+                askToRunMore :: IO RunMore
                 askToRunMore = do
-                    putStrLn "Get more solutions?"
+                    putStrLn "Find more solutions?"
                     str <- getLine
                     if str == "Y" || str == "y"
-                        then return True
-                        else return False
+                        then return False
+                        else return True
                 printDisagreements :: IO ()
                 printDisagreements = do
                     putStrLn "The remaining disagreements are:"

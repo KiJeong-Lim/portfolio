@@ -20,6 +20,8 @@ type Stack = [(Context, [Cell])]
 
 type Satisfied = Bool
 
+type RunMore = Bool
+
 data KernelErr
     = BadGoalGiven TermNode
     | BadFactGiven TermNode
@@ -44,31 +46,31 @@ data Context
 data RuntimeEnv
     = RuntimeEnv
         { _PutStr :: String -> IO ()
-        , _Answer :: Context -> IO Satisfied
+        , _Answer :: Context -> IO RunMore
         }
     deriving ()
 
 instance ZonkLVar Cell where
     zonkLVar theta (Cell facts level goal) = Cell (applyBinding theta facts) level (applyBinding theta goal)
 
-showStackItem :: Indentation -> (Context, [Cell]) -> String -> String
-showStackItem space (ctx, cells) = strcat
+showStackItem :: Set.Set LogicVar -> Indentation -> (Context, [Cell]) -> String -> String
+showStackItem fvs space (ctx, cells) = strcat
     [ pindent space . strstr "- progressings = " . plist (space + 4) [ strstr "?- " . showsPrec 0 goal | Cell facts level goal <- cells ] . nl
     , pindent space . strstr "- context = Context" . nl
-    , pindent (space + 4) . strstr "{ " . strstr "_TotalVarBinding = " . plist (space + 8) [ showsPrec 0 (LVar v) . strstr " +-> " . showsPrec 0 t | (v, t) <- Map.toList (unVarBinding (_TotalVarBinding ctx)) ] . nl
+    , pindent (space + 4) . strstr "{ " . strstr "_TotalVarBinding = " . plist (space + 8) [ showsPrec 0 (LVar v) . strstr " +-> " . showsPrec 0 t | (v, t) <- Map.toList (unVarBinding (_TotalVarBinding ctx)), v `Set.member` fvs ] . nl
     , pindent (space + 4) . strstr ", " . strstr "_LeftConstraints = " . plist (space + 8) [ showsPrec 0 constraint | constraint <- _LeftConstraints ctx ] . nl
     , pindent (space + 4) . strstr "} " . nl
     ]
 
-showsCurrentState :: Context -> [Cell] -> Stack -> String -> String
-showsCurrentState ctx cells stack = strcat
+showsCurrentState :: Set.Set LogicVar -> Context -> [Cell] -> Stack -> String -> String
+showsCurrentState fvs ctx cells stack = strcat
     [ strstr "* The top of the stack is:" . nl
-    , showStackItem 4 (ctx, cells) . nl
+    , showStackItem fvs 4 (ctx, cells) . nl
     , strstr "* The rest of the stack is:" . nl
     , strcat
         [ strcat
             [ pindent 2 . strstr "- #[ " . showsPrec 0 i . strstr "]:" . nl
-            , showStackItem 4 item . nl
+            , showStackItem fvs 4 item . nl
             ]
         | (i, item) <- zip [1, 2 .. length stack] stack
         ]

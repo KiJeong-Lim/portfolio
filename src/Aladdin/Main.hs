@@ -49,4 +49,6 @@ main = do
                     kind_env `seq` type_env `seq` facts3 `seq` return (Program { _KindDecls = kind_env, _TypeDecls = type_env, _FactDecls = facts3 })
                 case result of
                     Left err_msg -> lift $ quitWithMsg err_msg
-                    Right program2 -> runREPL program2
+                    Right program2 -> do
+                        lift $ putStrLn ("loaded: " ++ dir)
+                        runREPL program2

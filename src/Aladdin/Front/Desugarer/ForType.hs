@@ -12,8 +12,8 @@ makeTypeEnv kind_env = go where
     applyModusPonens :: KindExpr -> KindExpr -> Either ErrMsg KindExpr
     applyModusPonens (kin1 `KArr` kin2) kin3
         | kin1 == kin3 = Right kin2
-    modus_ponens (kin1 `KArr` kin2) kin3 = Left ("  ? couldn't solve `" ++ pprint 0 kin1 ("\' ~ `" ++ pprint 0 kin3 "\'"))
-    modus_ponens Star kin1 = Left ("  ? coudln't solve `type\' ~ `" ++ pprint 1 kin1 " -> _\'")
+    applyModusPonens (kin1 `KArr` kin2) kin3 = Left ("  ? couldn't solve `" ++ pprint 0 kin1 ("\' ~ `" ++ pprint 0 kin3 "\'"))
+    applyModusPonens Star kin1 = Left ("  ? coudln't solve `type\' ~ `" ++ pprint 1 kin1 " -> _\'")
     unRep :: TypeRep -> Either ErrMsg (KindExpr, MonoType LargeId)
     unRep trep = case trep of
         RTyVar loc tvrep -> return (Star, TyVar tvrep)
@@ -24,7 +24,7 @@ makeTypeEnv kind_env = go where
         RTyApp loc trep1 trep2 -> do
             (kin1, typ1) <- unRep trep1
             (kin2, typ2) <- unRep trep2
-            case modus_ponens kin1 kin2 of
+            case applyModusPonens kin1 kin2 of
                 Left msg -> Left ("desugaring-error[" ++ pprint 0 loc ("]:\n " ++ msg ++ ".\n"))
                 Right kin -> return (kin, TyApp typ1 typ2)
         RTyPrn loc trep -> unRep trep
