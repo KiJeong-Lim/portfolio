@@ -55,7 +55,7 @@ instance Outputable ViewNode where
         go (ViewTCon con) = parenthesize 11 (strstr con)
         go (ViewTApp viewer1 viewer2) = parenthesize 10 (pprint 10 viewer1 . strstr " " . pprint 11 viewer2)
         go (ViewOper (oper, prec')) = case oper of
-            Prefix str viewer1 -> parenthesize prec' (pprint prec' viewer1)
+            Prefix str viewer1 -> parenthesize prec' (strstr str . pprint prec' viewer1)
             InfixL viewer1 str viewer2 -> parenthesize prec' (pprint prec' viewer1 . strstr str . pprint (prec' + 1) viewer2)
             InfixR viewer1 str viewer2 -> parenthesize prec' (pprint (prec' + 1) viewer1 . strstr str . pprint prec' viewer2)
             InfixN viewer1 str viewer2 -> parenthesize prec' (pprint (prec' + 1) viewer1 . strstr str . pprint (prec' + 1) viewer2)
