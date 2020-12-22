@@ -85,6 +85,11 @@ executable Aladdin
         Aladdin.Back.HOPU.Select
         Aladdin.Back.HOPU.Simplify
         Aladdin.Back.HOPU.Util
+        Aladdin.Back.Runtime.Instantiation
+        Aladdin.Back.Runtime.LogicalOperator
+        Aladdin.Back.Runtime.Main
+        Aladdin.Back.Runtime.Transition
+        Aladdin.Back.Runtime.Util
         Aladdin.Front.Analyzer.Grammar
         Aladdin.Front.Analyzer.Lexer
         Aladdin.Front.Analyzer.Main
