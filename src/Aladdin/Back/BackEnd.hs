@@ -47,24 +47,21 @@ runREPL program = lift (newIORef False) >>= go where
                         ":d" -> do
                             modifyIORef isDebugging not
                             debugging <- readIORef isDebugging
-                            putStrLn ("Debugging mode " ++ (if debugging then "on" else "off") ++ ".")
+                            putStrLn "Debugging mode off."
                         _ -> return ()
                 else return ()
         printAnswer :: Context -> IO RunMore
         printAnswer final_ctx
             | isShort && isClear = return False
-            | isShort = do
-                printDisagreements
-                askToRunMore
-            | otherwise = do
+            | isClear = do
                 putStrLn "The answer substitution is:"
                 sequence
                     [ putStrLn ("  " ++ v ++ " := " ++ showsPrec 0 t ".")
                     | (LV_Named v, t) <- Map.toList (unVarBinding (_TotalVarBinding final_ctx))
                     ]
-                if isClear
-                    then return ()
-                    else printDisagreements
+                askToRunMore
+            | otherwise = do
+                printDisagreements
                 askToRunMore
             where
                 isShort :: Bool
@@ -87,7 +84,7 @@ runREPL program = lift (newIORef False) >>= go where
                         ]
                     putStrLn "The binding is:"
                     sequence
-                        [ putStrLn ("  " ++ showsPrec 0 (mkLVar v) (" +-> " ++ showsPrec 0 t "."))
+                        [ putStrLn ("  " ++ showsPrec 0 (mkLVar v) (" := " ++ showsPrec 0 t "."))
                         | (v, t) <- Map.toList (unVarBinding (_TotalVarBinding final_ctx))
                         ]
                     return ()

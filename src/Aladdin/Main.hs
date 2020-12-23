@@ -29,6 +29,13 @@ showCopyright = concat
     , "All rights reserved.\n"
     ]
 
+sequence' :: Monad m => [m a] -> m [a]
+sequence' [] = return []
+sequence' (x : xs) = do
+    y <- x
+    ys <- y `seq` sequence' xs
+    ys `seq` return (y : ys)
+
 runAladdin :: UniqueGenT IO ()
 runAladdin = do
     lift $ putStrLn "Enter the path of the aladdin file to execute:"
@@ -45,8 +52,8 @@ runAladdin = do
             Right program1 -> do
                 result <- runExceptT $ do
                     module1 <- desugarProgram theInitialKindEnv theInitialTypeEnv program1
-                    facts2 <- sequence [ checkType (_TypeDecls module1) fact mkTyO | fact <- _FactDecls module1 ]
-                    facts3 <- sequence [ convertProgram used_mtvs assumptions fact | (fact, (used_mtvs, assumptions)) <- facts2 ]
+                    facts2 <- sequence' [ checkType (_TypeDecls module1) fact mkTyO | fact <- _FactDecls module1 ]
+                    facts3 <- sequence' [ convertProgram used_mtvs assumptions fact | (fact, (used_mtvs, assumptions)) <- facts2 ]
                     let kind_env = _KindDecls module1
                         type_env = _TypeDecls module1
                     kind_env `seq` type_env `seq` facts3 `seq` return (Program { _KindDecls = kind_env, _TypeDecls = type_env, _FactDecls = facts3 })
@@ -62,3 +69,4 @@ main :: IO ()
 main = do
     putStrLn showCopyright
     runUniqueGenT runAladdin
+    return ()
