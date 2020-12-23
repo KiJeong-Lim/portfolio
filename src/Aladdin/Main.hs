@@ -29,20 +29,20 @@ showCopyright = concat
     , "All rights reserved.\n"
     ]
 
-runAladdin :: IO ()
+runAladdin :: UniqueGenT IO ()
 runAladdin = do
-    putStrLn "Enter the path of the aladdin file to execute:"
-    dir <- getLine
-    src <- readFile dir
+    lift $ putStrLn "Enter the path of the aladdin file to execute:"
+    dir <- lift $ getLine
+    src <- lift $ readFile dir
     case runAnalyzer src of
         Left err_msg -> do
-            putStrLn err_msg
+            lift $ putStrLn err_msg
             runAladdin
         Right output -> case output of
             Left query1 -> do
-                putStrLn "parsing-error: it is not a program."
+                lift $ putStrLn "parsing-error: it is not a program."
                 runAladdin
-            Right program1 -> runUniqueGenT $ do
+            Right program1 -> do
                 result <- runExceptT $ do
                     module1 <- desugarProgram theInitialKindEnv theInitialTypeEnv program1
                     facts2 <- sequence [ checkType (_TypeDecls module1) fact mkTyO | fact <- _FactDecls module1 ]
@@ -51,8 +51,8 @@ runAladdin = do
                         type_env = _TypeDecls module1
                     kind_env `seq` type_env `seq` facts3 `seq` return (Program { _KindDecls = kind_env, _TypeDecls = type_env, _FactDecls = facts3 })
                 case result of
-                    Left err_msg -> lift $ do
-                        putStrLn err_msg
+                    Left err_msg -> do
+                        lift $ putStrLn err_msg
                         runAladdin
                     Right program2 -> do
                         lift $ putStrLn ("Loaded: " ++ dir)
@@ -61,4 +61,4 @@ runAladdin = do
 main :: IO ()
 main = do
     putStrLn showCopyright
-    runAladdin
+    runUniqueGenT runAladdin

@@ -95,7 +95,7 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
             DC_Cons -> return (ViewDCon "::")
             DC_ChrL chr -> return (ViewChrL chr)
             DC_NatL nat -> return (ViewNatL nat)
-            DC_Succ -> return (ViewDCon "__S")
+            DC_Succ -> return (ViewDCon "__s")
         TC type_constructor -> case type_constructor of
             TC_Arrow -> return (ViewTCon "->")
             TC_Unique uni -> return (ViewTCon ("tc_" ++ show uni))
