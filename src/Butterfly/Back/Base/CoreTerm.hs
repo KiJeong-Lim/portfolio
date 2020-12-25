@@ -51,9 +51,9 @@ instance HasAnnot (CoreTerm var) where
 
 getFVsOfTops :: CoreTops CoreSC GuaranteeIVarRenamed -> CoreTops CoreSC (GuaranteeIVarRenamed, FreeVars)
 getFVsOfTops tops = [ (var, (params, runIdentity (getFVsOfTerm (Set.fromList params) rhs))) | (var, (params, rhs)) <- tops ] where
-    getFVs :: CoreTerm IVar (GuaranteeIVarRenamed, FreeVars) -> FreeVars
+    getFVs :: CoreTerm CoreIVar (GuaranteeIVarRenamed, FreeVars) -> FreeVars
     getFVs = snd . getAnnot
-    getFVsOfTerm :: Set.Set FreeVarCandidate -> CoreTersm CoreIVar GuaranteeIVarRenamed -> Identity (CoreTerm CoreIVar (GuaranteeIVarRenamed, FreeVars))
+    getFVsOfTerm :: Set.Set FreeVarCandidate -> CoreTerm CoreIVar GuaranteeIVarRenamed -> Identity (CoreTerm CoreIVar (GuaranteeIVarRenamed, FreeVars))
     getFVsOfTerm vars (CT_Var g var)
         | var `Set.member` vars = return (CT_Var (g, Set.singleton var) var)
         | otherwise = return (CT_Var (g, Set.empty) var)
