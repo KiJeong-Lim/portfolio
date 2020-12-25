@@ -13,9 +13,9 @@ type SmallId = String
 
 type IsRec = Bool
 
-type IVar = Unique
+type CoreIVar = Unique
 
-type SC = Unique
+type CoreSC = Unique
 
 type AdrOf object = Int
 
