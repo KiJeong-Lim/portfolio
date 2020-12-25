@@ -17,7 +17,7 @@ type IVar = Unique
 
 type SC = Unique
 
-type AdrOfSC = Int
+type AdrOf object = Int
 
 newtype LargeId
     = LargeId { unLargeId :: String }

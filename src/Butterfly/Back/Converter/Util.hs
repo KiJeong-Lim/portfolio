@@ -17,9 +17,9 @@ data VarIdxEnvItem
 
 data Converter
     = Converter
-        { getAdrOfNamedSC :: Map.Map SC AdrOfSC
-        , getAdrForNextSC :: AdrOfSC
-        , bindsGmCodeToSC :: Map.Map AdrOfSC GmCode
+        { getAdrOfNamedSC :: Map.Map SC (AdrOf SC)
+        , getAdrForNextSC :: AdrOf SC
+        , bindsGmCodeToSC :: Map.Map (AdrOf SC) GmCode
         }
     deriving ()
 
