@@ -112,6 +112,6 @@ executable Butterfly
         Butterfly.Back.Base.CoreTerm
         Butterfly.Back.Base.Instruction
         Butterfly.Back.Base.Util
-        Butterfly.Back.Converter.Scheme
+        Butterfly.Back.Converter.Schema
         Butterfly.Back.Converter.Util
         Lib.Base

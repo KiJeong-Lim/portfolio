@@ -13,9 +13,11 @@ type SmallId = String
 
 type IsRec = Bool
 
-type SC = SmallId
+type IVar = Unique
 
-type IVar = String
+type SC = Unique
+
+type AdrOfSC = Int
 
 newtype LargeId
     = LargeId { unLargeId :: String }

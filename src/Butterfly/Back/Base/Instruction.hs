@@ -11,7 +11,7 @@ data GmInstruction
     | GI_pop Int
     | GI_mk_var Int
     | GI_mk_con Tag
-    | GI_mk_fun SC
+    | GI_mk_fun AdrOfSC
     | GI_mk_app
     | GI_mk_lam
     | GI_eval
