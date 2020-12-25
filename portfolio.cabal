@@ -108,4 +108,10 @@ executable Butterfly
     build-depends: base >= 4.7 && < 5, containers >= 0.6, transformers >= 0.5, QuickCheck >= 2.13, checkers >= 0.5, pretty-terminal >= 0.1.0.0
     main-is: Butterfly/Main.hs
     other-modules:
+        Butterfly.Back.BackEnd
+        Butterfly.Back.Base.CoreTerm
+        Butterfly.Back.Base.Instruction
+        Butterfly.Back.Base.Util
+        Butterfly.Back.Converter.Scheme
+        Butterfly.Back.Converter.Util
         Lib.Base
