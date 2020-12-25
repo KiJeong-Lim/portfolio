@@ -13,7 +13,7 @@ data GmInstruction
     | GI_mk_con Tag
     | GI_mk_fun (AdrOf SC, Arity)
     | GI_mk_app
-    | GI_mk_lam
+    | GI_mk_abs
     | GI_eval
     | GI_memo (AdrOf SC)
     | GI_jump [(Tag, GmCode)]
