@@ -11,19 +11,6 @@ import Lib.Base
 type VarIdxEnv = [VarIdxEnvItem]
 
 data VarIdxEnvItem
-    = VI_var IVar
+    = VI_local IVar
     | VI_dummy
     deriving (Eq)
-
-data Converter
-    = Converter
-        { getAdrOfNamedSC :: Map.Map SC (AdrOf SC)
-        , getAdrForNextSC :: AdrOf SC
-        , bindsGmCodeToSC :: Map.Map (AdrOf SC) GmCode
-        }
-    deriving ()
-
-data ConvertErr
-    = CannotFindVar IVar VarIdxEnv
-    | CannotFindSC SC
-    deriving ()
