@@ -15,8 +15,8 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Lib.Base
 
-runCompiler :: CoreTops IVar (GuaranteeIVarRenamed, FreeVars) -> StateT Converter (ExceptT ConvertErr Identity) ()
-runCompiler tops = sequence [ compileSC var | (var, (params, rhs)) <- tops ] *> pure () where
+runMainScheme :: CoreTops IVar (GuaranteeIVarRenamed, FreeVars) -> StateT Converter (ExceptT ConvertErr Identity) ()
+runMainScheme tops = sequence [ compileSC var | (var, (params, rhs)) <- tops ] *> pure () where
     runSchemeOfConstruction :: VarIdxEnv -> CoreTerm IVar (GuaranteeIVarRenamed, FreeVars) -> WriterT GmCode (StateT Converter (ExceptT ConvertErr Identity)) ()
     runSchemeOfConstruction env (CT_Var (g, fvs) var)
         = case VI_var var `List.elemIndex` env of

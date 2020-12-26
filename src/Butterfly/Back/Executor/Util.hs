@@ -36,6 +36,7 @@ data RuntimeErr
     = DerefInvalid (AdrOf TermNode)
     | CannotLoadCodes (AdrOf SC)
     | Unreachable GmCode GmStack GmDummy
+    | IsNotNApp TermNode
     deriving ()
 
 malloc :: Monad m => TermNode -> StateT Executor (ExceptT RuntimeErr m) (AdrOf TermNode)
@@ -71,5 +72,14 @@ load fun_adr = do
         Nothing -> lift (throwE (CannotLoadCodes fun_adr))
         Just code -> return code
 
-reload :: Monad m => Arity -> GmStack -> StateT Executor (ExceptT RuntimeErr m) GmStack
-reload = undefined
+rearrange :: Monad m => Arity -> GmStack -> StateT Executor (ExceptT RuntimeErr m) GmStack
+rearrange n stack = do
+    args <- sequence
+        [ do
+            node <- deref adr
+            case node of
+                NApp _ arg -> return arg
+                _ -> lift (throwE (IsNotNApp node))
+        | adr <- take n stack
+        ]
+    return (args ++ drop (n - 1) stack)
