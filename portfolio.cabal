@@ -114,5 +114,3 @@ executable Butterfly
         Butterfly.Back.Base.Util
         Lib.Base
     c-sources:
-        src/Butterfly/Back/Executor/executor.h
-        src/Butterfly/Back/Executor/executor.c
