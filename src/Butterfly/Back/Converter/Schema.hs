@@ -64,24 +64,23 @@ runCompiler tops = sequence [ compileSC var | (var, (params, rhs)) <- tops ] *> 
             env' :: VarIdxEnv
             env' = map (VI_var . fst) defns ++ env
     runSchemeOfConstruction env (CT_Mat (g, fvs) body altns)
-        = case Set.toList fvs of
-            [] -> undefined
-            args -> do
-                code <- lift (runSchemeOfReturning (args, CT_Mat (g, fvs) body altns))
-                converter0 <- lift get
-                let fun_adr = getAdrForNextSC converter0
-                lift (put (converter0 { getAdrForNextSC = fun_adr + 1, bindsGmCodeToSC = Map.insert fun_adr code (bindsGmCodeToSC converter0) }))
-                tell [GI_mk_fun (fun_adr, length args)]
-                sequence
-                    [ case VI_var var `List.elemIndex` (VI_dummy : env) of
-                        Nothing -> lift (lift (throwE (CannotFindVar var (VI_dummy : env))))
-                        Just idx -> do
-                            tell [GI_mk_var idx]
-                            tell [GI_mk_app]
-                            return ()
-                    | var <- args
-                    ]
-                return ()
+        = do
+            let args = Set.toList fvs
+            code <- lift (runSchemeOfReturning (args, CT_Mat (g, fvs) body altns))
+            converter0 <- lift get
+            let fun_adr = getAdrForNextSC converter0
+            lift (put (converter0 { getAdrForNextSC = fun_adr + 1, bindsGmCodeToSC = Map.insert fun_adr code (bindsGmCodeToSC converter0) }))
+            tell [GI_mk_fun (fun_adr, length args)]
+            sequence
+                [ case VI_var var `List.elemIndex` (VI_dummy : env) of
+                    Nothing -> lift (lift (throwE (CannotFindVar var (VI_dummy : env))))
+                    Just idx -> do
+                        tell [GI_mk_var idx]
+                        tell [GI_mk_app]
+                        return ()
+                | var <- args
+                ]
+            return ()
     runSchemeOfConstruction env (CT_Lam (g, fvs) (params, body))
         | null params = do
             runSchemeOfConstruction env body
@@ -168,16 +167,15 @@ runCompiler tops = sequence [ compileSC var | (var, (params, rhs)) <- tops ] *> 
     compileSC :: SC -> StateT Converter (ExceptT ConvertErr Identity) (AdrOf SC, Arity)
     compileSC var = case lookup var tops of
         Nothing -> lift (throwE (CannotFindSC var))
-        Just (params, rhs) -> case length params of
-            0 -> undefined
-            arity -> do
-                converter0 <- get
-                case Map.lookup var (getAdrOfNamedSC converter0) of
-                    Nothing -> do
-                        let fun_adr = getAdrForNextSC converter0
-                        put (converter0 { getAdrForNextSC = fun_adr + 1, getAdrOfNamedSC = Map.insert var fun_adr (getAdrOfNamedSC converter0) })
-                        code <- runSchemeOfReturning (params, rhs)
-                        converter1 <- get
-                        put (converter1 { bindsGmCodeToSC = Map.insert fun_adr code (bindsGmCodeToSC converter1) })
-                        return (fun_adr, arity)
-                    Just fun_adr -> return (fun_adr, arity)
+        Just (params, rhs) -> do
+            let arity = length params
+            converter0 <- get
+            case Map.lookup var (getAdrOfNamedSC converter0) of
+                Nothing -> do
+                    let fun_adr = getAdrForNextSC converter0
+                    put (converter0 { getAdrForNextSC = fun_adr + 1, getAdrOfNamedSC = Map.insert var fun_adr (getAdrOfNamedSC converter0) })
+                    code <- runSchemeOfReturning (params, rhs)
+                    converter1 <- get
+                    put (converter1 { bindsGmCodeToSC = Map.insert fun_adr code (bindsGmCodeToSC converter1) })
+                    return (fun_adr, arity)
+                Just fun_adr -> return (fun_adr, arity)
