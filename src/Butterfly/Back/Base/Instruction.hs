@@ -8,15 +8,16 @@ data GmInstruction
     = GI_slide Int
     | GI_alloc Int
     | GI_update Int
+    | GI_install_gbl
     | GI_pop Int
-    | GI_mk_var Int
-    | GI_mk_con Tag
-    | GI_mk_fun (AdrOf SC, Arity)
+    | GI_push Int
+    | GI_push_con Tag
+    | GI_push_fun (FunAdr, Arity)
+    | GI_push_gbl GlobalIdx
     | GI_mk_app
-    | GI_mk_lam
+    | GI_mk_abs
     | GI_eval
-    | GI_memo (AdrOf SC)
-    | GI_jump [(Tag, GmCode)]
+    | GI_jump [((Tag, Arity), GmCode)]
     | GT_print
     | GT_put_str String
     deriving (Show)

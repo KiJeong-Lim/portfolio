@@ -19,6 +19,10 @@ type SC = Unique
 
 type AdrOf object = Int
 
+type FunAdr = Int
+
+type GlobalIdx = Int
+
 newtype LargeId
     = LargeId { unLargeId :: String }
     deriving (Eq, Ord)

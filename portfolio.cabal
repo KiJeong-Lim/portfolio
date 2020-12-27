@@ -112,8 +112,10 @@ executable Butterfly
         Butterfly.Back.Base.CoreTerm
         Butterfly.Back.Base.Instruction
         Butterfly.Back.Base.Util
-        Butterfly.Back.Converter.Schema
-        Butterfly.Back.Converter.Util
+        Butterfly.Back.Compiler.Main
+        Butterfly.Back.Compiler.Schema
+        Butterfly.Back.Compiler.Util
+        Butterfly.Back.Executor.Main
         Butterfly.Back.Executor.Transition
         Butterfly.Back.Executor.Util
         Lib.Base
