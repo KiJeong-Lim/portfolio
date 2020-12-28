@@ -25,11 +25,3 @@
 - Xiaochu Qi님의 논문 `An Implementation of the Language Lambda Prolog Organized around Higher-Order Pattern Unification`을 읽고 만들었습니다.
 
 - 이 언어로 `ndc.aladdin`과 같이 자연 연역을 검증하는 프로그램을 구현할 수 있습니다.
-
-# Butterfly
-
-- 느긋한 순수 함수형 언어입니다.
-
-- Simon Loftus Peyton Jones님과 David Lester님의 출판물 `Implementing functional languages: a tutorial`을 읽고 만들었습니다.
-
-- 소스 파일에 있는 람다식은 lift되지만, repl에 친 람다식은 그대로 람다식입니다.
