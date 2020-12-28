@@ -101,21 +101,4 @@ executable Aladdin
         Aladdin.Front.Header
         Aladdin.Front.TypeChecker.Main
         Aladdin.Front.TypeChecker.Util
-        Lib.Base
-executable Butterfly
-    hs-source-dirs: src
-    default-language: Haskell2010
-    build-depends: base >= 4.7 && < 5, containers >= 0.6, transformers >= 0.5, QuickCheck >= 2.13, checkers >= 0.5, pretty-terminal >= 0.1.0.0
-    main-is: Butterfly/Main.hs
-    other-modules:
-        Butterfly.Back.BackEnd
-        Butterfly.Back.Base.CoreTerm
-        Butterfly.Back.Base.Instruction
-        Butterfly.Back.Base.Util
-        Butterfly.Back.Compiler.Main
-        Butterfly.Back.Compiler.Schema
-        Butterfly.Back.Compiler.Util
-        Butterfly.Back.Executor.Main
-        Butterfly.Back.Executor.Transition
-        Butterfly.Back.Executor.Util
-        Lib.Base
+        Lib.base
