@@ -101,4 +101,4 @@ executable Aladdin
         Aladdin.Front.Header
         Aladdin.Front.TypeChecker.Main
         Aladdin.Front.TypeChecker.Util
-        Lib.base
+        Lib.Base
