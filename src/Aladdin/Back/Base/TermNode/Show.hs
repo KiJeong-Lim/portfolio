@@ -15,6 +15,7 @@ import Lib.Base
 
 data Oper a
     = Prefix String a
+    | Suffix a String
     | InfixL a String a
     | InfixR a String a
     | InfixN a String a
@@ -56,6 +57,7 @@ instance Outputable ViewNode where
         go (ViewTApp viewer1 viewer2) = parenthesize 10 (pprint 10 viewer1 . strstr " " . pprint 11 viewer2)
         go (ViewOper (oper, prec')) = case oper of
             Prefix str viewer1 -> parenthesize prec' (strstr str . pprint prec' viewer1)
+            Suffix viewer1 str -> parenthesize prec' (pprint prec' viewer1 . strstr str)
             InfixL viewer1 str viewer2 -> parenthesize prec' (pprint prec' viewer1 . strstr str . pprint (prec' + 1) viewer2)
             InfixR viewer1 str viewer2 -> parenthesize prec' (pprint (prec' + 1) viewer1 . strstr str . pprint prec' viewer2)
             InfixN viewer1 str viewer2 -> parenthesize prec' (pprint (prec' + 1) viewer1 . strstr str . pprint (prec' + 1) viewer2)
@@ -155,6 +157,10 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
                 t1' <- formatView t1
                 t2' <- formatView t2
                 return (ViewIApp (ViewOper (Prefix str t1', prec)) t2')
+            Suffix _ str -> do
+                t1' <- formatView t1
+                t2' <- formatView t2
+                return (ViewIApp (ViewOper (Suffix t1' str, prec)) t2')
             InfixL _ str _ -> do
                 t1' <- formatView t1
                 t2' <- formatView t2
@@ -172,6 +178,9 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
             Prefix str _ -> do
                 t1' <- formatView t1
                 return (ViewOper (Prefix str t1', prec))
+            Suffix _ str -> do
+                t1' <- formatView t1
+                return (ViewOper (Suffix t1' str, prec))
             InfixL _ str _ -> do
                 t1' <- formatView t1
                 v2 <- get
@@ -190,26 +199,27 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
                 let v2' = v2 + 1
                 v2' `seq` put v2'
                 return (ViewIAbs v2 (ViewOper (InfixN t1' str (ViewIVar v2), prec)))
-    formatView (ViewIApp (ViewDCon con) t1)
+    formatView (ViewDCon con)
         | Just (oper, prec) <- checkOper con = case oper of
             Prefix str _ -> do
                 v1 <- get
                 put (v1 + 1)
                 return (ViewIAbs v1 (ViewOper (Prefix str (ViewIVar v1), prec)))
+            Suffix _ str -> do
+                v1 <- get
+                put (v1 + 1)
+                return (ViewIAbs v1 (ViewOper (Suffix (ViewIVar v1) str, prec)))
             InfixL _ str _ -> do
-                t1' <- formatView t1
                 v1 <- get
                 let v2 = v1 + 1
                 put (v2 + 1)
-                return (ViewIAbs v1 (ViewIAbs v2 (ViewIAbs v2 (ViewOper (InfixL (ViewIVar v1) str (ViewIVar v2), prec)))))
+                return (ViewIAbs v1 (ViewIAbs v2 (ViewOper (InfixL (ViewIVar v1) str (ViewIVar v2), prec))))
             InfixR _ str _ -> do
-                t1' <- formatView t1
                 v1 <- get
                 let v2 = v1 + 1
                 put (v2 + 1)
-                return (ViewIAbs v1 (ViewIAbs v2 (ViewIAbs v2 (ViewOper (InfixR (ViewIVar v1) str (ViewIVar v2), prec)))))
+                return (ViewIAbs v1 (ViewIAbs v2 (ViewOper (InfixR (ViewIVar v1) str (ViewIVar v2), prec))))
             InfixN _ str _ -> do
-                t1' <- formatView t1
                 v1 <- get
                 let v2 = v1 + 1
                 put (v2 + 1)
