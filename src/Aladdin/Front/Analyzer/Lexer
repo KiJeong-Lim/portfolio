@@ -45,6 +45,8 @@
     T_pi (SLoc (row1, col1) (row2, col2))
 \xmatch "sigma":
     T_sigma (SLoc (row1, col1) (row2, col2))
+\xmatch ";":
+    T_semicolon (SLoc (row1, col1) (row2, col2))
 \xmatch "!":
     T_cut (SLoc (row1, col1) (row2, col2))
 \xmatch "true":
