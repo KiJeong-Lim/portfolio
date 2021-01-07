@@ -1,0 +1,38 @@
+-- einstein problem
+
+-- https://stackoverflow.com/a/9135257/12556322 "perm"
+type gen_permutation (list A -> list A -> o).
+gen_permutation (X :: Ys) Zs :- gen_permutation Ys Ws, gen_permutation_aux X Zs Ws.
+gen_permutation [] [].
+
+-- https://stackoverflow.com/a/9135257/12556322 "takeout"
+type gen_permutation_aux (A -> list A -> list A -> o).
+gen_permutation_aux X (X :: Xs) Xs :- true.
+gen_permutation_aux X (Y :: Ys1) (Y :: Ys2) :- gen_permutation_aux X Ys1 Ys2.
+
+type elem_index (A -> list A -> nat -> o).
+elem_index X (X :: Xs) 0 :- !.
+elem_index X (Y :: Ys) (s N) :- elem_index X Ys N.
+
+type main (list string -> list string -> list string -> list string -> list string -> o).
+main Countries Beverages Cigarettes Animals Colors :-
+    gen_permutation ["Norway", "Denmark", "England", "German", "Sweden"] Countries,
+    gen_permutation ["Water", "Tea", "Milk", "Coffee", "Beer"] Beverages,
+    gen_permutation ["Dunhill", "Blend", "PallMall", "Prince", "BlueMaster"] Cigarettes,
+    gen_permutation ["Cat", "Horse", "Bird", "Fish", "Dog"] Animals,
+    gen_permutation ["Yellow", "Blue", "Red", "Green", "White"] Colors,
+    elem_index "England" Countries N1, elem_index "Red" Colors N1,
+    elem_index "Sweden" Countries N2, elem_index "Dog" Animals N2,
+    elem_index "Denmark" Countries N3, elem_index "Tea" Beverages N3,
+    elem_index "Green" Colors N4, elem_index "White" Colors (s N4),
+    elem_index "Green" Colors N5, elem_index "Coffee" Beverages N5,
+    elem_index "PallMall" Cigarettes N6, elem_index "Bird" Animals N6,
+    elem_index "Yellow" Colors N7, elem_index "Dunhill" Cigarettes N7,
+    elem_index "Milk" Beverages 2,
+    elem_index "Norway" Countries 0,
+    (elem_index "Blend" Cigarettes N10, elem_index "Cat" Animals (s N10); elem_index "Blend" Cigarettes (s N10), elem_index "Cat" Animals N10),
+    (elem_index "Horse" Animals N11, elem_index "Dunhill" Cigarettes (s N11); elem_index "Horse" Animals (s N11), elem_index "Dunhill" Cigarettes N11),
+    elem_index "BlueMaster" Cigarettes N12, elem_index "Beer" Beverages N12,
+    elem_index "German" Countries N13, elem_index "Prince" Cigarettes N13,
+    (elem_index "Norway" Countries N14, elem_index "Blue" Colors (s N14); elem_index "Norway" Countries (s N14), elem_index "Blue" Colors N14),
+    (elem_index "Blend" Cigarettes N15, elem_index "Water" Beverages (s N15); elem_index "Blend" Cigarettes (s N15), elem_index "Water" Beverages N15).

@@ -58,7 +58,7 @@ showStackItem fvs space (ctx, cells) = strcat
     [ pindent space . strstr "- progressings = " . plist (space + 4) [ strstr "?- " . showsPrec 0 goal | Cell facts level goal <- cells ] . nl
     , pindent space . strstr "- context = Context" . nl
     , pindent (space + 4) . strstr "{ " . strstr "_CurrentLabeling = " . plist (space + 8) ([ strstr "`" . showsPrec 0 (mkNCon c) . strstr "\': " . showsPrec 0 level | (c, level) <- Map.toList (_ConLabel (_CurrentLabeling ctx)) ] ++ [ strstr "`" . showsPrec 0 (mkLVar v) . strstr "\': " . showsPrec 0 level | (v, level) <- Map.toList (_VarLabel (_CurrentLabeling ctx)), v `Set.member` fvs || not (v `Set.member` Map.keysSet (unVarBinding (_TotalVarBinding ctx))) ]) . nl
-    , pindent (space + 4) . strstr ", " . strstr "_TotalVarBinding = " . plist (space + 8) [ showsPrec 0 (LVar v) . strstr " +-> " . showsPrec 0 t | (v, t) <- Map.toList (unVarBinding (_TotalVarBinding ctx)), v `Set.member` fvs ] . nl
+    , pindent (space + 4) . strstr ", " . strstr "_TotalVarBinding = " . plist (space + 8) [ strstr "`" . showsPrec 0 (LVar v) . strstr "\' +-> " . showsPrec 0 t | (v, t) <- Map.toList (unVarBinding (_TotalVarBinding ctx)), v `Set.member` fvs ] . nl
     , pindent (space + 4) . strstr ", " . strstr "_LeftConstraints = " . plist (space + 8) [ showsPrec 0 constraint | constraint <- _LeftConstraints ctx ] . nl
     , pindent (space + 4) . strstr "} " . nl
     ]
@@ -70,7 +70,7 @@ showsCurrentState fvs ctx cells stack = strcat
     , strstr "* The rest of the current stack is:" . nl
     , strcat
         [ strcat
-            [ pindent 2 . strstr "- #[ " . showsPrec 0 i . strstr "]:" . nl
+            [ pindent 2 . strstr "- #[" . showsPrec 0 i . strstr "]:" . nl
             , showStackItem fvs 4 item . nl
             ]
         | (i, item) <- zip [1, 2 .. length stack] stack

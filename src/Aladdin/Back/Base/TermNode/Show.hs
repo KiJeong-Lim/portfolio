@@ -74,8 +74,8 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
     makeView :: [Int] -> TermNode -> StateT Int Identity ViewNode
     makeView vars (LVar var) = case var of
         LV_ty_var v -> return (ViewTVar ("TV_" ++ show v))
-        LV_Unique v -> return (ViewTVar ("V_" ++ show v))
-        LV_Named v -> return (ViewTVar v)
+        LV_Unique v -> return (ViewLVar ("V_" ++ show v))
+        LV_Named v -> return (ViewLVar v)
     makeView vars (NCon con) = case con of
         DC data_constructor -> case data_constructor of
             DC_LO logical_operator -> case logical_operator of
@@ -122,6 +122,7 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
     eraseType (ViewIApp t1 t2)
         | isType t2 = eraseType t1
         | otherwise = ViewIApp (eraseType t1) (eraseType t2)
+    eraseType (ViewNatL nat) = ViewNatL nat
     eraseType (ViewChrL chr) = ViewChrL chr
     eraseType (ViewDCon c) = ViewDCon c
     checkOper :: String -> Maybe (Oper (), Precedence)
