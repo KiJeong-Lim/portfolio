@@ -50,7 +50,11 @@ makeTypeEnv kind_env = go where
         go1 (TyApp (TyApp (TyCon (TCon TC_Arrow _)) typ1) typ2) = go1 typ2
         go1 typ1 = typ1
         go2 :: MonoType LargeId -> Bool
-        go2 (TyCon _) = True
+        go2 (TyCon tcon) = case tcon of
+            TCon (TC_Named "char") _ -> False
+            TCon (TC_Named "list") _ -> False
+            TCon (TC_Named "nat") _ -> False
+            _ -> True
         go2 (TyApp typ _) = go2 typ
         go2 _ = False
     go :: [(SLoc, (DataConstructor, TypeRep))] -> TypeEnv -> Either ErrMsg TypeEnv
@@ -61,6 +65,6 @@ makeTypeEnv kind_env = go where
             if kin == Star
                 then if hasValidHead typ
                     then go triples (Map.insert con (generalize typ) type_env)
-                    else Left ("desugaring-error[" ++ pprint 0 loc ("]:\n  ? the type of `" ++ showsPrec 0 con "\' is invalid.\n"))
+                    else Left ("desugaring-error[" ++ pprint 0 loc ("]:\n  ? the head of the type `" ++ showsPrec 0 con "\' is invalid.\n"))
                 else Left ("desugaring-error[" ++ pprint 0 loc ("]:\n  ? couldn't solve `" ++ pprint 0 kin "\' ~ `type\'.\n"))
         _ -> Left ("desugaring-error[" ++ pprint 0 loc ("]:\n  ? it is wrong to redeclare the already declared constant `" ++ showsPrec 0 con "\'.\n"))
