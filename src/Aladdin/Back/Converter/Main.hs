@@ -18,7 +18,7 @@ import qualified Data.Set as Set
 import Lib.Base
 
 convertProgram :: GenUniqueM m => Map.Map MetaTVar SmallId -> Map.Map IVar (MonoType Int) -> TermExpr (DataConstructor, [MonoType Int]) (SLoc, MonoType Int) -> ExceptT ErrMsg m TermNode
-convertProgram used_mtvs assumptions = fmap makeUniversalClosure . convertWithChecking Map.empty initialEnv "fact" where
+convertProgram used_mtvs assumptions = fmap makeUniversalClosure . convertWithoutChecking Map.empty initialEnv "fact" where
     initialEnv :: DeBruijnIndicesEnv
     initialEnv = Set.toList (Map.keysSet assumptions) ++ Set.toList (Map.keysSet used_mtvs)
     makeUniversalClosure :: TermNode -> TermNode
@@ -26,5 +26,5 @@ convertProgram used_mtvs assumptions = fmap makeUniversalClosure . convertWithCh
 
 convertQuery :: GenUniqueM m => Map.Map MetaTVar SmallId -> Map.Map IVar (MonoType Int) -> FreeVariableEnv -> TermExpr (DataConstructor, [MonoType Int]) (SLoc, MonoType Int) -> ExceptT ErrMsg m TermNode
 convertQuery used_mtvs assumptions var_name_env query
-    | Map.null used_mtvs = convertWithChecking var_name_env [] "query" query
+    | Map.null used_mtvs = convertWithoutChecking var_name_env [] "query" query
     | otherwise = throwE ("converting-error\n  ? query must have no free type variables.\n")
