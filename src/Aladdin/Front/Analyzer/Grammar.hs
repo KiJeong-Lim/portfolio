@@ -15,6 +15,7 @@ data Token
     | T_semicolon SLoc
     | T_fatarrow SLoc
     | T_succ SLoc
+    | T_Eq SLoc
     | T_pi SLoc
     | T_sigma SLoc
     | T_cut SLoc

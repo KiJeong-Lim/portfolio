@@ -52,11 +52,7 @@ autoPM :: Read a => Precedence -> PM a
 autoPM = PM . readsPrec
 
 acceptCharIf :: (Char -> Bool) -> PM Char
-acceptCharIf condition = PM go where
-    go :: String -> [(Char, String)]
-    go (ch : str)
-        | condition ch = return (ch, str)
-    go _ = []
+acceptCharIf condition = PM $ \str -> let ch = head str in if null str then [] else if condition ch then [(ch, tail str)] else []
 
 consumeStr :: String -> PM ()
 consumeStr prefix = PM $ \str -> let n = length prefix in if take n str == prefix then return ((), drop n str) else []
@@ -78,7 +74,7 @@ pindent space str1 = if space < 0 then str1 else replicate space ' ' ++ str1
 
 ppunc :: String -> [String -> String] -> String -> String
 ppunc str [] = id
-ppunc str (delta : deltas) = delta . foldr (\delta0 -> \acc -> strstr str . delta0 . acc) id deltas
+ppunc str (delta1 : deltas2) = delta1 . foldr (\delta2 -> \acc -> strstr str . delta2 . acc) id deltas2
 
 plist :: Indentation -> [String -> String] -> String -> String
 plist space [] = strstr "[]"

@@ -38,9 +38,6 @@ type white (color).
 kind house (type).
 type house (country -> beverage -> cigarette -> animal -> color -> house).
 
-type copy (A -> A -> o).
-copy X X :- true.
-
 type member (A -> list A -> o).
 member X (X :: _) :- true.
 member X (Y :: Ys) :- member X Ys.
@@ -56,7 +53,7 @@ neighbor H1 H2 (_ :: Hs) :- neighbor H1 H2 Hs.
 
 type answer (list house -> o).
 answer Houses :-
-    copy [_, _, _, _, _] Houses,
+    [_, _, _, _, _] = Houses,
     member (house england _ _ _ red) Houses,
     member (house sweden _ _ dog _) Houses,
     member (house denmark tea _ _ _) Houses,
@@ -64,8 +61,8 @@ answer Houses :-
     member (house _ coffee _ _ green) Houses,
     member (house _ _ pallmall bird _) Houses,
     member (house _ _ dunhill _ yellow) Houses,
-    copy [_, _, house _ milk _ _ _, _, _] Houses,
-    copy [house norway _ _ _ _, _, _, _, _] Houses,
+    [_, _, house _ milk _ _ _, _, _] = Houses,
+    [house norway _ _ _ _, _, _, _, _] = Houses,
     neighbor (house _ _ blend _ _) (house _ _ _ cat _) Houses,
     neighbor (house _ _ _ horse _) (house _ _ dunhill _ _) Houses,
     member (house _ beer bluemaster _ _) Houses,

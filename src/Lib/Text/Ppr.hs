@@ -14,12 +14,13 @@ module Lib.Text.Ppr
     , indent
     , putDoc
     , renderDoc
+    , pprintChar
+    , pprintString
     ) where
 
+import Lib.Base
 import Lib.Text.Ppr.Viewer
 import System.Console.Pretty
-
-type Precedence = Int
 
 data Doc
     = DE
@@ -82,6 +83,15 @@ instance Show Doc where
     showsPrec 10 DE str = "DE" ++ str
     showsPrec 10 DB str = "DB" ++ str
     showsPrec _ doc1 str = "(" ++ showsPrec 0 doc1 (")" ++ str)
+
+instance Outputable Char where
+    pprint _ ch = case ch of
+        '\n' -> strstr "\\n"
+        '\t' -> strstr "\\t"
+        '\\' -> strstr "\\\\"
+        '\"' -> strstr "\\\""
+        '\'' -> strstr "\\\'"
+        ch -> strstr [ch]
 
 empty :: Doc
 empty = DE
@@ -149,3 +159,9 @@ renderDoc = render . toViewer . reduce where
     toViewer DB = mkVB
     toViewer (DV doc1 doc2) = mkVV (toViewer doc1) (toViewer doc2)
     toViewer (DH doc1 doc2) = mkVH (toViewer doc1) (toViewer doc2)
+
+pprintChar :: Char -> String -> String
+pprintChar ch = strstr "\\\'" . pprint 0 ch . strstr "\\\'"
+
+pprintString :: String -> String -> String
+pprintString str = strstr "\"" . strcat (map (pprint 0) str) . strstr "\"" where

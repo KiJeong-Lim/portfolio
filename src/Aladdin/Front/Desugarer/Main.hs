@@ -37,6 +37,7 @@ theInitialTypeEnv = Map.fromList
     , (DC_Nil, Forall ["a"] (mkTyList (TyVar 0)))
     , (DC_Cons, Forall ["a"] (TyVar 0 `mkTyArrow` (mkTyList (TyVar 0) `mkTyArrow` mkTyList (TyVar 0))))
     , (DC_Succ, Forall [] (mkTyNat `mkTyArrow` mkTyNat))
+    , (DC_Eq, Forall ["a"] (TyVar 0 `mkTyArrow` (TyVar 0 `mkTyArrow` mkTyO)))
     ]
 
 desugarProgram :: GenUniqueM m => KindEnv -> TypeEnv -> [DeclRep] -> ExceptT ErrMsg m (Program (TermExpr DataConstructor SLoc))

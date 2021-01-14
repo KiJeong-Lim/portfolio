@@ -36,6 +36,22 @@ convertType var_name_env env (TyVar _) = error "`convertType\'"
 convertCon :: FreeVariableEnv -> DeBruijnIndicesEnv -> DataConstructor -> [MonoType Int] -> TermNode
 convertCon var_name_env env con tapps = List.foldl' mkNApp (mkNCon con) (map (convertType var_name_env env) tapps)
 
+convertWithoutChecking :: GenUniqueM m => FreeVariableEnv -> DeBruijnIndicesEnv -> ExpectedAs -> TermExpr (DataConstructor, [MonoType Int]) (SLoc, MonoType Int) -> ExceptT ErrMsg m TermNode
+convertWithoutChecking var_name_env = go where
+    loop :: DeBruijnIndicesEnv -> TermExpr (DataConstructor, [MonoType Int]) (SLoc, MonoType Int) -> TermNode
+    loop env (DCon loc (DC_LO logical_operator, tapps))
+        = mkNCon logical_operator
+    loop env (DCon loc (data_constructor, tapps))
+        = convertCon var_name_env env data_constructor tapps
+    loop env (IVar loc var)
+        = convertVar var_name_env env var
+    loop env (IApp loc term1 term2)
+        = mkNApp (loop env term1) (loop env term2)
+    loop env (IAbs loc var1 term2)
+        = mkNAbs (loop (var1 : env) term2)
+    go :: GenUniqueM m => DeBruijnIndicesEnv -> ExpectedAs -> TermExpr (DataConstructor, [MonoType Int]) (SLoc, MonoType Int) -> ExceptT ErrMsg m TermNode
+    go env expected_as = return . loop env . reduceTermExpr
+
 convertWithChecking :: GenUniqueM m => FreeVariableEnv -> DeBruijnIndicesEnv -> ExpectedAs -> TermExpr (DataConstructor, [MonoType Int]) (SLoc, MonoType Int) -> ExceptT ErrMsg m TermNode
 convertWithChecking var_name_env = go where
     check :: GenUniqueM m => DeBruijnIndicesEnv -> ExpectedAs -> TermExpr (DataConstructor, [MonoType Int]) (SLoc, MonoType Int) -> ExceptT ErrMsg m TermNode

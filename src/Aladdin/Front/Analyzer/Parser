@@ -25,6 +25,7 @@
         "T_pi loc": $pi 0 none
         "T_sigma loc": $sigma 0 none
         "T_succ loc": $succ 0 none
+        "T_Eq loc": $eq 0 none
         "T_cut loc": $cut 0 none
         "T_true loc": $true 0 none
         "T_fail loc": $fail 0 none
@@ -132,6 +133,8 @@
         RApp ($1.loc <> getSLoc $2) (RCon $1.loc (DC_LO LO_pi)) $2
     35 [$sigma, $TermRep5]:
         RApp ($1.loc <> getSLoc $2) (RCon $1.loc (DC_LO LO_sigma)) $2
+    35 [$TermRep6, $eq, $TermRep6]:
+        RApp (getSLoc $1 <> getSLoc $3) (RApp (getSLoc $1 <> $2.loc) (RCon $2.loc DC_Eq) $1) $3
     35 [$TermRep6]:
         $1
 }

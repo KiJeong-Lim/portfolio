@@ -33,10 +33,15 @@ isPredicate _ = False
 reduceTermExpr :: TermExpr dcon annot -> TermExpr dcon annot
 reduceTermExpr = go Map.empty where
     go :: Map.Map IVar (TermExpr tapp annot) -> TermExpr tapp annot -> TermExpr tapp annot
-    go mapsto (IApp annot1 (IAbs annot2 var term1) term2) = go (Map.insert var term2 mapsto) term1
-    go mapsto (IVar annot var) = case Map.lookup var mapsto of
-        Nothing -> IVar annot var
-        Just term -> go mapsto term
-    go mapsto (DCon annot con) = DCon annot con
-    go mapsto (IApp annot term1 term2) = IApp annot (go mapsto term1) (go mapsto term2)
-    go mapsto (IAbs annot var term) = IAbs annot var (go mapsto term)
+    go mapsto (IApp annot1 (IAbs annot2 var term1) term2)
+        = go mapsto (go (Map.singleton var term2) term1)
+    go mapsto (IVar annot var)
+        = case Map.lookup var mapsto of
+            Nothing -> IVar annot var
+            Just term -> term
+    go mapsto (DCon annot con)
+        = DCon annot con
+    go mapsto (IApp annot term1 term2)
+        = IApp annot (go mapsto term1) (go mapsto term2)
+    go mapsto (IAbs annot var term)
+        = IAbs annot var (go mapsto term)

@@ -56,7 +56,8 @@ runAladdin = do
                     facts3 <- sequence' [ convertProgram used_mtvs assumptions fact | (fact, (used_mtvs, assumptions)) <- facts2 ]
                     let kind_env = _KindDecls module1
                         type_env = _TypeDecls module1
-                    kind_env `seq` type_env `seq` facts3 `seq` return (Program { _KindDecls = kind_env, _TypeDecls = type_env, _FactDecls = facts3 })
+                        eq_fact = mkNApp (mkNCon LO_ty_pi) (mkNAbs (mkNApp (mkNCon LO_pi) (mkNAbs (mkNApp (mkNApp (mkNApp (mkNCon DC_Eq) (mkNIdx 2)) (mkNIdx 1)) (mkNIdx 1)))))
+                    kind_env `seq` type_env `seq` facts3 `seq` return (Program { _KindDecls = kind_env, _TypeDecls = type_env, _FactDecls = eq_fact : facts3 })
                 case result of
                     Left err_msg -> do
                         lift $ putStrLn err_msg

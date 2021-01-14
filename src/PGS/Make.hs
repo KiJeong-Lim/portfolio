@@ -40,13 +40,13 @@ instance Outputable CFGrammar where
         ]
 
 instance Outputable LR0Item where
-    pprint _ (LR0Item lhs left right) = pprint 0 (NS lhs) . strstr " ::= " . ppunc " " (map (pprint 0) left) . strstr " . " . ppunc " " (map (pprint 0) right) . strstr ";"
+    pprint _ (LR0Item lhs left right) = pprint 0 (NS lhs) . strstr " ::= " . ppunc " " (map (pprint 0) left ++ [strstr "."] ++ map (pprint 0) right)
 
 instance Outputable Cannonical0 where
     pprint _ (Cannonical0 vertices root edges) = strcat
-        [ strstr "vertices: " . plist 2 [ showsPrec 0 q . strstr ": " . plist 4 (map (pprint 0) (Set.toList items)) | (items, q) <- Map.toList vertices ] . nl
-        , strstr "root: " . showsPrec 0 root . nl
-        , strstr "edges: " . plist 2 [ strstr "(" . showsPrec 0 q . strstr ", " . pprint 0 sym . strstr ") +-> " . showsPrec 0 p | ((q, sym), p) <- Map.toList edges ] . nl
+        [ strstr "    vertices: " . plist 8 [ showsPrec 0 q . strstr ": " . plist 12 (map (pprint 0) (Set.toList items)) | (items, q) <- Map.toList vertices ] . nl
+        , strstr "    root: " . showsPrec 0 root . nl
+        , strstr "    edges: " . plist 8 [ strstr "(" . showsPrec 0 q . strstr ", " . pprint 0 sym . strstr ") +-> " . showsPrec 0 p | ((q, sym), p) <- Map.toList edges ] . nl
         ]
 
 instance Outputable Action where
@@ -58,11 +58,11 @@ instance Outputable LR1Parser where
     pprint _ (LR1Parser initS actionT reduceT) = strcat
         [ strstr "initS: " . showsPrec 0 initS . nl
         , strstr "actionT: " . plist 2 [ strstr "(" . showsPrec 0 q . strstr ", " . pprint 0 (TS t) . strstr ") +-> " . pprint 0 action | ((q, t), action) <- Map.toList actionT ] . nl
-        , strstr "reduceT: " . plist 2 [ strstr "(" . showsPrec 0 q . strstr ", " . pprint 0 (NS nt) . showsPrec 0 p . strstr ";" | ((q, nt), p) <- Map.toList reduceT ] . nl
+        , strstr "reduceT: " . plist 2 [ strstr "(" . showsPrec 0 q . strstr ", " . pprint 0 (NS nt) . showsPrec 0 p | ((q, nt), p) <- Map.toList reduceT ] . nl
         ]
 
-getLALR1 :: CFGrammar -> ExceptT String Identity LR1Parser
-getLALR1 (CFGrammar start terminals productions) = makeLALR1 where
+makeCollectionAndLALR1Parser :: CFGrammar -> ExceptT String Identity (Cannonical0, LR1Parser)
+makeCollectionAndLALR1Parser (CFGrammar start terminals productions) = theResult where
     maxPrec :: Precedence
     maxPrec = 100
     start' :: NSym
@@ -229,14 +229,17 @@ getLALR1 (CFGrammar start terminals productions) = makeLALR1 where
                     , strstr "}" . nl
                     , pprint 0 getCannonical0
                     ]
-    makeLALR1 :: ExceptT String Identity LR1Parser
-    makeLALR1 = case resolveConflicts of
+    theResult :: ExceptT String Identity (Cannonical0, LR1Parser)
+    theResult = case resolveConflicts of
         Left delta -> throwE (delta "")
-        Right getActionT -> return $ LR1Parser
-            { getInitialS = getRoot getCannonical0
-            , getActionTable = getActionT
-            , getReduceTable = Map.fromList
-                [ ((q, nt), p)
-                | ((q, NS nt), p) <- Map.toList (getEdges getCannonical0)
-                ]
-            }
+        Right getActionT -> return 
+            ( getCannonical0
+            , LR1Parser
+                { getInitialS = getRoot getCannonical0
+                , getActionTable = getActionT
+                , getReduceTable = Map.fromList
+                    [ ((q, nt), p)
+                    | ((q, NS nt), p) <- Map.toList (getEdges getCannonical0)
+                    ]
+                }
+            )

@@ -13,12 +13,12 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Lib.Base
 
-data Oper a
-    = Prefix String a
-    | Suffix a String
-    | InfixL a String a
-    | InfixR a String a
-    | InfixN a String a
+data Fixity extra
+    = Prefix String extra
+    | Suffix extra String
+    | InfixL extra String extra
+    | InfixR extra String extra
+    | InfixN extra String extra
     deriving ()
 
 data ViewNode
@@ -30,7 +30,7 @@ data ViewNode
     | ViewTVar LargeId
     | ViewTCon SmallId
     | ViewTApp ViewNode ViewNode
-    | ViewOper (Oper ViewNode, Precedence)
+    | ViewOper (Fixity ViewNode, Precedence)
     | ViewNatL Integer
     | ViewChrL Char
     | ViewStrL String
@@ -47,23 +47,23 @@ instance Outputable ViewNode where
             | prec > prec' = strstr "(" . delta . strstr ")"
             | otherwise = delta
         go :: ViewNode -> String -> String
-        go (ViewIVar var) = parenthesize 11 (strstr "W_" . showsPrec 0 var)
-        go (ViewLVar var) = parenthesize 11 (strstr var)
-        go (ViewDCon con) = parenthesize 11 (strstr con)
-        go (ViewIApp viewer1 viewer2) = parenthesize 10 (pprint 10 viewer1 . strstr " " . pprint 11 viewer2)
+        go (ViewIVar var) = strstr "W_" . showsPrec 0 var
+        go (ViewLVar var) = strstr var
+        go (ViewDCon con) = strstr con
+        go (ViewIApp viewer1 viewer2) = parenthesize 6 (pprint 6 viewer1 . strstr " " . pprint 7 viewer2)
         go (ViewIAbs var viewer1) = parenthesize 0 (strstr "W_" . showsPrec 0 var . strstr "\\ " . pprint 0 viewer1)
-        go (ViewTVar var) = parenthesize 11 (strstr var)
-        go (ViewTCon con) = parenthesize 11 (strstr con)
-        go (ViewTApp viewer1 viewer2) = parenthesize 10 (pprint 10 viewer1 . strstr " " . pprint 11 viewer2)
+        go (ViewTVar var) = strstr var
+        go (ViewTCon con) = strstr con
+        go (ViewTApp viewer1 viewer2) = parenthesize 6 (pprint 6 viewer1 . strstr " " . pprint 7 viewer2)
         go (ViewOper (oper, prec')) = case oper of
             Prefix str viewer1 -> parenthesize prec' (strstr str . pprint prec' viewer1)
             Suffix viewer1 str -> parenthesize prec' (pprint prec' viewer1 . strstr str)
             InfixL viewer1 str viewer2 -> parenthesize prec' (pprint prec' viewer1 . strstr str . pprint (prec' + 1) viewer2)
             InfixR viewer1 str viewer2 -> parenthesize prec' (pprint (prec' + 1) viewer1 . strstr str . pprint prec' viewer2)
             InfixN viewer1 str viewer2 -> parenthesize prec' (pprint (prec' + 1) viewer1 . strstr str . pprint (prec' + 1) viewer2)
-        go (ViewChrL chr) = parenthesize 11 (showsPrec 0 chr)
-        go (ViewStrL str) = parenthesize 11 (showsPrec 0 str)
-        go (ViewNatL nat) = parenthesize 11 (showsPrec 0 nat)
+        go (ViewChrL chr) = showsPrec 0 chr
+        go (ViewStrL str) = showsPrec 0 str
+        go (ViewNatL nat) = showsPrec 0 nat
         go (ViewList viewers) = strstr "[" . ppunc ", " (map (pprint 5) viewers) . strstr "]"
 
 constructViewer :: TermNode -> ViewNode
@@ -81,7 +81,7 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
     makeView vars (NCon con) = case con of
         DC data_constructor -> case data_constructor of
             DC_LO logical_operator -> case logical_operator of
-                LO_ty_pi -> return (ViewDCon "^")
+                LO_ty_pi -> return (ViewDCon "Lambda")
                 LO_if -> return (ViewDCon ":-")
                 LO_true -> return (ViewDCon "true")
                 LO_fail -> return (ViewDCon "fail")
@@ -98,6 +98,7 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
             DC_ChrL chr -> return (ViewChrL chr)
             DC_NatL nat -> return (ViewNatL nat)
             DC_Succ -> return (ViewDCon "__s")
+            DC_Eq -> return (ViewDCon "=")
         TC type_constructor -> case type_constructor of
             TC_Arrow -> return (ViewTCon "->")
             TC_Unique uni -> return (ViewTCon ("tc_" ++ show uni))
@@ -121,22 +122,21 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
     eraseType (ViewLVar v) = ViewLVar v
     eraseType (ViewTVar v) = ViewTVar v
     eraseType (ViewIAbs v t) = ViewIAbs v (eraseType t)
-    eraseType (ViewIApp t1 t2)
-        | isType t2 = eraseType t1
-        | otherwise = ViewIApp (eraseType t1) (eraseType t2)
+    eraseType (ViewIApp t1 t2) = if isType t2 then eraseType t1 else ViewIApp (eraseType t1) (eraseType t2)
     eraseType (ViewNatL nat) = ViewNatL nat
     eraseType (ViewChrL chr) = ViewChrL chr
     eraseType (ViewDCon c) = ViewDCon c
-    checkOper :: String -> Maybe (Oper (), Precedence)
+    checkOper :: String -> Maybe (Fixity (), Precedence)
     checkOper "->" = Just (InfixR () " -> " (), 4)
     checkOper "::" = Just (InfixR () " :: " (), 4)
-    checkOper "^" = Just (Prefix "^ " (), 0)
+    checkOper "Lambda" = Just (Prefix "Lambda " (), 0)
     checkOper ":-" = Just (InfixR () " :- " (), 0)
     checkOper ";" = Just (InfixL () "; " (), 1)
     checkOper "," = Just (InfixL () ", " (), 3)
     checkOper "=>" = Just (InfixR () " => " (), 2)
     checkOper "pi" = Just (Prefix "pi " (), 5)
     checkOper "sigma" = Just (Prefix "sigma " (), 5)
+    checkOper "=" = Just (InfixN () " = " (), 5)
     checkOper _ = Nothing
     formatView :: ViewNode -> StateT Int Identity ViewNode
     formatView (ViewDCon "[]") = return (ViewList [])
@@ -152,7 +152,8 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
             ViewList ts -> return (ViewList (t1' : ts))
             _ -> return (ViewOper (InfixR t1' " :: " t2', 4))
     formatView (ViewIApp (ViewIApp (ViewDCon con) t1) t2)
-        | Just (oper, prec) <- checkOper con = case oper of
+        | Just (oper, prec) <- checkOper con
+        = case oper of
             Prefix str _ -> do
                 t1' <- formatView t1
                 t2' <- formatView t2
@@ -174,7 +175,8 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
                 t2' <- formatView t2
                 return (ViewOper (InfixN t1' str t2', prec))
     formatView (ViewIApp (ViewDCon con) t1)
-        | Just (oper, prec) <- checkOper con = case oper of
+        | Just (oper, prec) <- checkOper con
+        = case oper of
             Prefix str _ -> do
                 t1' <- formatView t1
                 return (ViewOper (Prefix str t1', prec))
@@ -200,7 +202,8 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
                 v2' `seq` put v2'
                 return (ViewIAbs v2 (ViewOper (InfixN t1' str (ViewIVar v2), prec)))
     formatView (ViewDCon con)
-        | Just (oper, prec) <- checkOper con = case oper of
+        | Just (oper, prec) <- checkOper con
+        = case oper of
             Prefix str _ -> do
                 v1 <- get
                 put (v1 + 1)

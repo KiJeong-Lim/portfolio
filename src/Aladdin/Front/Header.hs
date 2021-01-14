@@ -71,6 +71,7 @@ data DataConstructor
     | DC_ChrL Char
     | DC_NatL Integer
     | DC_Succ
+    | DC_Eq
     deriving (Eq, Ord)
 
 data TypeConstructor
@@ -199,6 +200,7 @@ instance Show DataConstructor where
         DC_ChrL chr -> showsPrec 0 chr
         DC_NatL nat -> showsPrec 0 nat
         DC_Succ -> strstr "S"
+        DC_Eq -> strstr "="
 
 instance Show TypeConstructor where
     showsPrec _ type_constructor = case type_constructor of
