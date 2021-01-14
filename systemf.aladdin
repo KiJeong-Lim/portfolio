@@ -1,0 +1,29 @@
+-- systemf
+
+kind obj_type (type).
+type ty_arr (obj_type -> obj_type -> obj_type).
+type ty_all ((obj_type -> obj_type) -> obj_type).
+
+kind obj_term (type).
+type tabs ((obj_type -> obj_term) -> obj_term).
+type tapp (obj_term -> obj_type -> obj_term).
+type iabs (obj_type -> (obj_term -> obj_term) -> obj_term).
+type iapp (obj_term -> obj_term -> obj_term).
+
+type copy (A -> A -> o).
+copy F1 F2 :- pi (X\ copy X X => copy (F1 X) (F2 X)).
+copy (ty_arr Ty1_1 Ty2_1) (ty_arr Ty1_2 Ty2_2) :- copy Ty1_1 Ty1_2, copy Ty2_1 Ty2_1.
+copy (ty_all Ty1_1) (ty_all Ty1_2) :- copy Ty1_1 Ty1_2.
+copy (tabs Tm1_1) (tabs Tm1_2) :- copy Tm1_1 Tm1_2.
+copy (tapp Tm1_1 Ty2_1) (tapp Tm1_2 Ty2_2) :- copy Tm1_1 Tm1_2, copy Ty2_1 Ty2_2.
+copy (iabs Ty1_1 Tm2_1) (iabs Ty1_2 Tm2_2) :- copy Ty1_1 Ty1_2, copy Tm2_1 Tm2_2.
+copy (iapp Tm1_1 Tm2_1) (iapp Tm1_2 Tm2_2) :- copy Tm1_1 Tm1_2, copy Tm2_1 Tm2_2.
+
+type check (obj_term -> obj_type -> o).
+check (tabs M) (ty_all Sigma) :- pi (Alpha\ copy Alpha Alpha => check (M Alpha) (Sigma Alpha)).
+check (tapp M Tau) Sigma_Tau_Alpha :- pi (Alpha\ copy Alpha Tau => copy (Sigma Alpha) Sigma_Tau_Alpha, check M (ty_all Sigma)).
+check (iabs Tau M) (ty_arr Tau Sigma) :- pi (X\ check X Tau => check (M X) Sigma).
+check (iapp M N) Sigma :- check M (ty_arr Tau Sigma), check N Tau.
+
+type example1 (o).
+example1 :- check (tabs (Alpha\ iabs Alpha (X\ iabs Alpha (Y\ Y)))) (ty_all (Alpha\ ty_arr Alpha (ty_arr Alpha Alpha))).
