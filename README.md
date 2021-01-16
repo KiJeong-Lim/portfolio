@@ -4,9 +4,9 @@
 
 # LGS/PGS
 
-- 하스켈 코드를 출력하는 렉서 생성기와 파서 생성기입니다. This contains my lexer generator and my parser generator of mine, both of which print Haskell code.
+- 하스켈 코드를 출력하는 렉서 생성기와 파서 생성기입니다. This contains my lexer generator and my parser generator, both of which print Haskell code.
 
-- 오세만 교수님의 저서 `컴파일러 입문`을 읽고 만들었습니다. I acquire techniques required to have made those generators, reading the book `컴파일러 입문` written by Prof. Seman Oh.
+- 오세만 교수님의 저서 `컴파일러 입문`을 읽고 만들었습니다. I acquire techniques required to have made those generators, reading the book `컴파일러 입문` written by Professor Seman Oh.
 
 - 렉서 생성기는 lookahead operator `/`를 지원하며, 파서 생성기는 LALR(1)의 파서를 생성합니다. This lexer generator supports the positive lookahead operator `/`, and this parser generator yields parsers of LALR(1).
 
