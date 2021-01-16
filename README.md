@@ -14,7 +14,7 @@
 
 - 논리형 언어 λProlog의 서브셋입니다. This is a subset of λProlog.
 
-- Xiaochu Qi님의 논문 `An Implementation of the Language Lambda Prolog Organized around Higher-Order Pattern Unification`을 읽고 만들었습니다. By referring the paper `An Implementation of the Language Lambda Prolog Organized around Higher-Order Pattern Unification` of Xiaochu Qi, I could make the Aladdin interprerter.
+- Xiaochu Qi님의 논문 `An Implementation of the Language Lambda Prolog Organized around Higher-Order Pattern Unification`을 읽고 만들었습니다. Referring the paper `An Implementation of the Language Lambda Prolog Organized around Higher-Order Pattern Unification` of Xiaochu Qi, I made the Aladdin interprerter.
 
 - 이 언어로 `ndc.aladdin`처럼 자연 연역을 검증하는 프로그램을 구현할 수 있습니다. One can write an Aladdin code, which checks natural deduction, such as `ndc.aladdin`.
 
