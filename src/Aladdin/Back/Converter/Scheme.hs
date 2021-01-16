@@ -39,10 +39,12 @@ convertCon var_name_env env con tapps = List.foldl' mkNApp (mkNCon con) (map (co
 convertWithoutChecking :: GenUniqueM m => FreeVariableEnv -> DeBruijnIndicesEnv -> ExpectedAs -> TermExpr (DataConstructor, [MonoType Int]) (SLoc, MonoType Int) -> ExceptT ErrMsg m TermNode
 convertWithoutChecking var_name_env = go where
     loop :: DeBruijnIndicesEnv -> TermExpr (DataConstructor, [MonoType Int]) (SLoc, MonoType Int) -> TermNode
+    loop env (DCon loc (DC_LO logical_operator, tapps))
+        = mkNCon logical_operator
     loop env (IVar loc var)
         = convertVar var_name_env env var
-    loop env (DCon loc (con, tapps))
-        = convertCon var_name_env env con tapps
+    loop env (DCon loc (data_constructor, tapps))
+        = convertCon var_name_env env data_constructor tapps
     loop env (IApp loc term1 term2)
         = mkNApp (loop env term1) (loop env term2)
     loop env (IAbs loc var1 term2)
