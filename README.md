@@ -24,4 +24,4 @@
 
 - 완전성 정리를 증명할 때, Danko Ilik님의 논문 `Constructive Completeness Proofs and Delimited Control`을 참고하였습니다. Referring the paper `Constructive Completeness Proofs and Delimited Control` of Danko Ilik, I proved the propositional completeness theorem.
 
-- 손태승( https://github.com/paulsohn )님께서 비형식적 아이디어를 주시고, 장준영( https://github.com/Ailrun )님께서 Coq 다루는 법을 알려주셨습니다. 두 분께 감사의 말씀을 드립니다. Taseung Sohn and Clare Jang teached me how to prove them informally and teached me how to prove with the Coq proof assistant, respectively. Thanks to both.
+- 손태승( https://github.com/paulsohn )님께서 비형식적 아이디어를 주시고, 장준영( https://github.com/Ailrun )님께서 Coq 다루는 법을 알려주셨습니다. 두 분께 감사의 말씀을 드립니다. Paul Sohn and Clare Jang teached me how to prove them informally and teached me how to prove with the Coq proof assistant, respectively. Thanks to both.
