@@ -24,12 +24,12 @@ runLogicalOperator LO_or [goal1, goal2] ctx facts level cells stack
     = return ((ctx, mkCell facts level goal1 : cells) : (ctx, mkCell facts level goal2 : cells) : stack)
 runLogicalOperator LO_imply [fact1, goal2] ctx facts level cells stack
     = return ((ctx, mkCell (fact1 : facts) level goal2 : cells) : stack)
-runLogicalOperator LO_sigma [goal1] ctx facts level cells stack
+runLogicalOperator LO_sigma [typ, goal1] ctx facts level cells stack
     = do
         uni <- getNewUnique
         let var = LV_Unique uni
         return ((ctx { _CurrentLabeling = enrollLabel var level (_CurrentLabeling ctx) }, mkCell facts level (mkNApp goal1 (mkLVar var)) : cells) : stack)
-runLogicalOperator LO_pi [goal1] ctx facts level cells stack
+runLogicalOperator LO_pi [typ, goal1] ctx facts level cells stack
     = do
         uni <- getNewUnique
         let con = DC (DC_Unique uni)

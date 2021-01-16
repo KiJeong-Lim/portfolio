@@ -20,7 +20,7 @@ instantiateFact fact level
             let var = LV_ty_var uni
             modify (enrollLabel var level)
             instantiateFact (mkNApp fact1 (mkLVar var)) level
-        (NCon (DC (DC_LO LO_pi)), [fact1]) -> do
+        (NCon (DC (DC_LO LO_pi)), [typ, fact1]) -> do
             uni <- getNewUnique
             let var = LV_Unique uni
             modify (enrollLabel var level)

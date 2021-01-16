@@ -132,15 +132,13 @@ instance Show SLoc where
 
 instance Outputable SLoc where
     pprint _ (SLoc (row1, col1) (row2, col2)) = strcat
-        [ strstr "("
-        , showsPrec 0 row1
-        , strstr ","
+        [ showsPrec 0 row1
+        , strstr ":"
         , showsPrec 0 col1
-        , strstr ") - ("
+        , strstr "-"
         , showsPrec 0 row2
-        , strstr ","
+        , strstr ":"
         , showsPrec 0 col2
-        , strstr ")"
         ]
 
 instance Show Unique where
@@ -199,7 +197,7 @@ instance Show DataConstructor where
         DC_Cons -> strstr "::"
         DC_ChrL chr -> showsPrec 0 chr
         DC_NatL nat -> showsPrec 0 nat
-        DC_Succ -> strstr "S"
+        DC_Succ -> strstr "s"
         DC_Eq -> strstr "="
 
 instance Show TypeConstructor where
