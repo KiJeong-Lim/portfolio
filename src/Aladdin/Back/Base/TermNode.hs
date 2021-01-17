@@ -36,8 +36,8 @@ data SuspItem
     deriving (Eq, Ord)
 
 instance Show LogicVar where
-    showsPrec prec (LV_ty_var uni) = strstr "TVar_" . showsPrec prec (unUnique uni)
-    showsPrec prec (LV_Unique uni) = strstr "LVar_" . showsPrec prec (unUnique uni)
+    showsPrec prec (LV_ty_var uni) = strstr "TV_" . showsPrec prec (unUnique uni)
+    showsPrec prec (LV_Unique uni) = strstr "LV_" . showsPrec prec (unUnique uni)
     showsPrec prec (LV_Named name) = strstr name
 
 mkLVar :: LogicVar -> TermNode

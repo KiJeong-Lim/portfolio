@@ -15,7 +15,6 @@ import Lib.Base
 
 data Fixity extra
     = Prefix String extra
-    | Suffix extra String
     | InfixL extra String extra
     | InfixR extra String extra
     | InfixN extra String extra
@@ -57,7 +56,6 @@ instance Outputable ViewNode where
         go (ViewTApp viewer1 viewer2) = parenthesize 6 (pprint 6 viewer1 . strstr " " . pprint 7 viewer2)
         go (ViewOper (oper, prec')) = case oper of
             Prefix str viewer1 -> parenthesize prec' (strstr str . pprint prec' viewer1)
-            Suffix viewer1 str -> parenthesize prec' (pprint prec' viewer1 . strstr str)
             InfixL viewer1 str viewer2 -> parenthesize prec' (pprint prec' viewer1 . strstr str . pprint (prec' + 1) viewer2)
             InfixR viewer1 str viewer2 -> parenthesize prec' (pprint (prec' + 1) viewer1 . strstr str . pprint prec' viewer2)
             InfixN viewer1 str viewer2 -> parenthesize prec' (pprint (prec' + 1) viewer1 . strstr str . pprint (prec' + 1) viewer2)
@@ -80,17 +78,7 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
         LV_Named v -> return (ViewLVar v)
     makeView vars (NCon con) = case con of
         DC data_constructor -> case data_constructor of
-            DC_LO logical_operator -> case logical_operator of
-                LO_ty_pi -> return (ViewDCon "Lambda")
-                LO_if -> return (ViewDCon ":-")
-                LO_true -> return (ViewDCon "true")
-                LO_fail -> return (ViewDCon "fail")
-                LO_cut -> return (ViewDCon "!")
-                LO_and -> return (ViewDCon ",")
-                LO_or -> return (ViewDCon ";")
-                LO_imply -> return (ViewDCon "=>")
-                LO_pi -> return (ViewDCon "pi")
-                LO_sigma -> return (ViewDCon "sigma")
+            DC_LO logical_operator -> return (ViewDCon (show logical_operator))
             DC_Named name -> return (ViewDCon ("__" ++ name))
             DC_Unique uni -> return (ViewDCon ("c_" ++ show uni))
             DC_Nil -> return (ViewDCon "[]")
@@ -158,10 +146,6 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
                 t1' <- formatView t1
                 t2' <- formatView t2
                 return (ViewIApp (ViewOper (Prefix str t1', prec)) t2')
-            Suffix _ str -> do
-                t1' <- formatView t1
-                t2' <- formatView t2
-                return (ViewIApp (ViewOper (Suffix t1' str, prec)) t2')
             InfixL _ str _ -> do
                 t1' <- formatView t1
                 t2' <- formatView t2
@@ -180,9 +164,6 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
             Prefix str _ -> do
                 t1' <- formatView t1
                 return (ViewOper (Prefix str t1', prec))
-            Suffix _ str -> do
-                t1' <- formatView t1
-                return (ViewOper (Suffix t1' str, prec))
             InfixL _ str _ -> do
                 t1' <- formatView t1
                 v2 <- get
@@ -208,10 +189,6 @@ constructViewer = fst . runIdentity . uncurry (runStateT . formatView . eraseTyp
                 v1 <- get
                 put (v1 + 1)
                 return (ViewIAbs v1 (ViewOper (Prefix str (ViewIVar v1), prec)))
-            Suffix _ str -> do
-                v1 <- get
-                put (v1 + 1)
-                return (ViewIAbs v1 (ViewOper (Suffix (ViewIVar v1) str, prec)))
             InfixL _ str _ -> do
                 v1 <- get
                 let v2 = v1 + 1

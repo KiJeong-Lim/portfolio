@@ -9,6 +9,7 @@ import Data.Functor.Identity
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import Lib.Algorithm.Sorting
 import Lib.Base
 import PGS.Util
 
@@ -34,7 +35,7 @@ instance Outputable Sym where
 
 instance Outputable CFGrammar where
     pprint _ (CFGrammar start terminals productions) = strcat
-        [ strstr "start-symbol: " . pprint 0 start . nl
+        [ strstr "start-symbol: " . pprint 0 (NS start) . nl
         , strstr "terminal-symbols: " . plist 2 [ pprint 0 (TS t) . strstr " : " . pprint 0 assoc . strstr ", " . strstr (reverse (take 2 ("0" ++ reverse (show prec)))) | (t, (assoc, prec)) <- Map.toList terminals ] . nl
         , strstr "production-rules: " . plist 2 [ pprint 0 (NS lhs) . strstr " ::= " . ppunc " " (map (pprint 0) rhs) . strstr "; " . strstr (reverse (take 2 (reverse ("0" ++ show prec)))) | ((lhs, rhs), prec) <- Map.toList productions ] . nl
         ]
@@ -43,11 +44,36 @@ instance Outputable LR0Item where
     pprint _ (LR0Item lhs left right) = pprint 0 (NS lhs) . strstr " ::= " . ppunc " " (map (pprint 0) left ++ [strstr "."] ++ map (pprint 0) right)
 
 instance Outputable Cannonical0 where
-    pprint _ (Cannonical0 vertices root edges) = strcat
-        [ strstr "    vertices: " . plist 8 [ showsPrec 0 q . strstr ": " . plist 12 (map (pprint 0) (Set.toList items)) | (items, q) <- Map.toList vertices ] . nl
-        , strstr "    root: " . showsPrec 0 root . nl
-        , strstr "    edges: " . plist 8 [ strstr "(" . showsPrec 0 q . strstr ", " . pprint 0 sym . strstr ") +-> " . showsPrec 0 p | ((q, sym), p) <- Map.toList edges ] . nl
-        ]
+    pprint _ (Cannonical0 vertices root edges)
+        = ppunc "\n"
+            [ strstr "getParserSInfo :: ParserS -> ParserSInfo"
+            , ppunc "\n"
+                [ ppunc "\n"
+                    [ strstr "getParserSInfo " . showsPrec 0 q . strstr " = ParserSInfo"
+                    , strstr "    { myItems = " . plist 8 (map (pprint 0) items)
+                    , strstr "    , myNexts = " . plist 8 [ pprint 0 sym . strstr " +-> " . showsPrec 0 p | (sym, p) <- maybe [] id (lookup q formatedEdges) ]
+                    , strstr "    }"
+                    ]
+                | (q, items) <- formatedVertices
+                ]
+            ]
+        where
+            formatedVertices :: [(ParserS, [LR0Item])]
+            formatedVertices = do
+                (items, q) <- sortByMerging (\pair1 -> \pair2 -> snd pair1 < snd pair2) (Map.toAscList vertices)
+                return
+                    ( q
+                    , Set.toAscList items
+                    )
+            formatedEdges :: [(ParserS, [(Sym, ParserS)])]
+            formatedEdges = do
+                triples <- split' (\triple1 -> \triple2 -> fst (fst triple1) == fst (fst triple2)) (Map.toAscList edges)
+                case triples of
+                    [] -> []
+                    ((q, sym), p) : triples' -> return
+                        ( q
+                        , (sym, p) : [ (sym', p') | ((q', sym'), p') <- triples' ]
+                        )
 
 instance Outputable Action where
     pprint _ (Shift p) = strstr "SHIFT: " . showsPrec 0 p . strstr ";"
@@ -61,7 +87,7 @@ instance Outputable LR1Parser where
         , strstr "reduceT: " . plist 2 [ strstr "(" . showsPrec 0 q . strstr ", " . pprint 0 (NS nt) . showsPrec 0 p | ((q, nt), p) <- Map.toList reduceT ] . nl
         ]
 
-makeCollectionAndLALR1Parser :: CFGrammar -> ExceptT String Identity (Cannonical0, LR1Parser)
+makeCollectionAndLALR1Parser :: CFGrammar -> ExceptT Conflict Identity (Cannonical0, LR1Parser)
 makeCollectionAndLALR1Parser (CFGrammar start terminals productions) = theResult where
     maxPrec :: Precedence
     maxPrec = 100
@@ -193,14 +219,14 @@ makeCollectionAndLALR1Parser (CFGrammar start terminals productions) = theResult
                 | ((LR0Item lhs left right, q), ts) <- triples
                 , Just t <- Set.toList (unTerminalSet ts)
                 ]
-    resolveConflicts :: Either (String -> String) (Map.Map (ParserS, TSym) Action)
+    resolveConflicts :: Either Conflict (Map.Map (ParserS, TSym) Action)
     resolveConflicts = foldr loop (Right init) getLATable where
         init :: Map.Map (ParserS, TSym) Action
         init = Map.fromList
             [ ((q, t), Shift p)
             | ((q, TS t), p) <- Map.toList (getEdges getCannonical0)
             ]
-        loop :: ((ParserS, TSym), ProductionRule) -> Either (String -> String) (Map.Map (ParserS, TSym) Action) -> Either (String -> String) (Map.Map (ParserS, TSym) Action)
+        loop :: ((ParserS, TSym), ProductionRule) -> Either Conflict (Map.Map (ParserS, TSym) Action) -> Either Conflict (Map.Map (ParserS, TSym) Action)
         loop _ (Left str) = Left str
         loop ((q, t), production) (Right getActionT) = case (Map.lookup (q, t) getActionT, if fst production == start' then Accept else Reduce production) of
             (Nothing, ra) -> Right (Map.insert (q, t) ra getActionT)
@@ -211,27 +237,15 @@ makeCollectionAndLALR1Parser (CFGrammar start terminals productions) = theResult
                     | prec1 < prec2 -> Right (Map.update (const (Just ra)) (q, t) getActionT)
                     | assoc == ALeft -> Right (Map.update (const (Just ra)) (q, t) getActionT)
                     | assoc == ARight -> Right getActionT
-                _ -> Left $ strcat
-                    [ strstr "cannot resolve conflict: {" . nl
-                    , strstr "  (" . showsPrec 0 q . strstr ", " . pprint 0 (TS t) . strstr ") +-> " . pprint 0 (Shift p) . nl
-                    , strstr "  (" . showsPrec 0 q . strstr ", " . pprint 0 (TS t) . strstr ") +-> " . pprint 0 (Reduce production) . nl
-                    , strstr "}" . nl
-                    , pprint 0 getCannonical0
-                    ]
+                _ -> Left (Conflict { because = (Shift p, ra), whereIs = (q, t), withEnv = getCannonical0 })
             (Just (Reduce production'), ra) -> case (Map.lookup production' productions', Map.lookup production productions') of
                 (Just prec1, Just prec2)
                     | prec1 > prec2 -> Right getActionT
                     | prec1 < prec2 -> Right (Map.update (const (Just ra)) (q, t) getActionT)
-                _ -> Left $ strcat
-                    [ strstr "cannot resolve conflict: {" . nl
-                    , strstr "  (" . showsPrec 0 q . strstr ", " . pprint 0 (TS t) . strstr ") +-> " . pprint 0 (Reduce production) . nl
-                    , strstr "  (" . showsPrec 0 q . strstr ", " . pprint 0 (TS t) . strstr ") +-> " . pprint 0 (Reduce production') . nl
-                    , strstr "}" . nl
-                    , pprint 0 getCannonical0
-                    ]
-    theResult :: ExceptT String Identity (Cannonical0, LR1Parser)
+                _ -> Left (Conflict { because = (Reduce production, ra), whereIs = (q, t), withEnv = getCannonical0 })
+    theResult :: ExceptT Conflict Identity (Cannonical0, LR1Parser)
     theResult = case resolveConflicts of
-        Left delta -> throwE (delta "")
+        Left conflict -> throwE conflict
         Right getActionT -> return 
             ( getCannonical0
             , LR1Parser

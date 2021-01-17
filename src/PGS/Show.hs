@@ -17,6 +17,37 @@ import Lib.Text.PC.Expansion
 import PGS.Make
 import PGS.Util
 
+instance Show Conflict where
+    show = flip (showsPrec 0) ""
+    showList = undefined
+    showsPrec _ (Conflict (action1, action2) (q, t) (Cannonical0 vertices root edges))
+        = strcat
+            [ strstr "couldn't resolve conflict:" . nl
+            , strstr "  ? " . pprint 0 action1 . strstr " v.s. " . pprint 0 action2 . strstr " at (" . showsPrec 0 q . strstr ", " . showsPrec 0 (TS t) . strstr ")" . nl
+            , strstr "  ? collection = Cannonical0" . nl
+            , strstr "    { getVertices = " . plist 6 [ showsPrec 0 q . strstr ": " . plist 8 (map (pprint 0) items) | (q, items) <- formatedVertices ] . nl
+            , strstr "    , getRoot = " . showsPrec 0 root . nl
+            , strstr "    , getEdges = " . plist 6 [ showsPrec 0 q . strstr ": " . plist 8 [ pprint 0 sym . strstr " +-> " . showsPrec 0 p | (sym, p) <- pairs ] | (q, pairs) <- formatedEdges ] . nl
+            , strstr "    }" . nl
+            ]
+        where
+            formatedVertices :: [(ParserS, [LR0Item])]
+            formatedVertices = do
+                (items, q) <- sortByMerging (\pair1 -> \pair2 -> snd pair1 < snd pair2) (Map.toAscList vertices)
+                return
+                    ( q
+                    , Set.toAscList items
+                    )
+            formatedEdges :: [(ParserS, [(Sym, ParserS)])]
+            formatedEdges = do
+                triples <- split' (\triple1 -> \triple2 -> fst (fst triple1) == fst (fst triple2)) (Map.toAscList edges)
+                case triples of
+                    [] -> []
+                    ((q, sym), p) : triples' -> return
+                        ( q
+                        , (sym, p) : [ (sym', p') | ((q', sym'), p') <- triples' ]
+                        )
+
 unFoldNSApp :: NSym -> (String, [NSym])
 unFoldNSApp = flip loop [] where
     loop :: NSym -> [NSym] -> (String, [NSym])
@@ -196,7 +227,7 @@ genParser blocks = go where
                 Nothing -> throwE ("the terminal symbol " ++ pprint 0 nsym " hasn't declared.")
                 Just n -> return n
         checkTerminalOccurence (Set.fromList [ ts | (lhs, Just pairs) <- cache', (rhs, prec) <- pairs, TS ts <- rhs ]) (Set.fromList [ tsym | TerminalInfo patn tsym prec assoc <- terminal_infos ])
-        (collection, lalr1) <- makeCollectionAndLALR1Parser (CFGrammar { getStartSym = start_symbol, getTerminalSyms = terminal_symbols, getProductionRules = production_rules })
+        (collection, lalr1) <- catchE (makeCollectionAndLALR1Parser (CFGrammar { getStartSym = start_symbol, getTerminalSyms = terminal_symbols, getProductionRules = production_rules })) $ throwE . show
         fmap (strcat . snd) $ runWriterT $ do
             tellLine (ppunc "\n" (map strstr hs_head))
             tellLine (strstr "import qualified Control.Monad.Trans.Class as Y")
@@ -268,17 +299,11 @@ genParser blocks = go where
                                     ]
                                 , strstr "])"
                                 ]
-                            tellLine $ strcat
-                                [ strstr "        | "
-                                , makeGuard id_env body_name params_name (zip naturals syms)
-                                , strstr " ="
-                                ]
                             sequence
                                 [ do
                                     let mkIndexErr idx = "the length of rhs is " ++ showsPrec 0 (length syms) (", but the index " ++ showsPrec 0 idx " is greater than or equal to it.")
-                                    des_rep <- fmap strcat $ sequence
-                                        [ return (strstr "            ")
-                                        , lift $ fmap strcat $ sequence
+                                    des_rep <- fmap (ppunc  "        ") $ sequence
+                                        [ lift $ fmap strcat $ sequence
                                             [ case de of
                                                 DsStrLit str -> return (showsPrec 0 str)
                                                 DsSource hs_src -> return (strstr hs_src)
@@ -295,7 +320,12 @@ genParser blocks = go where
                                             | de <- des
                                             ]
                                         ]
-                                    tellLine des_rep
+                                    tellLine $ strcat
+                                        [ strstr "        | "
+                                        , makeGuard id_env body_name params_name (zip naturals syms)
+                                        , strstr " = "
+                                        , des_rep
+                                        ]
                                     return ()
                                 | des <- dess
                                 ]
@@ -416,5 +446,6 @@ genParser blocks = go where
                 ]
             tellLine (strstr "        , getReduceTable = YMap.fromAscList " . plist 12 table2)
             tellLine (strstr "        }")
-            tellLine (strstr "{-" . nl . pprint 0 collection . strstr "-}" . nl)
+            tellLine (strstr "")
+            tellLine (strstr "{- The canonical collection of LR(0) items is:" . nl . pprint 0 collection . nl . strstr "-}")
             return ()

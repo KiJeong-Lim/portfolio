@@ -23,7 +23,7 @@ runPGS dir = do
     case runPC (many (readBlock <* many lend) <* eofPC) y_src of
         Left err -> putStrLn err
         Right yblocks -> case runIdentity (runExceptT (genParser yblocks)) of
-            Left err -> putStrLn err
+            Left err -> writeFile (dir ++ ".failed") err
             Right delta -> do
                 writeFile (dir ++ ".hs") (delta "")
                 putStrLn "The parser has been generated."

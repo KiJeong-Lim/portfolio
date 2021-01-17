@@ -25,7 +25,7 @@ import System.Exit
 
 showCopyright :: String
 showCopyright = concat
-    [ "Copyright (c) 2020, KiJeong-Lim\n"
+    [ "Copyright (c) 2020-2021, KiJeong Lim\n"
     , "All rights reserved.\n"
     ]
 

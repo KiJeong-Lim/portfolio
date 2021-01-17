@@ -45,172 +45,122 @@ runAladdinParser :: [Token] -> Either (Maybe (Token)) (Either TermRep [DeclRep])
 runAladdinParser = fmap (getEither getQuery (getSequence getDecl)) . runLR1 theLR1Parser where
     getQuery :: ParsingTree -> (TermRep)
     getQuery (PTBranch _ [PTLeaf (T_quest loc_1), _2@(PTBranch guard2 _), PTLeaf (T_dot loc_3)])
-        | [guard2] `elem` [[3]] =
-            (getTermRep0 _2)
+        | [guard2] `elem` [[3]] = (getTermRep0 _2)
     getDecl :: ParsingTree -> (DeclRep)
     getDecl (PTBranch _ [PTLeaf (T_kind loc_1), PTLeaf (T_smallid loc_2 contents_2), _3@(PTBranch guard3 _), PTLeaf (T_dot loc_4)])
-        | [guard3] `elem` [[14]] =
-            RKindDecl ((loc_1) <> (loc_4)) (TC_Named (contents_2)) (getKindRep0 _3)
+        | [guard3] `elem` [[14]] = RKindDecl ((loc_1) <> (loc_4)) (TC_Named (contents_2)) (getKindRep0 _3)
     getDecl (PTBranch _ [PTLeaf (T_type loc_1), PTLeaf (T_smallid loc_2 contents_2), _3@(PTBranch guard3 _), PTLeaf (T_dot loc_4)])
-        | [guard3] `elem` [[16]] =
-            RTypeDecl ((loc_1) <> (loc_4)) (DC_Named (contents_2)) (getTypeRep0 _3)
+        | [guard3] `elem` [[16]] = RTypeDecl ((loc_1) <> (loc_4)) (DC_Named (contents_2)) (getTypeRep0 _3)
     getDecl (PTBranch _ [_1@(PTBranch guard1 _), PTLeaf (T_dot loc_2)])
-        | [guard1] `elem` [[3]] =
-            RFactDecl (getSLoc (getTermRep0 _1) <> (loc_2)) (getTermRep0 _1)
+        | [guard1] `elem` [[3]] = RFactDecl (getSLoc (getTermRep0 _1) <> (loc_2)) (getTermRep0 _1)
     getKindRep0 :: ParsingTree -> (KindRep)
     getKindRep0 (PTBranch _ [_1@(PTBranch guard1 _), PTLeaf (T_arrow loc_2), _3@(PTBranch guard3 _)])
-        | [guard1, guard3] `elem` [[15, 14]] =
-            RKArr (getSLoc (getKindRep1 _1) <> getSLoc (getKindRep0 _3)) (getKindRep1 _1) (getKindRep0 _3)
+        | [guard1, guard3] `elem` [[15, 14]] = RKArr (getSLoc (getKindRep1 _1) <> getSLoc (getKindRep0 _3)) (getKindRep1 _1) (getKindRep0 _3)
     getKindRep0 (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[15]] =
-            (getKindRep1 _1)
+        | [guard1] `elem` [[15]] = (getKindRep1 _1)
     getKindRep1 :: ParsingTree -> (KindRep)
     getKindRep1 (PTBranch _ [PTLeaf (T_type loc_1)])
-        | otherwise =
-            RStar (loc_1)
+        | otherwise = RStar (loc_1)
     getKindRep1 (PTBranch _ [PTLeaf (T_lparen loc_1), _2@(PTBranch guard2 _), PTLeaf (T_rparen loc_3)])
-        | [guard2] `elem` [[14]] =
-            RKPrn ((loc_1) <> (loc_3)) (getKindRep0 _2)
+        | [guard2] `elem` [[14]] = RKPrn ((loc_1) <> (loc_3)) (getKindRep0 _2)
     getTypeRep0 :: ParsingTree -> (TypeRep)
     getTypeRep0 (PTBranch _ [_1@(PTBranch guard1 _), PTLeaf (T_arrow loc_2), _3@(PTBranch guard3 _)])
-        | [guard1, guard3] `elem` [[17, 16]] =
-            RTyApp (getSLoc (getTypeRep1 _1) <> getSLoc (getTypeRep0 _3)) (RTyApp (getSLoc (getTypeRep1 _1) <> (loc_2)) (RTyCon (loc_2) TC_Arrow) (getTypeRep1 _1)) (getTypeRep0 _3)
+        | [guard1, guard3] `elem` [[17, 16]] = RTyApp (getSLoc (getTypeRep1 _1) <> getSLoc (getTypeRep0 _3)) (RTyApp (getSLoc (getTypeRep1 _1) <> (loc_2)) (RTyCon (loc_2) TC_Arrow) (getTypeRep1 _1)) (getTypeRep0 _3)
     getTypeRep0 (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[17]] =
-            (getTypeRep1 _1)
+        | [guard1] `elem` [[17]] = (getTypeRep1 _1)
     getTypeRep1 :: ParsingTree -> (TypeRep)
     getTypeRep1 (PTBranch _ [_1@(PTBranch guard1 _), _2@(PTBranch guard2 _)])
-        | [guard1, guard2] `elem` [[17, 18]] =
-            RTyApp (getSLoc (getTypeRep1 _1) <> getSLoc (getTypeRep2 _2)) (getTypeRep1 _1) (getTypeRep2 _2)
+        | [guard1, guard2] `elem` [[17, 18]] = RTyApp (getSLoc (getTypeRep1 _1) <> getSLoc (getTypeRep2 _2)) (getTypeRep1 _1) (getTypeRep2 _2)
     getTypeRep1 (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[18]] =
-            (getTypeRep2 _1)
+        | [guard1] `elem` [[18]] = (getTypeRep2 _1)
     getTypeRep2 :: ParsingTree -> (TypeRep)
     getTypeRep2 (PTBranch _ [PTLeaf (T_largeid loc_1 contents_1)])
-        | otherwise =
-            RTyVar (loc_1) (contents_1)
+        | otherwise = RTyVar (loc_1) (contents_1)
     getTypeRep2 (PTBranch _ [PTLeaf (T_smallid loc_1 contents_1)])
-        | otherwise =
-            RTyCon (loc_1) (TC_Named (contents_1))
+        | otherwise = RTyCon (loc_1) (TC_Named (contents_1))
     getTypeRep2 (PTBranch _ [PTLeaf (T_lparen loc_1), _2@(PTBranch guard2 _), PTLeaf (T_rparen loc_3)])
-        | [guard2] `elem` [[16]] =
-            RTyPrn ((loc_1) <> (loc_3)) (getTypeRep0 _2)
+        | [guard2] `elem` [[16]] = RTyPrn ((loc_1) <> (loc_3)) (getTypeRep0 _2)
     getTermRep0 :: ParsingTree -> (TermRep)
     getTermRep0 (PTBranch _ [PTLeaf (T_largeid loc_1 contents_1), PTLeaf (T_bslash loc_2), _3@(PTBranch guard3 _)])
-        | [guard3] `elem` [[3]] =
-            RAbs ((loc_1) <> getSLoc (getTermRep0 _3)) (contents_1) (getTermRep0 _3)
+        | [guard3] `elem` [[3]] = RAbs ((loc_1) <> getSLoc (getTermRep0 _3)) (contents_1) (getTermRep0 _3)
     getTermRep0 (PTBranch _ [_1@(PTBranch guard1 _), PTLeaf (T_if loc_2), _3@(PTBranch guard3 _)])
-        | [guard1, guard3] `elem` [[4, 3]] =
-            RApp (getSLoc (getTermRep1 _1) <> getSLoc (getTermRep0 _3)) (RApp (getSLoc (getTermRep1 _1) <> (loc_2)) (RCon (loc_2) (DC_LO LO_if)) (getTermRep1 _1)) (getTermRep0 _3)
+        | [guard1, guard3] `elem` [[4, 3]] = RApp (getSLoc (getTermRep1 _1) <> getSLoc (getTermRep0 _3)) (RApp (getSLoc (getTermRep1 _1) <> (loc_2)) (RCon (loc_2) (DC_LO LO_if)) (getTermRep1 _1)) (getTermRep0 _3)
     getTermRep0 (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[4]] =
-            (getTermRep1 _1)
+        | [guard1] `elem` [[4]] = (getTermRep1 _1)
     getTermRep1 :: ParsingTree -> (TermRep)
     getTermRep1 (PTBranch _ [_1@(PTBranch guard1 _), PTLeaf (T_semicolon loc_2), _3@(PTBranch guard3 _)])
-        | [guard1, guard3] `elem` [[4, 5]] =
-            RApp (getSLoc (getTermRep1 _1) <> getSLoc (getTermRep2 _3)) (RApp (getSLoc (getTermRep1 _1) <> (loc_2)) (RCon (loc_2) (DC_LO LO_or)) (getTermRep1 _1)) (getTermRep2 _3)
+        | [guard1, guard3] `elem` [[4, 5]] = RApp (getSLoc (getTermRep1 _1) <> getSLoc (getTermRep2 _3)) (RApp (getSLoc (getTermRep1 _1) <> (loc_2)) (RCon (loc_2) (DC_LO LO_or)) (getTermRep1 _1)) (getTermRep2 _3)
     getTermRep1 (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[5]] =
-            (getTermRep2 _1)
+        | [guard1] `elem` [[5]] = (getTermRep2 _1)
     getTermRep2 :: ParsingTree -> (TermRep)
     getTermRep2 (PTBranch _ [_1@(PTBranch guard1 _), PTLeaf (T_fatarrow loc_2), _3@(PTBranch guard3 _)])
-        | [guard1, guard3] `elem` [[6, 5]] =
-            RApp (getSLoc (getTermRep3 _1) <> getSLoc (getTermRep2 _3)) (RApp (getSLoc (getTermRep3 _1) <> (loc_2)) (RCon (loc_2) (DC_LO LO_imply)) (getTermRep3 _1)) (getTermRep2 _3)
+        | [guard1, guard3] `elem` [[6, 5]] = RApp (getSLoc (getTermRep3 _1) <> getSLoc (getTermRep2 _3)) (RApp (getSLoc (getTermRep3 _1) <> (loc_2)) (RCon (loc_2) (DC_LO LO_imply)) (getTermRep3 _1)) (getTermRep2 _3)
     getTermRep2 (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[6]] =
-            (getTermRep3 _1)
+        | [guard1] `elem` [[6]] = (getTermRep3 _1)
     getTermRep3 :: ParsingTree -> (TermRep)
     getTermRep3 (PTBranch _ [_1@(PTBranch guard1 _), PTLeaf (T_comma loc_2), _3@(PTBranch guard3 _)])
-        | [guard1, guard3] `elem` [[6, 7]] =
-            RApp (getSLoc (getTermRep3 _1) <> getSLoc (getTermRep4 _3)) (RApp (getSLoc (getTermRep3 _1) <> (loc_2)) (RCon (loc_2) (DC_LO LO_and)) (getTermRep3 _1)) (getTermRep4 _3)
+        | [guard1, guard3] `elem` [[6, 7]] = RApp (getSLoc (getTermRep3 _1) <> getSLoc (getTermRep4 _3)) (RApp (getSLoc (getTermRep3 _1) <> (loc_2)) (RCon (loc_2) (DC_LO LO_and)) (getTermRep3 _1)) (getTermRep4 _3)
     getTermRep3 (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[7]] =
-            (getTermRep4 _1)
+        | [guard1] `elem` [[7]] = (getTermRep4 _1)
     getTermRep4 :: ParsingTree -> (TermRep)
     getTermRep4 (PTBranch _ [_1@(PTBranch guard1 _), PTLeaf (T_cons loc_2), _3@(PTBranch guard3 _)])
-        | [guard1, guard3] `elem` [[8, 7]] =
-            RApp (getSLoc (getTermRep5 _1) <> getSLoc (getTermRep4 _3)) (RApp (getSLoc (getTermRep5 _1) <> (loc_2)) (RCon (loc_2) DC_Cons) (getTermRep5 _1)) (getTermRep4 _3)
+        | [guard1, guard3] `elem` [[8, 7]] = RApp (getSLoc (getTermRep5 _1) <> getSLoc (getTermRep4 _3)) (RApp (getSLoc (getTermRep5 _1) <> (loc_2)) (RCon (loc_2) DC_Cons) (getTermRep5 _1)) (getTermRep4 _3)
     getTermRep4 (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[8]] =
-            (getTermRep5 _1)
+        | [guard1] `elem` [[8]] = (getTermRep5 _1)
     getTermRep5 :: ParsingTree -> (TermRep)
     getTermRep5 (PTBranch _ [PTLeaf (T_pi loc_1), _2@(PTBranch guard2 _)])
-        | [guard2] `elem` [[8]] =
-            RApp ((loc_1) <> getSLoc (getTermRep5 _2)) (RCon (loc_1) (DC_LO LO_pi)) (getTermRep5 _2)
+        | [guard2] `elem` [[8]] = RApp ((loc_1) <> getSLoc (getTermRep5 _2)) (RCon (loc_1) (DC_LO LO_pi)) (getTermRep5 _2)
     getTermRep5 (PTBranch _ [PTLeaf (T_sigma loc_1), _2@(PTBranch guard2 _)])
-        | [guard2] `elem` [[8]] =
-            RApp ((loc_1) <> getSLoc (getTermRep5 _2)) (RCon (loc_1) (DC_LO LO_sigma)) (getTermRep5 _2)
+        | [guard2] `elem` [[8]] = RApp ((loc_1) <> getSLoc (getTermRep5 _2)) (RCon (loc_1) (DC_LO LO_sigma)) (getTermRep5 _2)
     getTermRep5 (PTBranch _ [_1@(PTBranch guard1 _), PTLeaf (T_Eq loc_2), _3@(PTBranch guard3 _)])
-        | [guard1, guard3] `elem` [[9, 9]] =
-            RApp (getSLoc (getTermRep6 _1) <> getSLoc (getTermRep6 _3)) (RApp (getSLoc (getTermRep6 _1) <> (loc_2)) (RCon (loc_2) DC_Eq) (getTermRep6 _1)) (getTermRep6 _3)
+        | [guard1, guard3] `elem` [[9, 9]] = RApp (getSLoc (getTermRep6 _1) <> getSLoc (getTermRep6 _3)) (RApp (getSLoc (getTermRep6 _1) <> (loc_2)) (RCon (loc_2) DC_Eq) (getTermRep6 _1)) (getTermRep6 _3)
     getTermRep5 (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[9]] =
-            (getTermRep6 _1)
+        | [guard1] `elem` [[9]] = (getTermRep6 _1)
     getTermRep6 :: ParsingTree -> (TermRep)
     getTermRep6 (PTBranch _ [_1@(PTBranch guard1 _), _2@(PTBranch guard2 _)])
-        | [guard1, guard2] `elem` [[9, 10]] =
-            RApp (getSLoc (getTermRep6 _1) <> getSLoc (getTermRep7 _2)) (getTermRep6 _1) (getTermRep7 _2)
+        | [guard1, guard2] `elem` [[9, 10]] = RApp (getSLoc (getTermRep6 _1) <> getSLoc (getTermRep7 _2)) (getTermRep6 _1) (getTermRep7 _2)
     getTermRep6 (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[10]] =
-            (getTermRep7 _1)
+        | [guard1] `elem` [[10]] = (getTermRep7 _1)
     getTermRep6 (PTBranch _ [PTLeaf (T_succ loc_1)])
-        | otherwise =
-            RCon (loc_1) DC_Succ
+        | otherwise = RCon (loc_1) DC_Succ
     getTermRep7 :: ParsingTree -> (TermRep)
     getTermRep7 (PTBranch _ [PTLeaf (T_lparen loc_1), _2@(PTBranch guard2 _), PTLeaf (T_rparen loc_3)])
-        | [guard2] `elem` [[3]] =
-            RPrn ((loc_1) <> (loc_3)) (getTermRep0 _2)
+        | [guard2] `elem` [[3]] = RPrn ((loc_1) <> (loc_3)) (getTermRep0 _2)
     getTermRep7 (PTBranch _ [PTLeaf (T_cut loc_1)])
-        | otherwise =
-            RCon (loc_1) (DC_LO LO_cut)
+        | otherwise = RCon (loc_1) (DC_LO LO_cut)
     getTermRep7 (PTBranch _ [PTLeaf (T_true loc_1)])
-        | otherwise =
-            RCon (loc_1) (DC_LO LO_true)
+        | otherwise = RCon (loc_1) (DC_LO LO_true)
     getTermRep7 (PTBranch _ [PTLeaf (T_fail loc_1)])
-        | otherwise =
-            RCon (loc_1) (DC_LO LO_fail)
+        | otherwise = RCon (loc_1) (DC_LO LO_fail)
     getTermRep7 (PTBranch _ [PTLeaf (T_smallid loc_1 contents_1)])
-        | otherwise =
-            RCon (loc_1) (DC_Named (contents_1))
+        | otherwise = RCon (loc_1) (DC_Named (contents_1))
     getTermRep7 (PTBranch _ [PTLeaf (T_largeid loc_1 contents_1)])
-        | otherwise =
-            RVar (loc_1) (contents_1)
+        | otherwise = RVar (loc_1) (contents_1)
     getTermRep7 (PTBranch _ [PTLeaf (T_nat_lit loc_1 contents_1)])
-        | otherwise =
-            mkNatLit (loc_1) (contents_1)
+        | otherwise = mkNatLit (loc_1) (contents_1)
     getTermRep7 (PTBranch _ [PTLeaf (T_str_lit loc_1 contents_1)])
-        | otherwise =
-            mkStrLit (loc_1) (contents_1)
+        | otherwise = mkStrLit (loc_1) (contents_1)
     getTermRep7 (PTBranch _ [PTLeaf (T_chr_lit loc_1 contents_1)])
-        | otherwise =
-            mkChrLit (loc_1) (contents_1)
+        | otherwise = mkChrLit (loc_1) (contents_1)
     getTermRep7 (PTBranch _ [PTLeaf (T_lbracket loc_1), PTLeaf (T_rbracket loc_2)])
-        | otherwise =
-            RCon ((loc_1) <> (loc_2)) DC_Nil
+        | otherwise = RCon ((loc_1) <> (loc_2)) DC_Nil
     getTermRep7 (PTBranch _ [PTLeaf (T_lbracket loc_1), _2@(PTBranch guard2 _), PTLeaf (T_rbracket loc_3)])
-        | [guard2] `elem` [[11]] =
-            RPrn ((loc_1) <> (loc_3)) (getListBody _2)
+        | [guard2] `elem` [[11]] = RPrn ((loc_1) <> (loc_3)) (getListBody _2)
     getSequence :: (ParsingTree -> (a)) -> ParsingTree -> ([a])
     getSequence getElem (PTBranch _ [])
-        | otherwise =
-            []
+        | otherwise = []
     getSequence getElem (PTBranch _ [_1@(PTBranch guard1 _), _2@(PTBranch guard2 _)])
-        | [guard1, guard2] `elem` [[13, 12]] =
-            (getElem _1) : (getSequence getElem _2)
+        | [guard1, guard2] `elem` [[13, 12]] = (getElem _1) : (getSequence getElem _2)
     getEither :: (ParsingTree -> (a)) -> (ParsingTree -> (b)) -> ParsingTree -> (Either a b)
     getEither getLeft getRight (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[2]] =
-            Left (getLeft _1)
+        | [guard1] `elem` [[2]] = Left (getLeft _1)
     getEither getLeft getRight (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[12]] =
-            Right (getRight _1)
+        | [guard1] `elem` [[12]] = Right (getRight _1)
     getListBody :: ParsingTree -> (TermRep)
     getListBody (PTBranch _ [_1@(PTBranch guard1 _)])
-        | [guard1] `elem` [[8]] =
-            RApp (getSLoc (getTermRep5 _1)) (RApp (getSLoc (getTermRep5 _1)) (RCon (getSLoc (getTermRep5 _1)) DC_Cons) (getTermRep5 _1)) (RCon (getSLoc (getTermRep5 _1)) DC_Nil)
+        | [guard1] `elem` [[8]] = RApp (getSLoc (getTermRep5 _1)) (RApp (getSLoc (getTermRep5 _1)) (RCon (getSLoc (getTermRep5 _1)) DC_Cons) (getTermRep5 _1)) (RCon (getSLoc (getTermRep5 _1)) DC_Nil)
     getListBody (PTBranch _ [_1@(PTBranch guard1 _), PTLeaf (T_comma loc_2), _3@(PTBranch guard3 _)])
-        | [guard1, guard3] `elem` [[8, 11]] =
-            RApp (getSLoc (getTermRep5 _1) <> getSLoc (getListBody _3)) (RApp (getSLoc (getTermRep5 _1) <> (loc_2)) (RCon (loc_2) DC_Cons) (getTermRep5 _1)) (getListBody _3)
+        | [guard1, guard3] `elem` [[8, 11]] = RApp (getSLoc (getTermRep5 _1) <> getSLoc (getListBody _3)) (RApp (getSLoc (getTermRep5 _1) <> (loc_2)) (RCon (loc_2) DC_Cons) (getTermRep5 _1)) (getListBody _3)
     toTerminal :: (Token) -> TSym
     toTerminal (T_dot loc) = 1
     toTerminal (T_arrow loc) = 2
@@ -376,1059 +326,1341 @@ runAladdinParser = fmap (getEither getQuery (getSequence getDecl)) . runLR1 theL
             , ((77, 16), 80), ((77, 17), 54), ((77, 18), 55)
             ]
         }
-{-
-    vertices: 
-        [ 0: 
-            [ <$\ACCEPT> ::= . <Either Query (Sequence Decl)> `\$'
-            , <Decl> ::= . <TermRep0> `dot'
-            , <Decl> ::= . `kind' `smallid' <KindRep0> `dot'
-            , <Decl> ::= . `type' `smallid' <TypeRep0> `dot'
-            , <Query> ::= . `quest' <TermRep0> `dot'
-            , <TermRep0> ::= . <TermRep1>
-            , <TermRep0> ::= . <TermRep1> `if' <TermRep0>
-            , <TermRep0> ::= . `largeid' `bslash' <TermRep0>
-            , <TermRep1> ::= . <TermRep1> `semicolon' <TermRep2>
-            , <TermRep1> ::= . <TermRep2>
-            , <TermRep2> ::= . <TermRep3>
-            , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
-            , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
-            , <TermRep3> ::= . <TermRep4>
-            , <TermRep4> ::= . <TermRep5>
-            , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
-            , <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            , <Sequence Decl> ::= .
-            , <Sequence Decl> ::= . <Decl> <Sequence Decl>
-            , <Either Query (Sequence Decl)> ::= . <Query>
-            , <Either Query (Sequence Decl)> ::= . <Sequence Decl>
-            ]
-        , 12: 
-            [ <$\ACCEPT> ::= <Either Query (Sequence Decl)> . `\$'
-            ]
-        , 1: 
-            [ <Decl> ::= . <TermRep0> `dot'
-            , <Decl> ::= . `kind' `smallid' <KindRep0> `dot'
-            , <Decl> ::= . `type' `smallid' <TypeRep0> `dot'
-            , <TermRep0> ::= . <TermRep1>
-            , <TermRep0> ::= . <TermRep1> `if' <TermRep0>
-            , <TermRep0> ::= . `largeid' `bslash' <TermRep0>
-            , <TermRep1> ::= . <TermRep1> `semicolon' <TermRep2>
-            , <TermRep1> ::= . <TermRep2>
-            , <TermRep2> ::= . <TermRep3>
-            , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
-            , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
-            , <TermRep3> ::= . <TermRep4>
-            , <TermRep4> ::= . <TermRep5>
-            , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
-            , <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            , <Sequence Decl> ::= .
-            , <Sequence Decl> ::= . <Decl> <Sequence Decl>
-            , <Sequence Decl> ::= <Decl> . <Sequence Decl>
-            ]
-        , 3: 
-            [ <Decl> ::= <TermRep0> . `dot'
-            ]
-        , 30: 
-            [ <Decl> ::= <TermRep0> `dot' .
-            ]
-        , 16: 
-            [ <Decl> ::= `kind' . `smallid' <KindRep0> `dot'
-            ]
-        , 31: 
-            [ <Decl> ::= `kind' `smallid' . <KindRep0> `dot'
-            , <KindRep0> ::= . <KindRep1>
-            , <KindRep0> ::= . <KindRep1> `arrow' <KindRep0>
-            , <KindRep1> ::= . `lparen' <KindRep0> `rparen'
-            , <KindRep1> ::= . `type'
-            ]
-        , 49: 
-            [ <Decl> ::= `kind' `smallid' <KindRep0> . `dot'
-            ]
-        , 70: 
-            [ <Decl> ::= `kind' `smallid' <KindRep0> `dot' .
-            ]
-        , 28: 
-            [ <Decl> ::= `type' . `smallid' <TypeRep0> `dot'
-            ]
-        , 32: 
-            [ <Decl> ::= `type' `smallid' . <TypeRep0> `dot'
-            , <TypeRep0> ::= . <TypeRep1>
-            , <TypeRep0> ::= . <TypeRep1> `arrow' <TypeRep0>
-            , <TypeRep1> ::= . <TypeRep1> <TypeRep2>
-            , <TypeRep1> ::= . <TypeRep2>
-            , <TypeRep2> ::= . `largeid'
-            , <TypeRep2> ::= . `lparen' <TypeRep0> `rparen'
-            , <TypeRep2> ::= . `smallid'
-            ]
-        , 53: 
-            [ <Decl> ::= `type' `smallid' <TypeRep0> . `dot'
-            ]
-        , 71: 
-            [ <Decl> ::= `type' `smallid' <TypeRep0> `dot' .
-            ]
-        , 73: 
-            [ <KindRep0> ::= . <KindRep1>
-            , <KindRep0> ::= . <KindRep1> `arrow' <KindRep0>
-            , <KindRep0> ::= <KindRep1> `arrow' . <KindRep0>
-            , <KindRep1> ::= . `lparen' <KindRep0> `rparen'
-            , <KindRep1> ::= . `type'
-            ]
-        , 51: 
-            [ <KindRep0> ::= . <KindRep1>
-            , <KindRep0> ::= . <KindRep1> `arrow' <KindRep0>
-            , <KindRep1> ::= . `lparen' <KindRep0> `rparen'
-            , <KindRep1> ::= . `type'
-            , <KindRep1> ::= `lparen' . <KindRep0> `rparen'
-            ]
-        , 50: 
-            [ <KindRep0> ::= <KindRep1> .
-            , <KindRep0> ::= <KindRep1> . `arrow' <KindRep0>
-            ]
-        , 78: 
-            [ <KindRep0> ::= <KindRep1> `arrow' <KindRep0> .
-            ]
-        , 72: 
-            [ <KindRep1> ::= `lparen' <KindRep0> . `rparen'
-            ]
-        , 79: 
-            [ <KindRep1> ::= `lparen' <KindRep0> `rparen' .
-            ]
-        , 52: 
-            [ <KindRep1> ::= `type' .
-            ]
-        , 59: 
-            [ <ListBody> ::= . <TermRep5>
-            , <ListBody> ::= . <TermRep5> `comma' <ListBody>
-            , <ListBody> ::= <TermRep5> `comma' . <ListBody>
-            , <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 18: 
-            [ <ListBody> ::= . <TermRep5>
-            , <ListBody> ::= . <TermRep5> `comma' <ListBody>
-            , <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            , <TermRep7> ::= `lbracket' . <ListBody> `rbracket'
-            , <TermRep7> ::= `lbracket' . `rbracket'
-            ]
-        , 34: 
-            [ <ListBody> ::= <TermRep5> .
-            , <ListBody> ::= <TermRep5> . `comma' <ListBody>
-            ]
-        , 74: 
-            [ <ListBody> ::= <TermRep5> `comma' <ListBody> .
-            ]
-        , 22: 
-            [ <Query> ::= `quest' . <TermRep0> `dot'
-            , <TermRep0> ::= . <TermRep1>
-            , <TermRep0> ::= . <TermRep1> `if' <TermRep0>
-            , <TermRep0> ::= . `largeid' `bslash' <TermRep0>
-            , <TermRep1> ::= . <TermRep1> `semicolon' <TermRep2>
-            , <TermRep1> ::= . <TermRep2>
-            , <TermRep2> ::= . <TermRep3>
-            , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
-            , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
-            , <TermRep3> ::= . <TermRep4>
-            , <TermRep4> ::= . <TermRep5>
-            , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
-            , <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 37: 
-            [ <Query> ::= `quest' <TermRep0> . `dot'
-            ]
-        , 60: 
-            [ <Query> ::= `quest' <TermRep0> `dot' .
-            ]
-        , 39: 
-            [ <TermRep0> ::= . <TermRep1>
-            , <TermRep0> ::= . <TermRep1> `if' <TermRep0>
-            , <TermRep0> ::= . `largeid' `bslash' <TermRep0>
-            , <TermRep0> ::= <TermRep1> `if' . <TermRep0>
-            , <TermRep1> ::= . <TermRep1> `semicolon' <TermRep2>
-            , <TermRep1> ::= . <TermRep2>
-            , <TermRep2> ::= . <TermRep3>
-            , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
-            , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
-            , <TermRep3> ::= . <TermRep4>
-            , <TermRep4> ::= . <TermRep5>
-            , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
-            , <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 41: 
-            [ <TermRep0> ::= . <TermRep1>
-            , <TermRep0> ::= . <TermRep1> `if' <TermRep0>
-            , <TermRep0> ::= . `largeid' `bslash' <TermRep0>
-            , <TermRep0> ::= `largeid' `bslash' . <TermRep0>
-            , <TermRep1> ::= . <TermRep1> `semicolon' <TermRep2>
-            , <TermRep1> ::= . <TermRep2>
-            , <TermRep2> ::= . <TermRep3>
-            , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
-            , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
-            , <TermRep3> ::= . <TermRep4>
-            , <TermRep4> ::= . <TermRep5>
-            , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
-            , <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 19: 
-            [ <TermRep0> ::= . <TermRep1>
-            , <TermRep0> ::= . <TermRep1> `if' <TermRep0>
-            , <TermRep0> ::= . `largeid' `bslash' <TermRep0>
-            , <TermRep1> ::= . <TermRep1> `semicolon' <TermRep2>
-            , <TermRep1> ::= . <TermRep2>
-            , <TermRep2> ::= . <TermRep3>
-            , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
-            , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
-            , <TermRep3> ::= . <TermRep4>
-            , <TermRep4> ::= . <TermRep5>
-            , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
-            , <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            , <TermRep7> ::= `lparen' . <TermRep0> `rparen'
-            ]
-        , 4: 
-            [ <TermRep0> ::= <TermRep1> .
-            , <TermRep0> ::= <TermRep1> . `if' <TermRep0>
-            , <TermRep1> ::= <TermRep1> . `semicolon' <TermRep2>
-            ]
-        , 61: 
-            [ <TermRep0> ::= <TermRep1> `if' <TermRep0> .
-            ]
-        , 17: 
-            [ <TermRep0> ::= `largeid' . `bslash' <TermRep0>
-            , <TermRep7> ::= `largeid' .
-            ]
-        , 62: 
-            [ <TermRep0> ::= `largeid' `bslash' <TermRep0> .
-            ]
-        , 40: 
-            [ <TermRep1> ::= <TermRep1> `semicolon' . <TermRep2>
-            , <TermRep2> ::= . <TermRep3>
-            , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
-            , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
-            , <TermRep3> ::= . <TermRep4>
-            , <TermRep4> ::= . <TermRep5>
-            , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
-            , <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 63: 
-            [ <TermRep1> ::= <TermRep1> `semicolon' <TermRep2> .
-            ]
-        , 5: 
-            [ <TermRep1> ::= <TermRep2> .
-            ]
-        , 43: 
-            [ <TermRep2> ::= . <TermRep3>
-            , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
-            , <TermRep2> ::= <TermRep3> `fatarrow' . <TermRep2>
-            , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
-            , <TermRep3> ::= . <TermRep4>
-            , <TermRep4> ::= . <TermRep5>
-            , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
-            , <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 6: 
-            [ <TermRep2> ::= <TermRep3> .
-            , <TermRep2> ::= <TermRep3> . `fatarrow' <TermRep2>
-            , <TermRep3> ::= <TermRep3> . `comma' <TermRep4>
-            ]
-        , 64: 
-            [ <TermRep2> ::= <TermRep3> `fatarrow' <TermRep2> .
-            ]
-        , 42: 
-            [ <TermRep3> ::= <TermRep3> `comma' . <TermRep4>
-            , <TermRep4> ::= . <TermRep5>
-            , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
-            , <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 65: 
-            [ <TermRep3> ::= <TermRep3> `comma' <TermRep4> .
-            ]
-        , 7: 
-            [ <TermRep3> ::= <TermRep4> .
-            ]
-        , 44: 
-            [ <TermRep4> ::= . <TermRep5>
-            , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
-            , <TermRep4> ::= <TermRep5> `cons' . <TermRep4>
-            , <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 8: 
-            [ <TermRep4> ::= <TermRep5> .
-            , <TermRep4> ::= <TermRep5> . `cons' <TermRep4>
-            ]
-        , 66: 
-            [ <TermRep4> ::= <TermRep5> `cons' <TermRep4> .
-            ]
-        , 21: 
-            [ <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep5> ::= `pi' . <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 23: 
-            [ <TermRep5> ::= . <TermRep6>
-            , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
-            , <TermRep5> ::= . `pi' <TermRep5>
-            , <TermRep5> ::= . `sigma' <TermRep5>
-            , <TermRep5> ::= `sigma' . <TermRep5>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 9: 
-            [ <TermRep5> ::= <TermRep6> .
-            , <TermRep5> ::= <TermRep6> . `eq' <TermRep6>
-            , <TermRep6> ::= <TermRep6> . <TermRep7>
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 48: 
-            [ <TermRep5> ::= <TermRep6> `eq' . <TermRep6>
-            , <TermRep6> ::= . <TermRep6> <TermRep7>
-            , <TermRep6> ::= . <TermRep7>
-            , <TermRep6> ::= . `succ'
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 67: 
-            [ <TermRep5> ::= <TermRep6> `eq' <TermRep6> .
-            , <TermRep6> ::= <TermRep6> . <TermRep7>
-            , <TermRep7> ::= . `chrlit'
-            , <TermRep7> ::= . `cut'
-            , <TermRep7> ::= . `fail'
-            , <TermRep7> ::= . `largeid'
-            , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
-            , <TermRep7> ::= . `lbracket' `rbracket'
-            , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
-            , <TermRep7> ::= . `natlit'
-            , <TermRep7> ::= . `smallid'
-            , <TermRep7> ::= . `strlit'
-            , <TermRep7> ::= . `true'
-            ]
-        , 45: 
-            [ <TermRep5> ::= `pi' <TermRep5> .
-            ]
-        , 46: 
-            [ <TermRep5> ::= `sigma' <TermRep5> .
-            ]
-        , 47: 
-            [ <TermRep6> ::= <TermRep6> <TermRep7> .
-            ]
-        , 10: 
-            [ <TermRep6> ::= <TermRep7> .
-            ]
-        , 26: 
-            [ <TermRep6> ::= `succ' .
-            ]
-        , 13: 
-            [ <TermRep7> ::= `chrlit' .
-            ]
-        , 14: 
-            [ <TermRep7> ::= `cut' .
-            ]
-        , 15: 
-            [ <TermRep7> ::= `fail' .
-            ]
-        , 35: 
-            [ <TermRep7> ::= `largeid' .
-            ]
-        , 33: 
-            [ <TermRep7> ::= `lbracket' <ListBody> . `rbracket'
-            ]
-        , 68: 
-            [ <TermRep7> ::= `lbracket' <ListBody> `rbracket' .
-            ]
-        , 36: 
-            [ <TermRep7> ::= `lbracket' `rbracket' .
-            ]
-        , 38: 
-            [ <TermRep7> ::= `lparen' <TermRep0> . `rparen'
-            ]
-        , 69: 
-            [ <TermRep7> ::= `lparen' <TermRep0> `rparen' .
-            ]
-        , 20: 
-            [ <TermRep7> ::= `natlit' .
-            ]
-        , 24: 
-            [ <TermRep7> ::= `smallid' .
-            ]
-        , 25: 
-            [ <TermRep7> ::= `strlit' .
-            ]
-        , 27: 
-            [ <TermRep7> ::= `true' .
-            ]
-        , 77: 
-            [ <TypeRep0> ::= . <TypeRep1>
-            , <TypeRep0> ::= . <TypeRep1> `arrow' <TypeRep0>
-            , <TypeRep0> ::= <TypeRep1> `arrow' . <TypeRep0>
-            , <TypeRep1> ::= . <TypeRep1> <TypeRep2>
-            , <TypeRep1> ::= . <TypeRep2>
-            , <TypeRep2> ::= . `largeid'
-            , <TypeRep2> ::= . `lparen' <TypeRep0> `rparen'
-            , <TypeRep2> ::= . `smallid'
-            ]
-        , 57: 
-            [ <TypeRep0> ::= . <TypeRep1>
-            , <TypeRep0> ::= . <TypeRep1> `arrow' <TypeRep0>
-            , <TypeRep1> ::= . <TypeRep1> <TypeRep2>
-            , <TypeRep1> ::= . <TypeRep2>
-            , <TypeRep2> ::= . `largeid'
-            , <TypeRep2> ::= . `lparen' <TypeRep0> `rparen'
-            , <TypeRep2> ::= . `smallid'
-            , <TypeRep2> ::= `lparen' . <TypeRep0> `rparen'
-            ]
-        , 54: 
-            [ <TypeRep0> ::= <TypeRep1> .
-            , <TypeRep0> ::= <TypeRep1> . `arrow' <TypeRep0>
-            , <TypeRep1> ::= <TypeRep1> . <TypeRep2>
-            , <TypeRep2> ::= . `largeid'
-            , <TypeRep2> ::= . `lparen' <TypeRep0> `rparen'
-            , <TypeRep2> ::= . `smallid'
-            ]
-        , 80: 
-            [ <TypeRep0> ::= <TypeRep1> `arrow' <TypeRep0> .
-            ]
-        , 76: 
-            [ <TypeRep1> ::= <TypeRep1> <TypeRep2> .
-            ]
-        , 55: 
-            [ <TypeRep1> ::= <TypeRep2> .
-            ]
-        , 56: 
-            [ <TypeRep2> ::= `largeid' .
-            ]
-        , 75: 
-            [ <TypeRep2> ::= `lparen' <TypeRep0> . `rparen'
-            ]
-        , 81: 
-            [ <TypeRep2> ::= `lparen' <TypeRep0> `rparen' .
-            ]
-        , 58: 
-            [ <TypeRep2> ::= `smallid' .
-            ]
-        , 29: 
-            [ <Sequence Decl> ::= <Decl> <Sequence Decl> .
-            ]
-        , 2: 
-            [ <Either Query (Sequence Decl)> ::= <Query> .
-            ]
-        , 11: 
-            [ <Either Query (Sequence Decl)> ::= <Sequence Decl> .
-            ]
-        ]
-    root: 0
-    edges: 
-        [ (0, <Decl>) +-> 1
-        , (0, <Query>) +-> 2
-        , (0, <TermRep0>) +-> 3
-        , (0, <TermRep1>) +-> 4
-        , (0, <TermRep2>) +-> 5
-        , (0, <TermRep3>) +-> 6
-        , (0, <TermRep4>) +-> 7
-        , (0, <TermRep5>) +-> 8
-        , (0, <TermRep6>) +-> 9
-        , (0, <TermRep7>) +-> 10
-        , (0, <Sequence Decl>) +-> 11
-        , (0, <Either Query (Sequence Decl)>) +-> 12
-        , (0, `chrlit') +-> 13
-        , (0, `cut') +-> 14
-        , (0, `fail') +-> 15
-        , (0, `kind') +-> 16
-        , (0, `largeid') +-> 17
-        , (0, `lbracket') +-> 18
-        , (0, `lparen') +-> 19
-        , (0, `natlit') +-> 20
-        , (0, `pi') +-> 21
-        , (0, `quest') +-> 22
-        , (0, `sigma') +-> 23
-        , (0, `smallid') +-> 24
-        , (0, `strlit') +-> 25
-        , (0, `succ') +-> 26
-        , (0, `true') +-> 27
-        , (0, `type') +-> 28
-        , (1, <Decl>) +-> 1
-        , (1, <TermRep0>) +-> 3
-        , (1, <TermRep1>) +-> 4
-        , (1, <TermRep2>) +-> 5
-        , (1, <TermRep3>) +-> 6
-        , (1, <TermRep4>) +-> 7
-        , (1, <TermRep5>) +-> 8
-        , (1, <TermRep6>) +-> 9
-        , (1, <TermRep7>) +-> 10
-        , (1, <Sequence Decl>) +-> 29
-        , (1, `chrlit') +-> 13
-        , (1, `cut') +-> 14
-        , (1, `fail') +-> 15
-        , (1, `kind') +-> 16
-        , (1, `largeid') +-> 17
-        , (1, `lbracket') +-> 18
-        , (1, `lparen') +-> 19
-        , (1, `natlit') +-> 20
-        , (1, `pi') +-> 21
-        , (1, `sigma') +-> 23
-        , (1, `smallid') +-> 24
-        , (1, `strlit') +-> 25
-        , (1, `succ') +-> 26
-        , (1, `true') +-> 27
-        , (1, `type') +-> 28
-        , (3, `dot') +-> 30
-        , (4, `if') +-> 39
-        , (4, `semicolon') +-> 40
-        , (6, `comma') +-> 42
-        , (6, `fatarrow') +-> 43
-        , (8, `cons') +-> 44
-        , (9, <TermRep7>) +-> 47
-        , (9, `chrlit') +-> 13
-        , (9, `cut') +-> 14
-        , (9, `eq') +-> 48
-        , (9, `fail') +-> 15
-        , (9, `largeid') +-> 35
-        , (9, `lbracket') +-> 18
-        , (9, `lparen') +-> 19
-        , (9, `natlit') +-> 20
-        , (9, `smallid') +-> 24
-        , (9, `strlit') +-> 25
-        , (9, `true') +-> 27
-        , (16, `smallid') +-> 31
-        , (17, `bslash') +-> 41
-        , (18, <ListBody>) +-> 33
-        , (18, <TermRep5>) +-> 34
-        , (18, <TermRep6>) +-> 9
-        , (18, <TermRep7>) +-> 10
-        , (18, `chrlit') +-> 13
-        , (18, `cut') +-> 14
-        , (18, `fail') +-> 15
-        , (18, `largeid') +-> 35
-        , (18, `lbracket') +-> 18
-        , (18, `lparen') +-> 19
-        , (18, `natlit') +-> 20
-        , (18, `pi') +-> 21
-        , (18, `rbracket') +-> 36
-        , (18, `sigma') +-> 23
-        , (18, `smallid') +-> 24
-        , (18, `strlit') +-> 25
-        , (18, `succ') +-> 26
-        , (18, `true') +-> 27
-        , (19, <TermRep0>) +-> 38
-        , (19, <TermRep1>) +-> 4
-        , (19, <TermRep2>) +-> 5
-        , (19, <TermRep3>) +-> 6
-        , (19, <TermRep4>) +-> 7
-        , (19, <TermRep5>) +-> 8
-        , (19, <TermRep6>) +-> 9
-        , (19, <TermRep7>) +-> 10
-        , (19, `chrlit') +-> 13
-        , (19, `cut') +-> 14
-        , (19, `fail') +-> 15
-        , (19, `largeid') +-> 17
-        , (19, `lbracket') +-> 18
-        , (19, `lparen') +-> 19
-        , (19, `natlit') +-> 20
-        , (19, `pi') +-> 21
-        , (19, `sigma') +-> 23
-        , (19, `smallid') +-> 24
-        , (19, `strlit') +-> 25
-        , (19, `succ') +-> 26
-        , (19, `true') +-> 27
-        , (21, <TermRep5>) +-> 45
-        , (21, <TermRep6>) +-> 9
-        , (21, <TermRep7>) +-> 10
-        , (21, `chrlit') +-> 13
-        , (21, `cut') +-> 14
-        , (21, `fail') +-> 15
-        , (21, `largeid') +-> 35
-        , (21, `lbracket') +-> 18
-        , (21, `lparen') +-> 19
-        , (21, `natlit') +-> 20
-        , (21, `pi') +-> 21
-        , (21, `sigma') +-> 23
-        , (21, `smallid') +-> 24
-        , (21, `strlit') +-> 25
-        , (21, `succ') +-> 26
-        , (21, `true') +-> 27
-        , (22, <TermRep0>) +-> 37
-        , (22, <TermRep1>) +-> 4
-        , (22, <TermRep2>) +-> 5
-        , (22, <TermRep3>) +-> 6
-        , (22, <TermRep4>) +-> 7
-        , (22, <TermRep5>) +-> 8
-        , (22, <TermRep6>) +-> 9
-        , (22, <TermRep7>) +-> 10
-        , (22, `chrlit') +-> 13
-        , (22, `cut') +-> 14
-        , (22, `fail') +-> 15
-        , (22, `largeid') +-> 17
-        , (22, `lbracket') +-> 18
-        , (22, `lparen') +-> 19
-        , (22, `natlit') +-> 20
-        , (22, `pi') +-> 21
-        , (22, `sigma') +-> 23
-        , (22, `smallid') +-> 24
-        , (22, `strlit') +-> 25
-        , (22, `succ') +-> 26
-        , (22, `true') +-> 27
-        , (23, <TermRep5>) +-> 46
-        , (23, <TermRep6>) +-> 9
-        , (23, <TermRep7>) +-> 10
-        , (23, `chrlit') +-> 13
-        , (23, `cut') +-> 14
-        , (23, `fail') +-> 15
-        , (23, `largeid') +-> 35
-        , (23, `lbracket') +-> 18
-        , (23, `lparen') +-> 19
-        , (23, `natlit') +-> 20
-        , (23, `pi') +-> 21
-        , (23, `sigma') +-> 23
-        , (23, `smallid') +-> 24
-        , (23, `strlit') +-> 25
-        , (23, `succ') +-> 26
-        , (23, `true') +-> 27
-        , (28, `smallid') +-> 32
-        , (31, <KindRep0>) +-> 49
-        , (31, <KindRep1>) +-> 50
-        , (31, `lparen') +-> 51
-        , (31, `type') +-> 52
-        , (32, <TypeRep0>) +-> 53
-        , (32, <TypeRep1>) +-> 54
-        , (32, <TypeRep2>) +-> 55
-        , (32, `largeid') +-> 56
-        , (32, `lparen') +-> 57
-        , (32, `smallid') +-> 58
-        , (33, `rbracket') +-> 68
-        , (34, `comma') +-> 59
-        , (37, `dot') +-> 60
-        , (38, `rparen') +-> 69
-        , (39, <TermRep0>) +-> 61
-        , (39, <TermRep1>) +-> 4
-        , (39, <TermRep2>) +-> 5
-        , (39, <TermRep3>) +-> 6
-        , (39, <TermRep4>) +-> 7
-        , (39, <TermRep5>) +-> 8
-        , (39, <TermRep6>) +-> 9
-        , (39, <TermRep7>) +-> 10
-        , (39, `chrlit') +-> 13
-        , (39, `cut') +-> 14
-        , (39, `fail') +-> 15
-        , (39, `largeid') +-> 17
-        , (39, `lbracket') +-> 18
-        , (39, `lparen') +-> 19
-        , (39, `natlit') +-> 20
-        , (39, `pi') +-> 21
-        , (39, `sigma') +-> 23
-        , (39, `smallid') +-> 24
-        , (39, `strlit') +-> 25
-        , (39, `succ') +-> 26
-        , (39, `true') +-> 27
-        , (40, <TermRep2>) +-> 63
-        , (40, <TermRep3>) +-> 6
-        , (40, <TermRep4>) +-> 7
-        , (40, <TermRep5>) +-> 8
-        , (40, <TermRep6>) +-> 9
-        , (40, <TermRep7>) +-> 10
-        , (40, `chrlit') +-> 13
-        , (40, `cut') +-> 14
-        , (40, `fail') +-> 15
-        , (40, `largeid') +-> 35
-        , (40, `lbracket') +-> 18
-        , (40, `lparen') +-> 19
-        , (40, `natlit') +-> 20
-        , (40, `pi') +-> 21
-        , (40, `sigma') +-> 23
-        , (40, `smallid') +-> 24
-        , (40, `strlit') +-> 25
-        , (40, `succ') +-> 26
-        , (40, `true') +-> 27
-        , (41, <TermRep0>) +-> 62
-        , (41, <TermRep1>) +-> 4
-        , (41, <TermRep2>) +-> 5
-        , (41, <TermRep3>) +-> 6
-        , (41, <TermRep4>) +-> 7
-        , (41, <TermRep5>) +-> 8
-        , (41, <TermRep6>) +-> 9
-        , (41, <TermRep7>) +-> 10
-        , (41, `chrlit') +-> 13
-        , (41, `cut') +-> 14
-        , (41, `fail') +-> 15
-        , (41, `largeid') +-> 17
-        , (41, `lbracket') +-> 18
-        , (41, `lparen') +-> 19
-        , (41, `natlit') +-> 20
-        , (41, `pi') +-> 21
-        , (41, `sigma') +-> 23
-        , (41, `smallid') +-> 24
-        , (41, `strlit') +-> 25
-        , (41, `succ') +-> 26
-        , (41, `true') +-> 27
-        , (42, <TermRep4>) +-> 65
-        , (42, <TermRep5>) +-> 8
-        , (42, <TermRep6>) +-> 9
-        , (42, <TermRep7>) +-> 10
-        , (42, `chrlit') +-> 13
-        , (42, `cut') +-> 14
-        , (42, `fail') +-> 15
-        , (42, `largeid') +-> 35
-        , (42, `lbracket') +-> 18
-        , (42, `lparen') +-> 19
-        , (42, `natlit') +-> 20
-        , (42, `pi') +-> 21
-        , (42, `sigma') +-> 23
-        , (42, `smallid') +-> 24
-        , (42, `strlit') +-> 25
-        , (42, `succ') +-> 26
-        , (42, `true') +-> 27
-        , (43, <TermRep2>) +-> 64
-        , (43, <TermRep3>) +-> 6
-        , (43, <TermRep4>) +-> 7
-        , (43, <TermRep5>) +-> 8
-        , (43, <TermRep6>) +-> 9
-        , (43, <TermRep7>) +-> 10
-        , (43, `chrlit') +-> 13
-        , (43, `cut') +-> 14
-        , (43, `fail') +-> 15
-        , (43, `largeid') +-> 35
-        , (43, `lbracket') +-> 18
-        , (43, `lparen') +-> 19
-        , (43, `natlit') +-> 20
-        , (43, `pi') +-> 21
-        , (43, `sigma') +-> 23
-        , (43, `smallid') +-> 24
-        , (43, `strlit') +-> 25
-        , (43, `succ') +-> 26
-        , (43, `true') +-> 27
-        , (44, <TermRep4>) +-> 66
-        , (44, <TermRep5>) +-> 8
-        , (44, <TermRep6>) +-> 9
-        , (44, <TermRep7>) +-> 10
-        , (44, `chrlit') +-> 13
-        , (44, `cut') +-> 14
-        , (44, `fail') +-> 15
-        , (44, `largeid') +-> 35
-        , (44, `lbracket') +-> 18
-        , (44, `lparen') +-> 19
-        , (44, `natlit') +-> 20
-        , (44, `pi') +-> 21
-        , (44, `sigma') +-> 23
-        , (44, `smallid') +-> 24
-        , (44, `strlit') +-> 25
-        , (44, `succ') +-> 26
-        , (44, `true') +-> 27
-        , (48, <TermRep6>) +-> 67
-        , (48, <TermRep7>) +-> 10
-        , (48, `chrlit') +-> 13
-        , (48, `cut') +-> 14
-        , (48, `fail') +-> 15
-        , (48, `largeid') +-> 35
-        , (48, `lbracket') +-> 18
-        , (48, `lparen') +-> 19
-        , (48, `natlit') +-> 20
-        , (48, `smallid') +-> 24
-        , (48, `strlit') +-> 25
-        , (48, `succ') +-> 26
-        , (48, `true') +-> 27
-        , (49, `dot') +-> 70
-        , (50, `arrow') +-> 73
-        , (51, <KindRep0>) +-> 72
-        , (51, <KindRep1>) +-> 50
-        , (51, `lparen') +-> 51
-        , (51, `type') +-> 52
-        , (53, `dot') +-> 71
-        , (54, <TypeRep2>) +-> 76
-        , (54, `arrow') +-> 77
-        , (54, `largeid') +-> 56
-        , (54, `lparen') +-> 57
-        , (54, `smallid') +-> 58
-        , (57, <TypeRep0>) +-> 75
-        , (57, <TypeRep1>) +-> 54
-        , (57, <TypeRep2>) +-> 55
-        , (57, `largeid') +-> 56
-        , (57, `lparen') +-> 57
-        , (57, `smallid') +-> 58
-        , (59, <ListBody>) +-> 74
-        , (59, <TermRep5>) +-> 34
-        , (59, <TermRep6>) +-> 9
-        , (59, <TermRep7>) +-> 10
-        , (59, `chrlit') +-> 13
-        , (59, `cut') +-> 14
-        , (59, `fail') +-> 15
-        , (59, `largeid') +-> 35
-        , (59, `lbracket') +-> 18
-        , (59, `lparen') +-> 19
-        , (59, `natlit') +-> 20
-        , (59, `pi') +-> 21
-        , (59, `sigma') +-> 23
-        , (59, `smallid') +-> 24
-        , (59, `strlit') +-> 25
-        , (59, `succ') +-> 26
-        , (59, `true') +-> 27
-        , (67, <TermRep7>) +-> 47
-        , (67, `chrlit') +-> 13
-        , (67, `cut') +-> 14
-        , (67, `fail') +-> 15
-        , (67, `largeid') +-> 35
-        , (67, `lbracket') +-> 18
-        , (67, `lparen') +-> 19
-        , (67, `natlit') +-> 20
-        , (67, `smallid') +-> 24
-        , (67, `strlit') +-> 25
-        , (67, `true') +-> 27
-        , (72, `rparen') +-> 79
-        , (73, <KindRep0>) +-> 78
-        , (73, <KindRep1>) +-> 50
-        , (73, `lparen') +-> 51
-        , (73, `type') +-> 52
-        , (75, `rparen') +-> 81
-        , (77, <TypeRep0>) +-> 80
-        , (77, <TypeRep1>) +-> 54
-        , (77, <TypeRep2>) +-> 55
-        , (77, `largeid') +-> 56
-        , (77, `lparen') +-> 57
-        , (77, `smallid') +-> 58
-        ]
--}
 
+{- The canonical collection of LR(0) items is:
+getParserSInfo :: ParserS -> ParserSInfo
+getParserSInfo 0 = ParserSInfo
+    { myItems = 
+        [ <$\ACCEPT> ::= . <Either Query (Sequence Decl)> `\$'
+        , <Decl> ::= . <TermRep0> `dot'
+        , <Decl> ::= . `kind' `smallid' <KindRep0> `dot'
+        , <Decl> ::= . `type' `smallid' <TypeRep0> `dot'
+        , <Query> ::= . `quest' <TermRep0> `dot'
+        , <TermRep0> ::= . <TermRep1>
+        , <TermRep0> ::= . <TermRep1> `if' <TermRep0>
+        , <TermRep0> ::= . `largeid' `bslash' <TermRep0>
+        , <TermRep1> ::= . <TermRep1> `semicolon' <TermRep2>
+        , <TermRep1> ::= . <TermRep2>
+        , <TermRep2> ::= . <TermRep3>
+        , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
+        , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
+        , <TermRep3> ::= . <TermRep4>
+        , <TermRep4> ::= . <TermRep5>
+        , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
+        , <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        , <Sequence Decl> ::= .
+        , <Sequence Decl> ::= . <Decl> <Sequence Decl>
+        , <Either Query (Sequence Decl)> ::= . <Query>
+        , <Either Query (Sequence Decl)> ::= . <Sequence Decl>
+        ]
+    , myNexts = 
+        [ <Decl> +-> 1
+        , <Query> +-> 2
+        , <TermRep0> +-> 3
+        , <TermRep1> +-> 4
+        , <TermRep2> +-> 5
+        , <TermRep3> +-> 6
+        , <TermRep4> +-> 7
+        , <TermRep5> +-> 8
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , <Sequence Decl> +-> 11
+        , <Either Query (Sequence Decl)> +-> 12
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `kind' +-> 16
+        , `largeid' +-> 17
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `quest' +-> 22
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        , `type' +-> 28
+        ]
+    }
+getParserSInfo 1 = ParserSInfo
+    { myItems = 
+        [ <Decl> ::= . <TermRep0> `dot'
+        , <Decl> ::= . `kind' `smallid' <KindRep0> `dot'
+        , <Decl> ::= . `type' `smallid' <TypeRep0> `dot'
+        , <TermRep0> ::= . <TermRep1>
+        , <TermRep0> ::= . <TermRep1> `if' <TermRep0>
+        , <TermRep0> ::= . `largeid' `bslash' <TermRep0>
+        , <TermRep1> ::= . <TermRep1> `semicolon' <TermRep2>
+        , <TermRep1> ::= . <TermRep2>
+        , <TermRep2> ::= . <TermRep3>
+        , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
+        , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
+        , <TermRep3> ::= . <TermRep4>
+        , <TermRep4> ::= . <TermRep5>
+        , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
+        , <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        , <Sequence Decl> ::= .
+        , <Sequence Decl> ::= . <Decl> <Sequence Decl>
+        , <Sequence Decl> ::= <Decl> . <Sequence Decl>
+        ]
+    , myNexts = 
+        [ <Decl> +-> 1
+        , <TermRep0> +-> 3
+        , <TermRep1> +-> 4
+        , <TermRep2> +-> 5
+        , <TermRep3> +-> 6
+        , <TermRep4> +-> 7
+        , <TermRep5> +-> 8
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , <Sequence Decl> +-> 29
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `kind' +-> 16
+        , `largeid' +-> 17
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        , `type' +-> 28
+        ]
+    }
+getParserSInfo 2 = ParserSInfo
+    { myItems = 
+        [ <Either Query (Sequence Decl)> ::= <Query> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 3 = ParserSInfo
+    { myItems = 
+        [ <Decl> ::= <TermRep0> . `dot'
+        ]
+    , myNexts = 
+        [ `dot' +-> 30
+        ]
+    }
+getParserSInfo 4 = ParserSInfo
+    { myItems = 
+        [ <TermRep0> ::= <TermRep1> .
+        , <TermRep0> ::= <TermRep1> . `if' <TermRep0>
+        , <TermRep1> ::= <TermRep1> . `semicolon' <TermRep2>
+        ]
+    , myNexts = 
+        [ `if' +-> 39
+        , `semicolon' +-> 40
+        ]
+    }
+getParserSInfo 5 = ParserSInfo
+    { myItems = 
+        [ <TermRep1> ::= <TermRep2> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 6 = ParserSInfo
+    { myItems = 
+        [ <TermRep2> ::= <TermRep3> .
+        , <TermRep2> ::= <TermRep3> . `fatarrow' <TermRep2>
+        , <TermRep3> ::= <TermRep3> . `comma' <TermRep4>
+        ]
+    , myNexts = 
+        [ `comma' +-> 42
+        , `fatarrow' +-> 43
+        ]
+    }
+getParserSInfo 7 = ParserSInfo
+    { myItems = 
+        [ <TermRep3> ::= <TermRep4> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 8 = ParserSInfo
+    { myItems = 
+        [ <TermRep4> ::= <TermRep5> .
+        , <TermRep4> ::= <TermRep5> . `cons' <TermRep4>
+        ]
+    , myNexts = 
+        [ `cons' +-> 44
+        ]
+    }
+getParserSInfo 9 = ParserSInfo
+    { myItems = 
+        [ <TermRep5> ::= <TermRep6> .
+        , <TermRep5> ::= <TermRep6> . `eq' <TermRep6>
+        , <TermRep6> ::= <TermRep6> . <TermRep7>
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <TermRep7> +-> 47
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `eq' +-> 48
+        , `fail' +-> 15
+        , `largeid' +-> 35
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 10 = ParserSInfo
+    { myItems = 
+        [ <TermRep6> ::= <TermRep7> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 11 = ParserSInfo
+    { myItems = 
+        [ <Either Query (Sequence Decl)> ::= <Sequence Decl> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 12 = ParserSInfo
+    { myItems = 
+        [ <$\ACCEPT> ::= <Either Query (Sequence Decl)> . `\$'
+        ]
+    , myNexts = []
+    }
+getParserSInfo 13 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `chrlit' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 14 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `cut' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 15 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `fail' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 16 = ParserSInfo
+    { myItems = 
+        [ <Decl> ::= `kind' . `smallid' <KindRep0> `dot'
+        ]
+    , myNexts = 
+        [ `smallid' +-> 31
+        ]
+    }
+getParserSInfo 17 = ParserSInfo
+    { myItems = 
+        [ <TermRep0> ::= `largeid' . `bslash' <TermRep0>
+        , <TermRep7> ::= `largeid' .
+        ]
+    , myNexts = 
+        [ `bslash' +-> 41
+        ]
+    }
+getParserSInfo 18 = ParserSInfo
+    { myItems = 
+        [ <ListBody> ::= . <TermRep5>
+        , <ListBody> ::= . <TermRep5> `comma' <ListBody>
+        , <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        , <TermRep7> ::= `lbracket' . <ListBody> `rbracket'
+        , <TermRep7> ::= `lbracket' . `rbracket'
+        ]
+    , myNexts = 
+        [ <ListBody> +-> 33
+        , <TermRep5> +-> 34
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 35
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `rbracket' +-> 36
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 19 = ParserSInfo
+    { myItems = 
+        [ <TermRep0> ::= . <TermRep1>
+        , <TermRep0> ::= . <TermRep1> `if' <TermRep0>
+        , <TermRep0> ::= . `largeid' `bslash' <TermRep0>
+        , <TermRep1> ::= . <TermRep1> `semicolon' <TermRep2>
+        , <TermRep1> ::= . <TermRep2>
+        , <TermRep2> ::= . <TermRep3>
+        , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
+        , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
+        , <TermRep3> ::= . <TermRep4>
+        , <TermRep4> ::= . <TermRep5>
+        , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
+        , <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        , <TermRep7> ::= `lparen' . <TermRep0> `rparen'
+        ]
+    , myNexts = 
+        [ <TermRep0> +-> 38
+        , <TermRep1> +-> 4
+        , <TermRep2> +-> 5
+        , <TermRep3> +-> 6
+        , <TermRep4> +-> 7
+        , <TermRep5> +-> 8
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 17
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 20 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `natlit' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 21 = ParserSInfo
+    { myItems = 
+        [ <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep5> ::= `pi' . <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <TermRep5> +-> 45
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 35
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 22 = ParserSInfo
+    { myItems = 
+        [ <Query> ::= `quest' . <TermRep0> `dot'
+        , <TermRep0> ::= . <TermRep1>
+        , <TermRep0> ::= . <TermRep1> `if' <TermRep0>
+        , <TermRep0> ::= . `largeid' `bslash' <TermRep0>
+        , <TermRep1> ::= . <TermRep1> `semicolon' <TermRep2>
+        , <TermRep1> ::= . <TermRep2>
+        , <TermRep2> ::= . <TermRep3>
+        , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
+        , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
+        , <TermRep3> ::= . <TermRep4>
+        , <TermRep4> ::= . <TermRep5>
+        , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
+        , <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <TermRep0> +-> 37
+        , <TermRep1> +-> 4
+        , <TermRep2> +-> 5
+        , <TermRep3> +-> 6
+        , <TermRep4> +-> 7
+        , <TermRep5> +-> 8
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 17
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 23 = ParserSInfo
+    { myItems = 
+        [ <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep5> ::= `sigma' . <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <TermRep5> +-> 46
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 35
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 24 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `smallid' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 25 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `strlit' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 26 = ParserSInfo
+    { myItems = 
+        [ <TermRep6> ::= `succ' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 27 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `true' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 28 = ParserSInfo
+    { myItems = 
+        [ <Decl> ::= `type' . `smallid' <TypeRep0> `dot'
+        ]
+    , myNexts = 
+        [ `smallid' +-> 32
+        ]
+    }
+getParserSInfo 29 = ParserSInfo
+    { myItems = 
+        [ <Sequence Decl> ::= <Decl> <Sequence Decl> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 30 = ParserSInfo
+    { myItems = 
+        [ <Decl> ::= <TermRep0> `dot' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 31 = ParserSInfo
+    { myItems = 
+        [ <Decl> ::= `kind' `smallid' . <KindRep0> `dot'
+        , <KindRep0> ::= . <KindRep1>
+        , <KindRep0> ::= . <KindRep1> `arrow' <KindRep0>
+        , <KindRep1> ::= . `lparen' <KindRep0> `rparen'
+        , <KindRep1> ::= . `type'
+        ]
+    , myNexts = 
+        [ <KindRep0> +-> 49
+        , <KindRep1> +-> 50
+        , `lparen' +-> 51
+        , `type' +-> 52
+        ]
+    }
+getParserSInfo 32 = ParserSInfo
+    { myItems = 
+        [ <Decl> ::= `type' `smallid' . <TypeRep0> `dot'
+        , <TypeRep0> ::= . <TypeRep1>
+        , <TypeRep0> ::= . <TypeRep1> `arrow' <TypeRep0>
+        , <TypeRep1> ::= . <TypeRep1> <TypeRep2>
+        , <TypeRep1> ::= . <TypeRep2>
+        , <TypeRep2> ::= . `largeid'
+        , <TypeRep2> ::= . `lparen' <TypeRep0> `rparen'
+        , <TypeRep2> ::= . `smallid'
+        ]
+    , myNexts = 
+        [ <TypeRep0> +-> 53
+        , <TypeRep1> +-> 54
+        , <TypeRep2> +-> 55
+        , `largeid' +-> 56
+        , `lparen' +-> 57
+        , `smallid' +-> 58
+        ]
+    }
+getParserSInfo 33 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `lbracket' <ListBody> . `rbracket'
+        ]
+    , myNexts = 
+        [ `rbracket' +-> 68
+        ]
+    }
+getParserSInfo 34 = ParserSInfo
+    { myItems = 
+        [ <ListBody> ::= <TermRep5> .
+        , <ListBody> ::= <TermRep5> . `comma' <ListBody>
+        ]
+    , myNexts = 
+        [ `comma' +-> 59
+        ]
+    }
+getParserSInfo 35 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `largeid' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 36 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `lbracket' `rbracket' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 37 = ParserSInfo
+    { myItems = 
+        [ <Query> ::= `quest' <TermRep0> . `dot'
+        ]
+    , myNexts = 
+        [ `dot' +-> 60
+        ]
+    }
+getParserSInfo 38 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `lparen' <TermRep0> . `rparen'
+        ]
+    , myNexts = 
+        [ `rparen' +-> 69
+        ]
+    }
+getParserSInfo 39 = ParserSInfo
+    { myItems = 
+        [ <TermRep0> ::= . <TermRep1>
+        , <TermRep0> ::= . <TermRep1> `if' <TermRep0>
+        , <TermRep0> ::= . `largeid' `bslash' <TermRep0>
+        , <TermRep0> ::= <TermRep1> `if' . <TermRep0>
+        , <TermRep1> ::= . <TermRep1> `semicolon' <TermRep2>
+        , <TermRep1> ::= . <TermRep2>
+        , <TermRep2> ::= . <TermRep3>
+        , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
+        , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
+        , <TermRep3> ::= . <TermRep4>
+        , <TermRep4> ::= . <TermRep5>
+        , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
+        , <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <TermRep0> +-> 61
+        , <TermRep1> +-> 4
+        , <TermRep2> +-> 5
+        , <TermRep3> +-> 6
+        , <TermRep4> +-> 7
+        , <TermRep5> +-> 8
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 17
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 40 = ParserSInfo
+    { myItems = 
+        [ <TermRep1> ::= <TermRep1> `semicolon' . <TermRep2>
+        , <TermRep2> ::= . <TermRep3>
+        , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
+        , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
+        , <TermRep3> ::= . <TermRep4>
+        , <TermRep4> ::= . <TermRep5>
+        , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
+        , <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <TermRep2> +-> 63
+        , <TermRep3> +-> 6
+        , <TermRep4> +-> 7
+        , <TermRep5> +-> 8
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 35
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 41 = ParserSInfo
+    { myItems = 
+        [ <TermRep0> ::= . <TermRep1>
+        , <TermRep0> ::= . <TermRep1> `if' <TermRep0>
+        , <TermRep0> ::= . `largeid' `bslash' <TermRep0>
+        , <TermRep0> ::= `largeid' `bslash' . <TermRep0>
+        , <TermRep1> ::= . <TermRep1> `semicolon' <TermRep2>
+        , <TermRep1> ::= . <TermRep2>
+        , <TermRep2> ::= . <TermRep3>
+        , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
+        , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
+        , <TermRep3> ::= . <TermRep4>
+        , <TermRep4> ::= . <TermRep5>
+        , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
+        , <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <TermRep0> +-> 62
+        , <TermRep1> +-> 4
+        , <TermRep2> +-> 5
+        , <TermRep3> +-> 6
+        , <TermRep4> +-> 7
+        , <TermRep5> +-> 8
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 17
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 42 = ParserSInfo
+    { myItems = 
+        [ <TermRep3> ::= <TermRep3> `comma' . <TermRep4>
+        , <TermRep4> ::= . <TermRep5>
+        , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
+        , <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <TermRep4> +-> 65
+        , <TermRep5> +-> 8
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 35
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 43 = ParserSInfo
+    { myItems = 
+        [ <TermRep2> ::= . <TermRep3>
+        , <TermRep2> ::= . <TermRep3> `fatarrow' <TermRep2>
+        , <TermRep2> ::= <TermRep3> `fatarrow' . <TermRep2>
+        , <TermRep3> ::= . <TermRep3> `comma' <TermRep4>
+        , <TermRep3> ::= . <TermRep4>
+        , <TermRep4> ::= . <TermRep5>
+        , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
+        , <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <TermRep2> +-> 64
+        , <TermRep3> +-> 6
+        , <TermRep4> +-> 7
+        , <TermRep5> +-> 8
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 35
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 44 = ParserSInfo
+    { myItems = 
+        [ <TermRep4> ::= . <TermRep5>
+        , <TermRep4> ::= . <TermRep5> `cons' <TermRep4>
+        , <TermRep4> ::= <TermRep5> `cons' . <TermRep4>
+        , <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <TermRep4> +-> 66
+        , <TermRep5> +-> 8
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 35
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 45 = ParserSInfo
+    { myItems = 
+        [ <TermRep5> ::= `pi' <TermRep5> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 46 = ParserSInfo
+    { myItems = 
+        [ <TermRep5> ::= `sigma' <TermRep5> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 47 = ParserSInfo
+    { myItems = 
+        [ <TermRep6> ::= <TermRep6> <TermRep7> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 48 = ParserSInfo
+    { myItems = 
+        [ <TermRep5> ::= <TermRep6> `eq' . <TermRep6>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <TermRep6> +-> 67
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 35
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 49 = ParserSInfo
+    { myItems = 
+        [ <Decl> ::= `kind' `smallid' <KindRep0> . `dot'
+        ]
+    , myNexts = 
+        [ `dot' +-> 70
+        ]
+    }
+getParserSInfo 50 = ParserSInfo
+    { myItems = 
+        [ <KindRep0> ::= <KindRep1> .
+        , <KindRep0> ::= <KindRep1> . `arrow' <KindRep0>
+        ]
+    , myNexts = 
+        [ `arrow' +-> 73
+        ]
+    }
+getParserSInfo 51 = ParserSInfo
+    { myItems = 
+        [ <KindRep0> ::= . <KindRep1>
+        , <KindRep0> ::= . <KindRep1> `arrow' <KindRep0>
+        , <KindRep1> ::= . `lparen' <KindRep0> `rparen'
+        , <KindRep1> ::= . `type'
+        , <KindRep1> ::= `lparen' . <KindRep0> `rparen'
+        ]
+    , myNexts = 
+        [ <KindRep0> +-> 72
+        , <KindRep1> +-> 50
+        , `lparen' +-> 51
+        , `type' +-> 52
+        ]
+    }
+getParserSInfo 52 = ParserSInfo
+    { myItems = 
+        [ <KindRep1> ::= `type' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 53 = ParserSInfo
+    { myItems = 
+        [ <Decl> ::= `type' `smallid' <TypeRep0> . `dot'
+        ]
+    , myNexts = 
+        [ `dot' +-> 71
+        ]
+    }
+getParserSInfo 54 = ParserSInfo
+    { myItems = 
+        [ <TypeRep0> ::= <TypeRep1> .
+        , <TypeRep0> ::= <TypeRep1> . `arrow' <TypeRep0>
+        , <TypeRep1> ::= <TypeRep1> . <TypeRep2>
+        , <TypeRep2> ::= . `largeid'
+        , <TypeRep2> ::= . `lparen' <TypeRep0> `rparen'
+        , <TypeRep2> ::= . `smallid'
+        ]
+    , myNexts = 
+        [ <TypeRep2> +-> 76
+        , `arrow' +-> 77
+        , `largeid' +-> 56
+        , `lparen' +-> 57
+        , `smallid' +-> 58
+        ]
+    }
+getParserSInfo 55 = ParserSInfo
+    { myItems = 
+        [ <TypeRep1> ::= <TypeRep2> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 56 = ParserSInfo
+    { myItems = 
+        [ <TypeRep2> ::= `largeid' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 57 = ParserSInfo
+    { myItems = 
+        [ <TypeRep0> ::= . <TypeRep1>
+        , <TypeRep0> ::= . <TypeRep1> `arrow' <TypeRep0>
+        , <TypeRep1> ::= . <TypeRep1> <TypeRep2>
+        , <TypeRep1> ::= . <TypeRep2>
+        , <TypeRep2> ::= . `largeid'
+        , <TypeRep2> ::= . `lparen' <TypeRep0> `rparen'
+        , <TypeRep2> ::= . `smallid'
+        , <TypeRep2> ::= `lparen' . <TypeRep0> `rparen'
+        ]
+    , myNexts = 
+        [ <TypeRep0> +-> 75
+        , <TypeRep1> +-> 54
+        , <TypeRep2> +-> 55
+        , `largeid' +-> 56
+        , `lparen' +-> 57
+        , `smallid' +-> 58
+        ]
+    }
+getParserSInfo 58 = ParserSInfo
+    { myItems = 
+        [ <TypeRep2> ::= `smallid' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 59 = ParserSInfo
+    { myItems = 
+        [ <ListBody> ::= . <TermRep5>
+        , <ListBody> ::= . <TermRep5> `comma' <ListBody>
+        , <ListBody> ::= <TermRep5> `comma' . <ListBody>
+        , <TermRep5> ::= . <TermRep6>
+        , <TermRep5> ::= . <TermRep6> `eq' <TermRep6>
+        , <TermRep5> ::= . `pi' <TermRep5>
+        , <TermRep5> ::= . `sigma' <TermRep5>
+        , <TermRep6> ::= . <TermRep6> <TermRep7>
+        , <TermRep6> ::= . <TermRep7>
+        , <TermRep6> ::= . `succ'
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <ListBody> +-> 74
+        , <TermRep5> +-> 34
+        , <TermRep6> +-> 9
+        , <TermRep7> +-> 10
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 35
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `pi' +-> 21
+        , `sigma' +-> 23
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `succ' +-> 26
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 60 = ParserSInfo
+    { myItems = 
+        [ <Query> ::= `quest' <TermRep0> `dot' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 61 = ParserSInfo
+    { myItems = 
+        [ <TermRep0> ::= <TermRep1> `if' <TermRep0> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 62 = ParserSInfo
+    { myItems = 
+        [ <TermRep0> ::= `largeid' `bslash' <TermRep0> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 63 = ParserSInfo
+    { myItems = 
+        [ <TermRep1> ::= <TermRep1> `semicolon' <TermRep2> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 64 = ParserSInfo
+    { myItems = 
+        [ <TermRep2> ::= <TermRep3> `fatarrow' <TermRep2> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 65 = ParserSInfo
+    { myItems = 
+        [ <TermRep3> ::= <TermRep3> `comma' <TermRep4> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 66 = ParserSInfo
+    { myItems = 
+        [ <TermRep4> ::= <TermRep5> `cons' <TermRep4> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 67 = ParserSInfo
+    { myItems = 
+        [ <TermRep5> ::= <TermRep6> `eq' <TermRep6> .
+        , <TermRep6> ::= <TermRep6> . <TermRep7>
+        , <TermRep7> ::= . `chrlit'
+        , <TermRep7> ::= . `cut'
+        , <TermRep7> ::= . `fail'
+        , <TermRep7> ::= . `largeid'
+        , <TermRep7> ::= . `lbracket' <ListBody> `rbracket'
+        , <TermRep7> ::= . `lbracket' `rbracket'
+        , <TermRep7> ::= . `lparen' <TermRep0> `rparen'
+        , <TermRep7> ::= . `natlit'
+        , <TermRep7> ::= . `smallid'
+        , <TermRep7> ::= . `strlit'
+        , <TermRep7> ::= . `true'
+        ]
+    , myNexts = 
+        [ <TermRep7> +-> 47
+        , `chrlit' +-> 13
+        , `cut' +-> 14
+        , `fail' +-> 15
+        , `largeid' +-> 35
+        , `lbracket' +-> 18
+        , `lparen' +-> 19
+        , `natlit' +-> 20
+        , `smallid' +-> 24
+        , `strlit' +-> 25
+        , `true' +-> 27
+        ]
+    }
+getParserSInfo 68 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `lbracket' <ListBody> `rbracket' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 69 = ParserSInfo
+    { myItems = 
+        [ <TermRep7> ::= `lparen' <TermRep0> `rparen' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 70 = ParserSInfo
+    { myItems = 
+        [ <Decl> ::= `kind' `smallid' <KindRep0> `dot' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 71 = ParserSInfo
+    { myItems = 
+        [ <Decl> ::= `type' `smallid' <TypeRep0> `dot' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 72 = ParserSInfo
+    { myItems = 
+        [ <KindRep1> ::= `lparen' <KindRep0> . `rparen'
+        ]
+    , myNexts = 
+        [ `rparen' +-> 79
+        ]
+    }
+getParserSInfo 73 = ParserSInfo
+    { myItems = 
+        [ <KindRep0> ::= . <KindRep1>
+        , <KindRep0> ::= . <KindRep1> `arrow' <KindRep0>
+        , <KindRep0> ::= <KindRep1> `arrow' . <KindRep0>
+        , <KindRep1> ::= . `lparen' <KindRep0> `rparen'
+        , <KindRep1> ::= . `type'
+        ]
+    , myNexts = 
+        [ <KindRep0> +-> 78
+        , <KindRep1> +-> 50
+        , `lparen' +-> 51
+        , `type' +-> 52
+        ]
+    }
+getParserSInfo 74 = ParserSInfo
+    { myItems = 
+        [ <ListBody> ::= <TermRep5> `comma' <ListBody> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 75 = ParserSInfo
+    { myItems = 
+        [ <TypeRep2> ::= `lparen' <TypeRep0> . `rparen'
+        ]
+    , myNexts = 
+        [ `rparen' +-> 81
+        ]
+    }
+getParserSInfo 76 = ParserSInfo
+    { myItems = 
+        [ <TypeRep1> ::= <TypeRep1> <TypeRep2> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 77 = ParserSInfo
+    { myItems = 
+        [ <TypeRep0> ::= . <TypeRep1>
+        , <TypeRep0> ::= . <TypeRep1> `arrow' <TypeRep0>
+        , <TypeRep0> ::= <TypeRep1> `arrow' . <TypeRep0>
+        , <TypeRep1> ::= . <TypeRep1> <TypeRep2>
+        , <TypeRep1> ::= . <TypeRep2>
+        , <TypeRep2> ::= . `largeid'
+        , <TypeRep2> ::= . `lparen' <TypeRep0> `rparen'
+        , <TypeRep2> ::= . `smallid'
+        ]
+    , myNexts = 
+        [ <TypeRep0> +-> 80
+        , <TypeRep1> +-> 54
+        , <TypeRep2> +-> 55
+        , `largeid' +-> 56
+        , `lparen' +-> 57
+        , `smallid' +-> 58
+        ]
+    }
+getParserSInfo 78 = ParserSInfo
+    { myItems = 
+        [ <KindRep0> ::= <KindRep1> `arrow' <KindRep0> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 79 = ParserSInfo
+    { myItems = 
+        [ <KindRep1> ::= `lparen' <KindRep0> `rparen' .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 80 = ParserSInfo
+    { myItems = 
+        [ <TypeRep0> ::= <TypeRep1> `arrow' <TypeRep0> .
+        ]
+    , myNexts = []
+    }
+getParserSInfo 81 = ParserSInfo
+    { myItems = 
+        [ <TypeRep2> ::= `lparen' <TypeRep0> `rparen' .
+        ]
+    , myNexts = []
+    }
+-}

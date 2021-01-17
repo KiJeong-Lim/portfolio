@@ -131,6 +131,14 @@ data YBlock
     | Target YTarget
     deriving (Show)
 
+data Conflict
+    = Conflict
+        { because :: (Action, Action)
+        , whereIs :: (ParserS, TSym)
+        , withEnv :: Cannonical0
+        }
+    deriving ()
+
 instance Semigroup TerminalSet where
     ts1 <> ts2
         | Nothing `Set.member` unTerminalSet ts1 = TerminalSet (Set.delete Nothing (unTerminalSet ts1) `Set.union` unTerminalSet ts2)

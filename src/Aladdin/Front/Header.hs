@@ -177,7 +177,7 @@ instance MonadIO m => MonadIO (UniqueGenT m) where
 
 instance Show LogicalOperator where
     showsPrec _ logical_operator = case logical_operator of
-        LO_ty_pi -> strstr "^"
+        LO_ty_pi -> strstr "Lambda"
         LO_if -> strstr ":-"
         LO_true -> strstr "true"
         LO_fail -> strstr "fail"
