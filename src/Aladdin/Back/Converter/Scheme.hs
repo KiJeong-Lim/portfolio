@@ -224,6 +224,6 @@ convertWithChecking var_name_env = go where
             _ -> undefined
         where
             raise :: GenUniqueM m => ExceptT ErrMsg m TermNode
-            raise = throwE ("converting-error[" ++ pprint 0 (fst (getAnnot term)) ("]:\n  ? expected_as = " ++ expected_as ++ ".\n"))
+            raise = throwE ("converting-error[" ++ pprint 0 (fst (getAnnot term)) ("]:\n  ? expected_as = " ++ expected_as ++ "."))
     go :: GenUniqueM m => DeBruijnIndicesEnv -> ExpectedAs -> TermExpr (DataConstructor, [MonoType Int]) (SLoc, MonoType Int) -> ExceptT ErrMsg m TermNode
     go env expected_as = check env expected_as . reduceTermExpr

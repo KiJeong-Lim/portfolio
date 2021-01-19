@@ -23,7 +23,7 @@ inferType type_env = flip runStateT Map.empty . infer where
         con -> do
             used_mtvs_0 <- get
             (mtvs, typ) <- case Map.lookup con type_env of
-                Nothing -> lift (throwE ("tc-error[" ++ pprint 0 loc ("]: the data constructor `" ++ showsPrec 0 con "\' hasn't declared yet.")))
+                Nothing -> lift (throwE ("tc-error[" ++ pprint 0 loc ("]:\n  ? the data constructor `" ++ showsPrec 0 con "\' hasn't declared yet.")))
                 Just scheme -> instantiateScheme scheme
             return (DCon (loc, typ) (con, map TyMTV mtvs), Map.empty)
     infer (IApp loc term1 term2) = do

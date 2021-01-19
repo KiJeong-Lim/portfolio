@@ -7,34 +7,32 @@ import Data.Functor.Identity
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 
-getTSortedSCCs :: Ord node => Map.Map node (Set.Set node) -> [Set.Set node]
+getTSortedSCCs :: Ord node => Map.Map node (Set.Set node) -> [(Bool, Set.Set node)]
 getTSortedSCCs = runIdentity . go where
-    when :: Monad m => Bool -> m a -> m (Maybe a)
-    when cond ma
-        | cond = fmap Just ma
-        | otherwise = return Nothing
+    whenMaybe :: Applicative m => Bool -> m a -> m (Maybe a)
+    whenMaybe cond ma = if cond then fmap Just ma else pure Nothing
     sortByRel :: Ord node => [node] -> StateT (Set.Set node) (ReaderT (node -> [node]) Identity) [node]
     sortByRel [] = return []
     sortByRel (cur : nexts) = do
         visteds <- get
-        maybe_ges <- when (not (cur `Set.member` visteds)) $ do
+        maybe_ges <- whenMaybe (not (cur `Set.member` visteds)) $ do
             put (Set.insert cur visteds)
             rel <- lift ask
             gts <- sortByRel (rel cur)
             return (cur : gts)
         lts <- sortByRel nexts
         return (maybe lts (\ges -> lts ++ ges) maybe_ges)
-    splitByRel :: Ord node => [node] -> StateT (Set.Set node) (ReaderT (node -> [node]) Identity) [Set.Set node]
+    splitByRel :: Ord node => [node] -> StateT (Set.Set node) (ReaderT (node -> [node]) Identity) [(Bool, Set.Set node)]
     splitByRel [] = return []
     splitByRel (cur : nexts) = do
         visteds <- get
-        maybe_ges <- when (not (cur `Set.member` visteds)) (sortByRel [cur])
+        maybe_ges <- whenMaybe (not (cur `Set.member` visteds)) (sortByRel [cur])
         sets <- splitByRel nexts
-        return (maybe sets (\ges -> Set.fromList ges : sets) maybe_ges)
-    go :: Ord node => Map.Map node (Set.Set node) -> Identity [Set.Set node]
+        return (maybe sets (\ges -> (cur `elem` ges, Set.fromList ges) : sets) maybe_ges)
+    go :: Ord node => Map.Map node (Set.Set node) -> Identity [(Bool, Set.Set node)]
     go getDigraph = do
         let getVertices = Set.toAscList (Map.keysSet getDigraph)
-            getOuts node = Set.toAscList (maybe (error "Src.Helper.ETC.getTSortedSCCs.go.getOuts") id (Map.lookup node getDigraph))
+            getOuts node = Set.toAscList (maybe (error "Lib.Base.getTSortedSCCs.go.getOuts") id (Map.lookup node getDigraph))
             getIns node = [ node' | (node', nodes) <- Map.toAscList getDigraph, node `Set.member` nodes ]
         (sortedVertices, _) <- runReaderT (runStateT (sortByRel getVertices) Set.empty) getOuts
         (sortedSCCs, _) <- runReaderT (runStateT (splitByRel getVertices) Set.empty) getIns

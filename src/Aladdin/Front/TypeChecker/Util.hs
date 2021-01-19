@@ -235,17 +235,17 @@ mkTyErr used_mtvs loc ((actual_typ, expected_typ), typ_error) = case typ_error o
         [ "typechecking-error[" ++ pprint 0 loc "]:\n"
         , "  ? expected_typ = `" ++ showMonoType used_mtvs expected_typ ("\', actual_typ = `" ++ showMonoType used_mtvs actual_typ "\'.\n")
         , "  ? couldn't solve the equation `" ++ showMonoType used_mtvs typ1 ("\' ~ `" ++ showMonoType used_mtvs typ2 "\',\n")
-        , "  ? because the kind of the L.H.S. is `" ++ pprint 0 kin1 ("\' but the kind of the R.H.S. is `" ++ pprint 0 kin2 "\'.\n")
+        , "  ? because the kind of the L.H.S. is `" ++ pprint 0 kin1 ("\' but the kind of the R.H.S. is `" ++ pprint 0 kin2 "\'.")
         ]
     OccursCheckFailed mtv1 typ2 -> concat
         [ "typechecking-error[" ++ pprint 0 loc "]:\n"
         , "  ? expected_typ = `" ++ showMonoType used_mtvs expected_typ ("\', actual_typ = `" ++ showMonoType used_mtvs actual_typ "\'.\n")
         , "  ? couldn't solve the equation `" ++ showMonoType used_mtvs (TyMTV mtv1) ("\' ~ `" ++ showMonoType used_mtvs typ2 "\',\n")
-        , "  ? because occurs check failed.\n"
+        , "  ? because occurs check failed."
         ]
     TypesAreMismatched typ1 typ2 -> concat
         [ "typechecking-error[" ++ pprint 0 loc "]:\n"
         , "  ? expected_typ = `" ++ showMonoType used_mtvs expected_typ ("\', actual_typ = `" ++ showMonoType used_mtvs actual_typ "\'.\n")
         , "  ? couldn't solve the equation `" ++ showMonoType used_mtvs typ1 ("\' ~ `" ++ showMonoType used_mtvs typ2 "\',\n")
-        , "  ? because the types `" ++ showMonoType used_mtvs typ1 ("\' and `" ++ showMonoType used_mtvs typ2 "\' are non-unifiable.\n")
+        , "  ? because the types `" ++ showMonoType used_mtvs typ1 ("\' and `" ++ showMonoType used_mtvs typ2 "\' are non-unifiable.")
         ]

@@ -72,7 +72,7 @@ instance Outputable Cannonical0 where
                     [] -> []
                     ((q, sym), p) : triples' -> return
                         ( q
-                        , (sym, p) : [ (sym', p') | ((q', sym'), p') <- triples' ]
+                        , sortByMerging (\pair1 -> \pair2 -> snd pair1 < snd pair2) ((sym, p) : [ (sym', p') | ((q', sym'), p') <- triples' ])
                         )
 
 instance Outputable Action where
@@ -92,7 +92,7 @@ makeCollectionAndLALR1Parser (CFGrammar start terminals productions) = theResult
     maxPrec :: Precedence
     maxPrec = 100
     start' :: NSym
-    start' = NSVar "$\\ACCEPT"
+    start' = NSVar "\\ACCEPT"
     terminals' :: Map.Map TSym (Associativity, Precedence)
     terminals' = Map.insert TSEOF (ANone, maxPrec) terminals
     productions' :: Map.Map ProductionRule Precedence
