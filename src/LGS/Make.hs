@@ -409,6 +409,15 @@ reduceRegEx = go3 . go2 . go1 where
                 ([(ch1, ch2)], pairs1) -> (ch1, ch0) : pairs1
             loop2 :: (Char, Char) -> CharSet
             loop2 (ch1, ch2) = if ch1 == ch2 then mkCsSingle ch1 else mkCsEnum ch1 ch2
+    go1 :: RegEx -> RegEx
+    go1 (ReZero) = makeReZero1
+    go1 (ReUnion re1 re2) = makeReUnion1 (go1 re1) (go1 re2)
+    go1 (ReWord str1) = makeReWord1 str1
+    go1 (ReConcat re1 re2) = makeReConcat1 (go1 re1) (go1 re2)
+    go1 (ReStar re1) = makeReStar1 (go1 re1)
+    go1 (ReDagger re1) = makeReDagger1 (go1 re1)
+    go1 (ReQuest re1) = makeReQuest1 (go1 re1)
+    go1 (ReCharSet chs1) = makeReCharSet1 chs1
     makeReZero1 :: RegEx
     makeReZero1 = mkReZero
     makeReUnion1 :: RegEx -> RegEx -> RegEx
@@ -473,15 +482,6 @@ reduceRegEx = go3 . go2 . go1 where
                         | otherwise -> extractCS yess
     makeReCharSet1 chs1
         = extractCS (Set.toAscList (runCharSet chs1))
-    go1 :: RegEx -> RegEx
-    go1 (ReZero) = makeReZero1
-    go1 (ReUnion re1 re2) = makeReUnion1 (go1 re1) (go1 re2)
-    go1 (ReWord str1) = makeReWord1 str1
-    go1 (ReConcat re1 re2) = makeReConcat1 (go1 re1) (go1 re2)
-    go1 (ReStar re1) = makeReStar1 (go1 re1)
-    go1 (ReDagger re1) = makeReDagger1 (go1 re1)
-    go1 (ReQuest re1) = makeReQuest1 (go1 re1)
-    go1 (ReCharSet chs1) = makeReCharSet1 chs1
     go2 :: RegEx -> RegEx
     go2 (ReZero) = makeReZero2
     go2 (ReUnion re1 re2) = makeReUnion2 (go2 re1) (go2 re2)
@@ -596,6 +596,10 @@ reduceRegEx = go3 . go2 . go1 where
     makeReZero3 = mkReZero
     makeReUnion3 :: RegEx -> RegEx -> RegEx
     makeReUnion3 re1 re2
+        | ReQuest re3 <- re1
+        = mkReQuest (makeReUnion3 re3 re2)
+        | ReQuest re3 <- re2
+        = mkReQuest (makeReUnion3 re1 re3)
         | ReUnion re3 re4 <- re1
         = case makeReUnion3 re4 re2 of
             ReUnion re5 re6 -> makeReUnion2 (makeReUnion3 re3 re5) re6
