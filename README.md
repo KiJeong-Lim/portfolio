@@ -6,7 +6,7 @@
 
 - 하스켈 코드를 출력하는 렉서 생성기와 파서 생성기로서, 이 생성기들을 이용하여 아래의 인터프리터를 만들었습니다. This contains my lexer generator and my parser generator, both of which print Haskell code. I made the below interpreter by using these generators.
 
-- 오세만 교수님의 저서 `컴파일러 입문`을 읽고 만드는 데 필요한 기술들을 배웠습니다. Reading the book `컴파일러 입문` written by Professor Seman Oh, I have acquired techniques required to have made those generators.
+- 오세만 교수님의 저서 `컴파일러 입문`을 읽고 만드는 데 필요한 기술들을 배웠습니다. Reading the book `컴파일러 입문` written by Professor Seman Oh, I have acquired techniques required to make those generators.
 
 - 렉서 생성기는 긍정적 전방탐색 연산자 `/`를 지원하며, 파서 생성기는 LALR(1)의 파서를 생성합니다. The lexer generator supports the positive lookahead operator `/`, and the parser generator yields parsers of LALR(1).
 
