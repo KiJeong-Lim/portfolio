@@ -342,13 +342,14 @@ End Ensembles.
 
 End Aux.
 
-Module CBA.
+
+Module CountableBooleanAlgebra.
 
 Import ListNotations.
 
 Import Aux.
 
-Section DefnOfCBA.
+Section DefinitionOfCBA.
 
 Class CountableBooleanAlgebra (B : Type) : Type :=
   { eqB : B -> B -> Prop
@@ -358,45 +359,47 @@ Class CountableBooleanAlgebra (B : Type) : Type :=
   ; andB : B -> B -> B
   ; orB : B -> B -> B
   ; enumB : nat -> B
-  ; eqB_refl b1 : eqB b1 b1
-  ; eqB_symm b1 b2 : eqB b1 b2 -> eqB b2 b1
-  ; eqB_trans b1 b2 b3 : eqB b1 b2 -> eqB b2 b3 -> eqB b1 b3
+  ; eqB_refl : forall b1 : B, eqB b1 b1
+  ; eqB_symm : forall b1 : B, forall b2 : B, eqB b1 b2 -> eqB b2 b1
+  ; eqB_trans : forall b1 : B, forall b2 : B, forall b3 : B, eqB b1 b2 -> eqB b2 b3 -> eqB b1 b3
   ; trueB_preserves_eqB : eqB trueB trueB
   ; falseB_preserves_eqB : eqB falseB falseB
-  ; negB_preserves_eqB b1 b1' : eqB b1 b1' -> eqB (negB b1) (negB b1')
-  ; andB_preserves_eqB b1 b1' b2 b2' : eqB b1 b1' -> eqB b2 b2' -> eqB (andB b1 b2) (andB b1' b2')
-  ; or_preserves_eqB b1 b1' b2 b2' : eqB b1 b1' -> eqB b2 b2' -> eqB (orB b1 b2) (orB b1' b2')
-  ; andB_associative b1 b2 b3 : eqB (andB b1 (andB b2 b3)) (andB (andB b1 b2) b3)
-  ; orB_associative b1 b2 b3 : eqB (orB b1 (orB b2 b3)) (orB (orB b1 b2) b3)
-  ; andB_idempotent b1 : eqB (andB b1 b1) b1
-  ; orB_idempotent b1 : eqB (orB b1 b1) b1
-  ; andB_commutative b1 b2 : eqB (andB b1 b2) (andB b2 b1)
-  ; orB_commutative b1 b2 : eqB (orB b1 b2) (orB b2 b1)
-  ; andB_distribute_orB b1 b2 b3 : eqB (andB b1 (orB b2 b3)) (orB (andB b1 b2) (andB b1 b3))
-  ; orB_distribute_andB b1 b2 b3 : eqB (orB b1 (andB b2 b3)) (andB (orB b1 b2) (orB b1 b3))
-  ; absorption_andB_orB b1 b2 : eqB (andB b1 (orB b1 b2)) b1
-  ; absorption_orB_andB b1 b2 : eqB (orB b1 (andB b1 b2)) b1
-  ; falseB_zero_andB b1 : eqB (andB b1 falseB) falseB
-  ; trueB_zero_orB b1 : eqB (orB b1 trueB) trueB
-  ; falseB_unit_orB b1 : eqB (orB b1 falseB) b1
-  ; trueB_unit_andB b1 : eqB (andB b1 trueB) b1
-  ; andB_negB b1 : eqB (andB b1 (negB b1)) falseB
-  ; orB_negB b1 : eqB (orB b1 (negB b1)) trueB 
-  ; enumB_surjective b : exists n : nat, enumB n = b
+  ; negB_preserves_eqB : forall b1 : B, forall b1' : B, eqB b1 b1' -> eqB (negB b1) (negB b1')
+  ; andB_preserves_eqB : forall b1 : B, forall b1' : B, forall b2 : B, forall b2' : B, eqB b1 b1' -> eqB b2 b2' -> eqB (andB b1 b2) (andB b1' b2')
+  ; or_preserves_eqB : forall b1 : B, forall b1' : B, forall b2 : B, forall b2' : B, eqB b1 b1' -> eqB b2 b2' -> eqB (orB b1 b2) (orB b1' b2')
+  ; andB_associative : forall b1 : B, forall b2 : B, forall b3 : B, eqB (andB b1 (andB b2 b3)) (andB (andB b1 b2) b3)
+  ; orB_associative : forall b1 : B, forall b2 : B, forall b3 : B, eqB (orB b1 (orB b2 b3)) (orB (orB b1 b2) b3)
+  ; andB_idempotent : forall b1 : B, eqB (andB b1 b1) b1
+  ; orB_idempotent : forall b1 : B, eqB (orB b1 b1) b1
+  ; andB_commutative : forall b1 : B, forall b2 : B, eqB (andB b1 b2) (andB b2 b1)
+  ; orB_commutative : forall b1 : B, forall b2 : B, eqB (orB b1 b2) (orB b2 b1)
+  ; andB_distribute_orB : forall b1 : B, forall b2 : B, forall b3 : B, eqB (andB b1 (orB b2 b3)) (orB (andB b1 b2) (andB b1 b3))
+  ; orB_distribute_andB : forall b1 : B, forall b2 : B, forall b3 : B, eqB (orB b1 (andB b2 b3)) (andB (orB b1 b2) (orB b1 b3))
+  ; absorption_andB_orB : forall b1 : B, forall b2 : B, eqB (andB b1 (orB b1 b2)) b1
+  ; absorption_orB_andB : forall b1 : B, forall b2 : B, eqB (orB b1 (andB b1 b2)) b1
+  ; falseB_zero_andB : forall b1 : B, eqB (andB b1 falseB) falseB
+  ; trueB_zero_orB : forall b1 : B, eqB (orB b1 trueB) trueB
+  ; falseB_unit_orB : forall b1 : B, eqB (orB b1 falseB) b1
+  ; trueB_unit_andB : forall b1 : B, eqB (andB b1 trueB) b1
+  ; andB_negB : forall b1 : B, eqB (andB b1 (negB b1)) falseB
+  ; orB_negB : forall b1 : B, eqB (orB b1 (negB b1)) trueB 
+  ; enumB_surjective : forall b : B, exists n : nat, enumB n = b
   }
 .
 
-End DefnOfCBA.
+End DefinitionOfCBA.
 
-Section PropertyOfCBA.
+Section TheoryOfCBA.
 
-Parameter B : Type.
+Variable B : Type.
+
+Variable cba : CountableBooleanAlgebra B.
 
 Notation "b1 == b2" := (eqB b1 b2) (at level 80).
 
 Notation "b1 =< b2" := (eqB (andB b1 b2) b1) (at level 80).
 
-Lemma leq_CBA_refl `{cba : CountableBooleanAlgebra B} :
+Lemma leq_CBA_refl :
   forall b1 : B,
   b1 =< b1.
 Proof.
@@ -404,7 +407,7 @@ Proof.
   apply andB_idempotent.
 Qed.
 
-Lemma leq_CBA_refl' `{cba : CountableBooleanAlgebra B} :
+Lemma leq_CBA_refl' :
   forall b1 : B,
   forall b2 : B,
   b1 == b2 ->
@@ -420,7 +423,7 @@ Proof.
   apply H.
 Qed.
 
-Lemma leq_CBA_asym `{cba : CountableBooleanAlgebra B} :
+Lemma leq_CBA_asym :
   forall b1 : B,
   forall b2 : B,
   b1 =< b2 ->
@@ -436,7 +439,7 @@ Proof.
   apply H2.
 Qed.
 
-Lemma leq_CBA_trans `{cba : CountableBooleanAlgebra B} :
+Lemma leq_CBA_trans :
   forall b1 : B,
   forall b2 : B,
   forall b3 : B,
@@ -462,7 +465,7 @@ Proof.
   apply andB_associative.
 Qed.
 
-Lemma leq_CBA_andB `{cba : CountableBooleanAlgebra B} :
+Lemma leq_CBA_andB :
   forall b1 : B,
   forall b1' : B,
   forall b2 : B,
@@ -534,7 +537,7 @@ Proof.
     apply (leq_CBA_trans (andB b1 b1') (andB b2 b1') (andB b2 b2') H H0).
 Qed.
 
-Lemma andBs_CBA `{cba : CountableBooleanAlgebra B} :
+Lemma andBs_CBA :
   forall ps1 : list B,
   forall ps2 : list B,
   fold_right andB trueB (ps1 ++ ps2) == andB (fold_right andB trueB ps1) (fold_right andB trueB ps2).
@@ -556,11 +559,11 @@ Proof.
     apply andB_associative.
 Qed.
 
-Definition isFilter `{cba : CountableBooleanAlgebra B} (filter : Ensemble B) : Prop :=
+Definition isFilter (filter : Ensemble B) : Prop :=
   (exists b0 : B, member b0 filter) /\ (forall b1 : B, forall b2 : B, member b1 filter -> b1 =< b2 -> member b2 filter) /\ (forall b1 : B, forall b2 : B, forall b : B, member b1 filter -> member b2 filter -> b == andB b1 b2 -> member b filter)
 .
 
-Lemma isFilter_refl' `{cba : CountableBooleanAlgebra B} :
+Lemma isFilter_refl' :
   forall bs1 : Ensemble B,
   isFilter bs1 ->
   forall bs2 : Ensemble B,
@@ -589,7 +592,7 @@ Proof.
   apply H6.
 Qed.
 
-Inductive Cl `{cba : CountableBooleanAlgebra B} : Ensemble B -> Ensemble B :=
+Inductive Cl : Ensemble B -> Ensemble B :=
 | Closure :
   forall ps : list B,
   forall b : B,
@@ -599,23 +602,23 @@ Inductive Cl `{cba : CountableBooleanAlgebra B} : Ensemble B -> Ensemble B :=
   member b (Cl bs)
 .
 
-Definition inconsistent `{cba : CountableBooleanAlgebra B} (bs1 : Ensemble B) : Prop :=
+Definition inconsistent (bs1 : Ensemble B) : Prop :=
   exists b : B, member b bs1 /\ b == falseB
 .
 
-Definition equiconsistent `{cba : CountableBooleanAlgebra B} (bs1 : Ensemble B) (bs2 : Ensemble B) : Prop :=
+Definition equiconsistent (bs1 : Ensemble B) (bs2 : Ensemble B) : Prop :=
   inconsistent bs1 <-> inconsistent bs2
 .
 
-Definition isElementComplete `{cba : CountableBooleanAlgebra B} (bs1 : Ensemble B) (b2 : B) : Prop :=
+Definition isElementComplete (bs1 : Ensemble B) (b2 : B) : Prop :=
   equiconsistent bs1 (Cl (insert b2 bs1)) -> member b2 bs1
 .
 
-Definition isComplete `{cba : CountableBooleanAlgebra B} (bs1 : Ensemble B) : Prop :=
+Definition isComplete (bs1 : Ensemble B) : Prop :=
   forall b2 : B, isElementComplete bs1 b2
 .
 
-Lemma inconsistent_subset `{cba : CountableBooleanAlgebra B} :
+Lemma inconsistent_subset :
   forall bs1 : Ensemble B,
   forall bs2 : Ensemble B,
   isSubsetOf bs1 bs2 ->
@@ -633,7 +636,7 @@ Proof.
   apply H1.
 Qed.
 
-Lemma fact_1_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
+Lemma fact_1_of_1_2_8 :
   forall bs : Ensemble B,
   isFilter (Cl bs).
 Proof.
@@ -675,7 +678,7 @@ Proof.
   apply H3.
 Qed.
 
-Lemma fact_2_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
+Lemma fact_2_of_1_2_8 :
   forall bs : Ensemble B,
   isFilter bs ->
   member trueB bs.
@@ -690,7 +693,7 @@ Proof.
   apply trueB_unit_andB.
 Qed.
 
-Lemma fact_3_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
+Lemma fact_3_of_1_2_8 :
   forall bs : Ensemble B,
   isSubsetOf bs (Cl bs).
 Proof.
@@ -709,7 +712,7 @@ Proof.
   apply trueB_unit_andB.
 Qed.
 
-Lemma fact_4_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
+Lemma fact_4_of_1_2_8 :
   forall bs1 : Ensemble B,
   forall bs2 : Ensemble B,
   isSubsetOf bs1 bs2 ->
@@ -728,7 +731,7 @@ Proof.
   apply H1.
 Qed.
 
-Lemma fact_5_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
+Lemma fact_5_of_1_2_8 :
   forall bs : Ensemble B,
   isFilter bs ->
   isSubsetOf (Cl bs) bs.
@@ -771,7 +774,7 @@ Proof.
     apply eqB_refl.
 Qed.
 
-Lemma proposition_1_of_1_2_9 `{cba : CountableBooleanAlgebra B} :
+Lemma proposition_1_of_1_2_9 :
   forall bs : Ensemble B,
   isFilter bs ->
   forall b1 : B,
@@ -794,7 +797,7 @@ Proof.
   apply H3.
 Qed.
 
-Inductive Insert `{cba : CountableBooleanAlgebra B} : Ensemble B -> nat -> Ensemble B :=
+Inductive Insert : Ensemble B -> nat -> Ensemble B :=
 | Insertion :
   forall bs : Ensemble B,
   forall n : nat,
@@ -802,7 +805,7 @@ Inductive Insert `{cba : CountableBooleanAlgebra B} : Ensemble B -> nat -> Ensem
   member (enumB n) (Insert bs n)
 .
 
-Fixpoint improveFilter `{cba : CountableBooleanAlgebra B} (bs : Ensemble B) (n : nat) : Ensemble B :=
+Fixpoint improveFilter (bs : Ensemble B) (n : nat) : Ensemble B :=
   match n with
   | 0 => bs
   | S n' =>
@@ -811,7 +814,7 @@ Fixpoint improveFilter `{cba : CountableBooleanAlgebra B} (bs : Ensemble B) (n :
   end
 .
 
-Lemma lemma_1_of_1_2_11 `{cba : CountableBooleanAlgebra B} :
+Lemma lemma_1_of_1_2_11 :
   forall bs : Ensemble B,
   isFilter bs ->
   forall n : nat,
@@ -827,7 +830,7 @@ Proof.
     apply fact_1_of_1_2_8.
 Qed.
 
-Lemma lemma_1_of_1_2_12 `{cba : CountableBooleanAlgebra B} :
+Lemma lemma_1_of_1_2_12 :
   forall bs : Ensemble B,
   forall n1 : nat,
   forall n2 : nat,
@@ -854,7 +857,7 @@ Proof.
     apply H1.
 Qed.
 
-Lemma lemma_1_of_1_2_13 `{cba : CountableBooleanAlgebra B} :
+Lemma lemma_1_of_1_2_13 :
   forall bs : Ensemble B,
   isFilter bs ->
   forall n : nat,
@@ -986,7 +989,7 @@ Proof.
       apply H5.
 Qed.
 
-Lemma lemma_2_of_1_2_13 `{cba : CountableBooleanAlgebra B} :
+Lemma lemma_2_of_1_2_13 :
   forall bs : Ensemble B,
   isFilter bs ->
   forall n1 : nat,
@@ -1004,7 +1007,7 @@ Proof.
   intuition.
 Qed.
 
-Inductive CompleteFilter `{cba : CountableBooleanAlgebra B} : Ensemble B -> Ensemble B :=
+Inductive CompleteFilter : Ensemble B -> Ensemble B :=
 | InCompleteFilter :
   forall n : nat,
   forall bs : Ensemble B,
@@ -1013,7 +1016,7 @@ Inductive CompleteFilter `{cba : CountableBooleanAlgebra B} : Ensemble B -> Ense
   member b (CompleteFilter bs)
 .
 
-Lemma lemma_3_of_1_2_13 `{cba : CountableBooleanAlgebra B} :
+Lemma lemma_3_of_1_2_13 :
   forall bs : Ensemble B,
   isFilter bs ->
   equiconsistent bs (CompleteFilter bs).
@@ -1042,7 +1045,7 @@ Proof.
   tauto.
 Qed.
 
-Theorem theorem_1_2_14 `{cba : CountableBooleanAlgebra B} :
+Theorem theorem_1_2_14 :
   forall bs : Ensemble B,
   isFilter bs ->
   isSubsetOf bs (CompleteFilter bs) /\ isFilter (CompleteFilter bs) /\ isComplete (CompleteFilter bs) /\ equiconsistent bs (CompleteFilter bs).
@@ -1186,11 +1189,11 @@ Proof.
   apply HHH.
 Qed.
 
-Definition isUltraFilter `{cba : CountableBooleanAlgebra B} (bs : Ensemble B) :=
+Definition isUltraFilter (bs : Ensemble B) :=
   isFilter bs /\ (forall bs' : Ensemble B, isFilter bs' -> equiconsistent bs bs' -> isSubsetOf bs bs' -> isSubsetOf bs' bs)
 .
 
-Corollary corollary_1_2_16 `{cba : CountableBooleanAlgebra B} :
+Corollary corollary_1_2_16 :
   forall bs : Ensemble B,
   isFilter bs ->
   isUltraFilter (CompleteFilter bs).
@@ -1268,17 +1271,17 @@ Proof.
   apply H8.
 Qed.
 
-End PropertyOfCBA.
+End TheoryOfCBA.
 
-End CBA.
+End CountableBooleanAlgebra.
 
-Module PL.
+Module PropositionalLogic.
 
 Import ListNotations.
 
 Import Aux.
 
-Import CBA.
+Import CountableBooleanAlgebra.
 
 Section Syntax.
 
@@ -1576,21 +1579,21 @@ Fixpoint enum_formula_aux (rank : nat) (seed0 : nat) : Formula :=
     let i := seed0 in
     AtomF i
   | S rank' =>
-    let (seed1, piece1) := mapsLineToPlane seed0 in
+    let (seed1, piece1) := cantor_pairing seed0 in
     match piece1 with
     | 0 => ContradictionF
     | S 0 => NegationF (enum_formula_aux rank' seed1) 
     | S (S 0) =>
-      let (seed2, seed3) := mapsLineToPlane seed1 in
+      let (seed2, seed3) := cantor_pairing seed1 in
       ConjunctionF (enum_formula_aux rank' seed2) (enum_formula_aux rank' seed3)
     | S (S (S 0)) =>
-      let (seed2, seed3) := mapsLineToPlane seed1 in
+      let (seed2, seed3) := cantor_pairing seed1 in
       DisjunctionF (enum_formula_aux rank' seed2) (enum_formula_aux rank' seed3)
     | S (S (S (S 0))) =>
-      let (seed2, seed3) := mapsLineToPlane seed1 in
+      let (seed2, seed3) := cantor_pairing seed1 in
       ImplicationF (enum_formula_aux rank' seed2) (enum_formula_aux rank' seed3)
     | S (S (S (S (S 0)))) =>
-      let (seed2, seed3) := mapsLineToPlane seed1 in
+      let (seed2, seed3) := cantor_pairing seed1 in
       BiconditionalF (enum_formula_aux rank' seed2) (enum_formula_aux rank' seed3)
     | S (S (S (S (S (S i))))) => AtomF i
     end
@@ -1608,16 +1611,16 @@ Proof.
     forall x : nat,
     forall y : nat,
     forall z : nat,
-    (y, z) = mapsLineToPlane x <-> x = sum_from_0_to (y + z) + z
+    (y, z) = cantor_pairing x <-> x = sum_from_0_to (y + z) + z
   ).
     intros x y z.
     constructor.
     intro.
-    apply mapsLineToPlane_is_injective.
+    apply cantor_pairing_is_injective.
     intuition.
     intro.
     subst.
-    apply mapsLineToPlane_is_surjective.
+    apply cantor_pairing_is_surjective.
   intros p.
   induction p.
   - intros r.
@@ -1627,7 +1630,7 @@ Proof.
     * exists i.
       simpl.
       tauto.
-    * assert (exists seed : nat, (0, S (S (S (S (S (S i)))))) = mapsLineToPlane seed).
+    * assert (exists seed : nat, (0, S (S (S (S (S (S i)))))) = cantor_pairing seed).
       exists (sum_from_0_to (0 + S (S (S (S (S (S i)))))) + S (S (S (S (S (S i)))))).
       apply (proj2 (H (sum_from_0_to (0 + S (S (S (S (S (S i)))))) + S (S (S (S (S (S i)))))) 0 (S (S (S (S (S (S i))))))) eq_refl).
       destruct H1 as [seed H1].
@@ -1661,7 +1664,7 @@ Proof.
     subst.
     destruct (IHp rank H2) as [seed H1].
     exists (sum_from_0_to (seed + 1) + 1).
-    assert ((seed, 1) = mapsLineToPlane (sum_from_0_to (seed + 1) + 1)).
+    assert ((seed, 1) = cantor_pairing (sum_from_0_to (seed + 1) + 1)).
       apply (H ((sum_from_0_to (seed + 1) + 1)) seed 1).
       intuition.
     simpl in *.
@@ -1686,7 +1689,7 @@ Proof.
       lia.
     destruct (IHp2 rank) as [seed3 H4].
       lia.
-    assert (exists seed : nat, (sum_from_0_to (seed2 + seed3) + seed3, 2) = mapsLineToPlane seed).
+    assert (exists seed : nat, (sum_from_0_to (seed2 + seed3) + seed3, 2) = cantor_pairing seed).
       exists (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 2) + 2).
         apply (proj2 (H (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 2) + 2) (sum_from_0_to (seed2 + seed3) + seed3) 2)).
         tauto.
@@ -1694,7 +1697,7 @@ Proof.
     exists (seed).
     simpl.
     rewrite <- H1.
-    assert ((seed2, seed3) = mapsLineToPlane (sum_from_0_to (seed2 + seed3) + seed3)).
+    assert ((seed2, seed3) = cantor_pairing (sum_from_0_to (seed2 + seed3) + seed3)).
       apply (proj2 (H (sum_from_0_to (seed2 + seed3) + seed3) seed2 seed3)).
       tauto.
     rewrite <- H5.
@@ -1719,7 +1722,7 @@ Proof.
       lia.
     destruct (IHp2 rank) as [seed3 H4].
       lia.
-    assert (exists seed : nat, (sum_from_0_to (seed2 + seed3) + seed3, 3) = mapsLineToPlane seed).
+    assert (exists seed : nat, (sum_from_0_to (seed2 + seed3) + seed3, 3) = cantor_pairing seed).
       exists (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 3) + 3).
         apply (proj2 (H (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 3) + 3) (sum_from_0_to (seed2 + seed3) + seed3) 3)).
         tauto.
@@ -1727,7 +1730,7 @@ Proof.
     exists (seed).
     simpl.
     rewrite <- H1.
-    assert ((seed2, seed3) = mapsLineToPlane (sum_from_0_to (seed2 + seed3) + seed3)).
+    assert ((seed2, seed3) = cantor_pairing (sum_from_0_to (seed2 + seed3) + seed3)).
       apply (proj2 (H (sum_from_0_to (seed2 + seed3) + seed3) seed2 seed3)).
       tauto.
     rewrite <- H5.
@@ -1752,7 +1755,7 @@ Proof.
       lia.
     destruct (IHp2 rank) as [seed3 H4].
       lia.
-    assert (exists seed : nat, (sum_from_0_to (seed2 + seed3) + seed3, 4) = mapsLineToPlane seed).
+    assert (exists seed : nat, (sum_from_0_to (seed2 + seed3) + seed3, 4) = cantor_pairing seed).
       exists (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 4) + 4).
         apply (proj2 (H (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 4) + 4) (sum_from_0_to (seed2 + seed3) + seed3) 4)).
         tauto.
@@ -1760,7 +1763,7 @@ Proof.
     exists (seed).
     simpl.
     rewrite <- H1.
-    assert ((seed2, seed3) = mapsLineToPlane (sum_from_0_to (seed2 + seed3) + seed3)).
+    assert ((seed2, seed3) = cantor_pairing (sum_from_0_to (seed2 + seed3) + seed3)).
       apply (proj2 (H (sum_from_0_to (seed2 + seed3) + seed3) seed2 seed3)).
       tauto.
     rewrite <- H5.
@@ -1785,7 +1788,7 @@ Proof.
       lia.
     destruct (IHp2 rank) as [seed3 H4].
       lia.
-    assert (exists seed : nat, (sum_from_0_to (seed2 + seed3) + seed3, 5) = mapsLineToPlane seed).
+    assert (exists seed : nat, (sum_from_0_to (seed2 + seed3) + seed3, 5) = cantor_pairing seed).
       exists (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 5) + 5).
         apply (proj2 (H (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 5) + 5) (sum_from_0_to (seed2 + seed3) + seed3) 5)).
         tauto.
@@ -1793,7 +1796,7 @@ Proof.
     exists (seed).
     simpl.
     rewrite <- H1.
-    assert ((seed2, seed3) = mapsLineToPlane (sum_from_0_to (seed2 + seed3) + seed3)).
+    assert ((seed2, seed3) = cantor_pairing (sum_from_0_to (seed2 + seed3) + seed3)).
       apply (proj2 (H (sum_from_0_to (seed2 + seed3) + seed3) seed2 seed3)).
       tauto.
     rewrite <- H5.
@@ -1803,7 +1806,7 @@ Proof.
 Qed.
 
 Definition enumerateFormula (n : nat) : Formula :=
-  let (x, y) := mapsLineToPlane n in
+  let (x, y) := cantor_pairing n in
   enum_formula_aux x y
 .
 
@@ -1817,8 +1820,8 @@ Proof.
     lia.
   destruct H as [seed H].
   exists (sum_from_0_to (rankOfFormula p + seed) + seed).
-  assert ((rankOfFormula p, seed) = mapsLineToPlane (sum_from_0_to (rankOfFormula p + seed) + seed)).
-    apply mapsLineToPlane_is_surjective.
+  assert ((rankOfFormula p, seed) = cantor_pairing (sum_from_0_to (rankOfFormula p + seed) + seed)).
+    apply cantor_pairing_is_surjective.
   unfold enumerateFormula.
   rewrite <- H0.
   apply H.
@@ -4950,5 +4953,3 @@ Qed.
 End Compactness.
 
 End PropositionalLogic.
-
-(* Praise the God! *)
