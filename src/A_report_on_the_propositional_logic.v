@@ -342,8 +342,7 @@ End Ensembles.
 
 End Aux.
 
-
-Module CountableBooleanAlgebra.
+Module CBA.
 
 Import ListNotations.
 
@@ -391,15 +390,13 @@ End DefinitionOfCBA.
 
 Section TheoryOfCBA.
 
-Variable B : Type.
-
-Variable cba : CountableBooleanAlgebra B.
-
 Notation "b1 == b2" := (eqB b1 b2) (at level 80).
 
 Notation "b1 =< b2" := (eqB (andB b1 b2) b1) (at level 80).
 
-Lemma leq_CBA_refl :
+Variable B : Type.
+
+Lemma leq_CBA_refl `{cba : CountableBooleanAlgebra B} :
   forall b1 : B,
   b1 =< b1.
 Proof.
@@ -407,7 +404,7 @@ Proof.
   apply andB_idempotent.
 Qed.
 
-Lemma leq_CBA_refl' :
+Lemma leq_CBA_refl' `{cba : CountableBooleanAlgebra B} :
   forall b1 : B,
   forall b2 : B,
   b1 == b2 ->
@@ -423,7 +420,7 @@ Proof.
   apply H.
 Qed.
 
-Lemma leq_CBA_asym :
+Lemma leq_CBA_asym `{cba : CountableBooleanAlgebra B} :
   forall b1 : B,
   forall b2 : B,
   b1 =< b2 ->
@@ -439,7 +436,7 @@ Proof.
   apply H2.
 Qed.
 
-Lemma leq_CBA_trans :
+Lemma leq_CBA_trans `{cba : CountableBooleanAlgebra B} :
   forall b1 : B,
   forall b2 : B,
   forall b3 : B,
@@ -465,7 +462,7 @@ Proof.
   apply andB_associative.
 Qed.
 
-Lemma leq_CBA_andB :
+Lemma leq_CBA_andB `{cba : CountableBooleanAlgebra B} :
   forall b1 : B,
   forall b1' : B,
   forall b2 : B,
@@ -537,7 +534,7 @@ Proof.
     apply (leq_CBA_trans (andB b1 b1') (andB b2 b1') (andB b2 b2') H H0).
 Qed.
 
-Lemma andBs_CBA :
+Lemma andBs_CBA `{cba : CountableBooleanAlgebra B} :
   forall ps1 : list B,
   forall ps2 : list B,
   fold_right andB trueB (ps1 ++ ps2) == andB (fold_right andB trueB ps1) (fold_right andB trueB ps2).
@@ -559,11 +556,11 @@ Proof.
     apply andB_associative.
 Qed.
 
-Definition isFilter (filter : Ensemble B) : Prop :=
+Definition isFilter `{cba : CountableBooleanAlgebra B} (filter : Ensemble B) : Prop :=
   (exists b0 : B, member b0 filter) /\ (forall b1 : B, forall b2 : B, member b1 filter -> b1 =< b2 -> member b2 filter) /\ (forall b1 : B, forall b2 : B, forall b : B, member b1 filter -> member b2 filter -> b == andB b1 b2 -> member b filter)
 .
 
-Lemma isFilter_refl' :
+Lemma isFilter_refl' `{cba : CountableBooleanAlgebra B} :
   forall bs1 : Ensemble B,
   isFilter bs1 ->
   forall bs2 : Ensemble B,
@@ -592,7 +589,7 @@ Proof.
   apply H6.
 Qed.
 
-Inductive Cl : Ensemble B -> Ensemble B :=
+Inductive Cl `{cba : CountableBooleanAlgebra B} : Ensemble B -> Ensemble B :=
 | Closure :
   forall ps : list B,
   forall b : B,
@@ -602,23 +599,23 @@ Inductive Cl : Ensemble B -> Ensemble B :=
   member b (Cl bs)
 .
 
-Definition inconsistent (bs1 : Ensemble B) : Prop :=
+Definition inconsistent `{cba : CountableBooleanAlgebra B} (bs1 : Ensemble B) : Prop :=
   exists b : B, member b bs1 /\ b == falseB
 .
 
-Definition equiconsistent (bs1 : Ensemble B) (bs2 : Ensemble B) : Prop :=
+Definition equiconsistent `{cba : CountableBooleanAlgebra B} (bs1 : Ensemble B) (bs2 : Ensemble B) : Prop :=
   inconsistent bs1 <-> inconsistent bs2
 .
 
-Definition isElementComplete (bs1 : Ensemble B) (b2 : B) : Prop :=
+Definition isElementComplete `{cba : CountableBooleanAlgebra B} (bs1 : Ensemble B) (b2 : B) : Prop :=
   equiconsistent bs1 (Cl (insert b2 bs1)) -> member b2 bs1
 .
 
-Definition isComplete (bs1 : Ensemble B) : Prop :=
+Definition isComplete `{cba : CountableBooleanAlgebra B} (bs1 : Ensemble B) : Prop :=
   forall b2 : B, isElementComplete bs1 b2
 .
 
-Lemma inconsistent_subset :
+Lemma inconsistent_subset `{cba : CountableBooleanAlgebra B} :
   forall bs1 : Ensemble B,
   forall bs2 : Ensemble B,
   isSubsetOf bs1 bs2 ->
@@ -636,7 +633,7 @@ Proof.
   apply H1.
 Qed.
 
-Lemma fact_1_of_1_2_8 :
+Lemma fact_1_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter (Cl bs).
 Proof.
@@ -678,7 +675,7 @@ Proof.
   apply H3.
 Qed.
 
-Lemma fact_2_of_1_2_8 :
+Lemma fact_2_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   member trueB bs.
@@ -693,7 +690,7 @@ Proof.
   apply trueB_unit_andB.
 Qed.
 
-Lemma fact_3_of_1_2_8 :
+Lemma fact_3_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isSubsetOf bs (Cl bs).
 Proof.
@@ -712,7 +709,7 @@ Proof.
   apply trueB_unit_andB.
 Qed.
 
-Lemma fact_4_of_1_2_8 :
+Lemma fact_4_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
   forall bs1 : Ensemble B,
   forall bs2 : Ensemble B,
   isSubsetOf bs1 bs2 ->
@@ -731,7 +728,7 @@ Proof.
   apply H1.
 Qed.
 
-Lemma fact_5_of_1_2_8 :
+Lemma fact_5_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   isSubsetOf (Cl bs) bs.
@@ -774,7 +771,7 @@ Proof.
     apply eqB_refl.
 Qed.
 
-Lemma proposition_1_of_1_2_9 :
+Lemma proposition_1_of_1_2_9 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   forall b1 : B,
@@ -797,7 +794,7 @@ Proof.
   apply H3.
 Qed.
 
-Inductive Insert : Ensemble B -> nat -> Ensemble B :=
+Inductive Insert `{cba : CountableBooleanAlgebra B} : Ensemble B -> nat -> Ensemble B :=
 | Insertion :
   forall bs : Ensemble B,
   forall n : nat,
@@ -805,7 +802,7 @@ Inductive Insert : Ensemble B -> nat -> Ensemble B :=
   member (enumB n) (Insert bs n)
 .
 
-Fixpoint improveFilter (bs : Ensemble B) (n : nat) : Ensemble B :=
+Fixpoint improveFilter `{cba : CountableBooleanAlgebra B} (bs : Ensemble B) (n : nat) : Ensemble B :=
   match n with
   | 0 => bs
   | S n' =>
@@ -814,7 +811,7 @@ Fixpoint improveFilter (bs : Ensemble B) (n : nat) : Ensemble B :=
   end
 .
 
-Lemma lemma_1_of_1_2_11 :
+Lemma lemma_1_of_1_2_11 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   forall n : nat,
@@ -830,7 +827,7 @@ Proof.
     apply fact_1_of_1_2_8.
 Qed.
 
-Lemma lemma_1_of_1_2_12 :
+Lemma lemma_1_of_1_2_12 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   forall n1 : nat,
   forall n2 : nat,
@@ -857,7 +854,7 @@ Proof.
     apply H1.
 Qed.
 
-Lemma lemma_1_of_1_2_13 :
+Lemma lemma_1_of_1_2_13 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   forall n : nat,
@@ -989,7 +986,7 @@ Proof.
       apply H5.
 Qed.
 
-Lemma lemma_2_of_1_2_13 :
+Lemma lemma_2_of_1_2_13 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   forall n1 : nat,
@@ -1007,7 +1004,7 @@ Proof.
   intuition.
 Qed.
 
-Inductive CompleteFilter : Ensemble B -> Ensemble B :=
+Inductive CompleteFilter `{cba : CountableBooleanAlgebra B} : Ensemble B -> Ensemble B :=
 | InCompleteFilter :
   forall n : nat,
   forall bs : Ensemble B,
@@ -1016,7 +1013,7 @@ Inductive CompleteFilter : Ensemble B -> Ensemble B :=
   member b (CompleteFilter bs)
 .
 
-Lemma lemma_3_of_1_2_13 :
+Lemma lemma_3_of_1_2_13 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   equiconsistent bs (CompleteFilter bs).
@@ -1045,7 +1042,7 @@ Proof.
   tauto.
 Qed.
 
-Theorem theorem_1_2_14 :
+Theorem theorem_1_2_14 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   isSubsetOf bs (CompleteFilter bs) /\ isFilter (CompleteFilter bs) /\ isComplete (CompleteFilter bs) /\ equiconsistent bs (CompleteFilter bs).
@@ -1189,11 +1186,11 @@ Proof.
   apply HHH.
 Qed.
 
-Definition isUltraFilter (bs : Ensemble B) :=
+Definition isUltraFilter `{cba : CountableBooleanAlgebra B} (bs : Ensemble B) :=
   isFilter bs /\ (forall bs' : Ensemble B, isFilter bs' -> equiconsistent bs bs' -> isSubsetOf bs bs' -> isSubsetOf bs' bs)
 .
 
-Corollary corollary_1_2_16 :
+Corollary corollary_1_2_16 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   isUltraFilter (CompleteFilter bs).
@@ -1273,15 +1270,15 @@ Qed.
 
 End TheoryOfCBA.
 
-End CountableBooleanAlgebra.
+End CBA.
 
-Module PropositionalLogic.
+Module PL.
 
 Import ListNotations.
 
 Import Aux.
 
-Import CountableBooleanAlgebra.
+Import CBA.
 
 Section Syntax.
 
@@ -3543,7 +3540,7 @@ Inductive TH : Ensemble Formula -> Ensemble Formula :=
 
 Lemma lemma_1_of_1_3_8 :
   forall bs : Ensemble Formula,
-  isFilter Formula LBA (TH bs).
+  isFilter Formula (TH bs).
 Proof.
   intros bs.
   constructor.
@@ -3584,7 +3581,7 @@ Qed.
 
 Lemma Cl_subset_TH :
   forall hs : Ensemble Formula,
-  isSubsetOf (Cl Formula LBA hs) (TH hs).
+  isSubsetOf (Cl Formula hs) (TH hs).
 Proof.
   intros hs.
   cut (
@@ -4047,7 +4044,7 @@ Qed.
 
 Lemma TH_subset_Cl :
   forall hs : Ensemble Formula,
-  isSubsetOf (TH hs) (Cl Formula LBA hs).
+  isSubsetOf (TH hs) (Cl Formula hs).
 Proof.
   intros hs.
   intros c.
@@ -4058,7 +4055,7 @@ Proof.
   destruct H1.
   assert (Infers (singleton (fold_right andB trueB ps)) c).
     apply (proj2 (andBs_LBA ps hs H1 c) H2).
-  apply (Closure Formula LBA ps).
+  apply (Closure Formula ps).
   apply H1.
   apply leq_LBA.
   apply H3.
@@ -4114,26 +4111,26 @@ Proof.
 Qed.
 
 Definition Filter (hs : Ensemble Formula) (n : nat) : Ensemble Formula :=
-  improveFilter Formula LBA (TH hs) n
+  improveFilter Formula (TH hs) n
 .
 
 Fixpoint AxmSet (hs : Ensemble Formula) (n : nat) : Ensemble Formula :=
   match n with
   | 0 => hs
-  | S n' => union (AxmSet hs n') (Insert Formula LBA (Filter hs n') n')
+  | S n' => union (AxmSet hs n') (Insert Formula (Filter hs n') n')
   end
 .
 
 Lemma inconsistent_property_1 :
   forall hs : Ensemble Formula,
-  Infers hs ContradictionF <-> inconsistent Formula LBA (Cl Formula LBA hs).
+  Infers hs ContradictionF <-> inconsistent Formula (Cl Formula hs).
 Proof.
   intros hs.
   constructor.
   intro.
   exists ContradictionF.
   constructor.
-  assert (isSubsetOf (TH hs) (Cl Formula LBA hs)).
+  assert (isSubsetOf (TH hs) (Cl Formula hs)).
     apply TH_subset_Cl.
   apply (H0 ContradictionF).
   apply InTheory.
@@ -4159,9 +4156,9 @@ Qed.
 Lemma equiconsistent_property_1 :
   forall hs1 : Ensemble Formula,
   forall hs2 : Ensemble Formula,
-  isFilter Formula LBA hs1 ->
-  isFilter Formula LBA hs2 ->
-  equiconsistent Formula LBA hs1 hs2 <-> (Infers hs1 ContradictionF <-> Infers hs2 ContradictionF).
+  isFilter Formula hs1 ->
+  isFilter Formula hs2 ->
+  equiconsistent Formula hs1 hs2 <-> (Infers hs1 ContradictionF <-> Infers hs2 ContradictionF).
 Proof.
   intros hs1 hs2 HHH1 HHH2.
   constructor.
@@ -4169,20 +4166,20 @@ Proof.
   constructor.
   intro.
   apply inconsistent_property_1.
-  apply (inconsistent_subset Formula LBA hs2).
+  apply (inconsistent_subset Formula hs2).
   apply fact_3_of_1_2_8.
   apply H.
-  apply (inconsistent_subset Formula LBA (Cl Formula LBA hs1)).
+  apply (inconsistent_subset Formula (Cl Formula hs1)).
   apply fact_5_of_1_2_8.
   apply HHH1.
   apply inconsistent_property_1.
   apply H0.
   intro.
   apply inconsistent_property_1.
-  apply (inconsistent_subset Formula LBA hs1).
+  apply (inconsistent_subset Formula hs1).
   apply fact_3_of_1_2_8.
   apply H.
-  apply (inconsistent_subset Formula LBA (Cl Formula LBA hs2)).
+  apply (inconsistent_subset Formula (Cl Formula hs2)).
   apply fact_5_of_1_2_8.
   apply HHH2.
   apply inconsistent_property_1.
@@ -4190,23 +4187,23 @@ Proof.
   intro.
   constructor.
   intro.
-  apply (inconsistent_subset Formula LBA (Cl Formula LBA hs2)).
+  apply (inconsistent_subset Formula (Cl Formula hs2)).
   apply fact_5_of_1_2_8.
   apply HHH2.
   apply inconsistent_property_1.
   apply H.
   apply inconsistent_property_1.
-  apply (inconsistent_subset Formula LBA hs1).
+  apply (inconsistent_subset Formula hs1).
   apply fact_3_of_1_2_8.
   apply H0.
   intro.
-  apply (inconsistent_subset Formula LBA (Cl Formula LBA hs1)).
+  apply (inconsistent_subset Formula (Cl Formula hs1)).
   apply fact_5_of_1_2_8.
   apply HHH1.
   apply inconsistent_property_1.
   apply H.
   apply inconsistent_property_1.
-  apply (inconsistent_subset Formula LBA hs2).
+  apply (inconsistent_subset Formula hs2).
   apply fact_3_of_1_2_8.
   apply H0.
 Qed.
@@ -4226,7 +4223,7 @@ Proof.
     unfold Filter in *.
     simpl.
     constructor.
-    * assert (isSubsetOf (Cl Formula LBA (union (improveFilter Formula LBA (TH hs) n) (Insert Formula LBA (improveFilter Formula LBA (TH hs) n) n))) (Cl Formula LBA (TH (union (AxmSet hs n) (Insert Formula LBA (Filter hs n) n))))).
+    * assert (isSubsetOf (Cl Formula (union (improveFilter Formula (TH hs) n) (Insert Formula (improveFilter Formula (TH hs) n) n))) (Cl Formula (TH (union (AxmSet hs n) (Insert Formula (Filter hs n) n))))).
         apply fact_4_of_1_2_8.
         intros b.
         intro.
@@ -4247,21 +4244,21 @@ Proof.
         apply ByAssumption.
         apply UnionR.
         apply H2.
-      assert (isSubsetOf (Cl Formula LBA (TH (union (AxmSet hs n) (Insert Formula LBA (Filter hs n) n)))) (TH (union (AxmSet hs n) (Insert Formula LBA (Filter hs n) n)))).
+      assert (isSubsetOf (Cl Formula (TH (union (AxmSet hs n) (Insert Formula (Filter hs n) n)))) (TH (union (AxmSet hs n) (Insert Formula (Filter hs n) n)))).
         apply fact_5_of_1_2_8.
         apply lemma_1_of_1_3_8.
       unfold isSubsetOf in *.
       intuition.
-    * cut (isSubsetOf (Cl Formula LBA (union (AxmSet hs n) (Insert Formula LBA (Filter hs n) n))) (Cl Formula LBA (union (improveFilter Formula LBA (TH hs) n) (Insert Formula LBA (improveFilter Formula LBA (TH hs) n) n)))).
+    * cut (isSubsetOf (Cl Formula (union (AxmSet hs n) (Insert Formula (Filter hs n) n))) (Cl Formula (union (improveFilter Formula (TH hs) n) (Insert Formula (improveFilter Formula (TH hs) n) n)))).
         intro.
-        assert (isSubsetOf (TH (union (AxmSet hs n) (Insert Formula LBA (Filter hs n) n))) (Cl Formula LBA (union (AxmSet hs n) (Insert Formula LBA (Filter hs n) n)))).
+        assert (isSubsetOf (TH (union (AxmSet hs n) (Insert Formula (Filter hs n) n))) (Cl Formula (union (AxmSet hs n) (Insert Formula (Filter hs n) n)))).
           apply TH_subset_Cl.
         unfold isSubsetOf in *.
         intuition.
-      assert (isSubsetOf (Cl Formula LBA (Cl Formula LBA (union (improveFilter Formula LBA (TH hs) n) (Insert Formula LBA (improveFilter Formula LBA (TH hs) n) n)))) (Cl Formula LBA (union (improveFilter Formula LBA (TH hs) n) (Insert Formula LBA (improveFilter Formula LBA (TH hs) n) n)))).
+      assert (isSubsetOf (Cl Formula (Cl Formula (union (improveFilter Formula (TH hs) n) (Insert Formula (improveFilter Formula (TH hs) n) n)))) (Cl Formula (union (improveFilter Formula (TH hs) n) (Insert Formula (improveFilter Formula (TH hs) n) n)))).
         apply fact_5_of_1_2_8.
         apply fact_1_of_1_2_8.
-      cut (isSubsetOf (Cl Formula LBA (union (AxmSet hs n) (Insert Formula LBA (Filter hs n) n))) (Cl Formula LBA (Cl Formula LBA (union (improveFilter Formula LBA (TH hs) n) (Insert Formula LBA (improveFilter Formula LBA (TH hs) n) n))))).
+      cut (isSubsetOf (Cl Formula (union (AxmSet hs n) (Insert Formula (Filter hs n) n))) (Cl Formula (Cl Formula (union (improveFilter Formula (TH hs) n) (Insert Formula (improveFilter Formula (TH hs) n) n))))).
         unfold isSubsetOf in *.
         intuition.
       apply fact_4_of_1_2_8.
@@ -4269,7 +4266,7 @@ Proof.
       intro.
       inversion H2.
       subst.
-      apply (Closure Formula LBA [b]).
+      apply (Closure Formula [b]).
       intros p.
       intro.
       inversion H4.
@@ -4288,7 +4285,7 @@ Proof.
       subst.
       inversion H3.
       subst.
-      apply (Closure Formula LBA [enumB n]).
+      apply (Closure Formula [enumB n]).
       intros p.
       intro.
       inversion H5.
@@ -4310,9 +4307,9 @@ Lemma RequirementForCompleteness :
   Entails hs c ->
   forall v : Formula -> Prop,
   isStructure v ->
-  equiconsistent Formula LBA (TH (insert (NegationF c) hs)) v ->
+  equiconsistent Formula (TH (insert (NegationF c) hs)) v ->
   isSubsetOf (TH (insert (NegationF c) hs)) v ->
-  isFilter Formula LBA v ->
+  isFilter Formula v ->
   Infers hs c.
 Proof.
   intros hs c.
@@ -4323,9 +4320,9 @@ Proof.
   intro Extensionality.
   intro IsFilter.
   apply NegationE.
-  assert (inconsistent Formula LBA (TH (insert (NegationF c) hs))).
+  assert (inconsistent Formula (TH (insert (NegationF c) hs))).
     apply Equiconsistent.
-    assert (inconsistent Formula LBA (Cl Formula LBA v)).
+    assert (inconsistent Formula (Cl Formula v)).
       apply inconsistent_property_1.
       apply (ContradictionI _ c).
       apply ByAssumption.
@@ -4344,12 +4341,12 @@ Proof.
       apply ByAssumption.
       apply UnionR.
       apply Singleton.
-    apply (inconsistent_subset Formula LBA (Cl Formula LBA v) v).
+    apply (inconsistent_subset Formula (Cl Formula v) v).
     apply fact_5_of_1_2_8.
     apply IsFilter.
     apply H.
-  assert (inconsistent Formula LBA (Cl Formula LBA (insert (NegationF c) hs))).
-    apply (inconsistent_subset Formula LBA (TH (insert (NegationF c) hs))).
+  assert (inconsistent Formula (Cl Formula (insert (NegationF c) hs))).
+    apply (inconsistent_subset Formula (TH (insert (NegationF c) hs))).
     apply TH_subset_Cl.
     apply H.
   apply inconsistent_property_1.
@@ -4357,7 +4354,7 @@ Proof.
 Qed.
 
 Definition MaximalConsistentSet (bs : Ensemble Formula) : Ensemble Formula :=
-  CompleteFilter Formula LBA (TH bs)
+  CompleteFilter Formula (TH bs)
 .
 
 Inductive FullAxmSet : Ensemble Formula -> Ensemble Formula :=
@@ -4409,15 +4406,15 @@ Proof.
     destruct (Infers_has_compactness (FullAxmSet bs) p H1) as [ps].
     destruct H2.
     destruct (H ps H2) as [m].
-    apply (InCompleteFilter Formula LBA m).
-    assert (isFilter Formula LBA (improveFilter Formula LBA (TH bs) m)).
+    apply (InCompleteFilter Formula m).
+    assert (isFilter Formula (improveFilter Formula (TH bs) m)).
       apply lemma_1_of_1_2_11.
       apply lemma_1_of_1_3_8.
     inversion H5.
     destruct H7.
     apply (H7 (fold_right andB trueB ps) p).
-    apply (fact_5_of_1_2_8 Formula LBA (improveFilter Formula LBA (TH bs) m) H5 (fold_right andB trueB ps)).
-    apply (Closure Formula LBA ps).
+    apply (fact_5_of_1_2_8 Formula (improveFilter Formula (TH bs) m) H5 (fold_right andB trueB ps)).
+    apply (Closure Formula ps).
     apply H4.
     apply andB_idempotent.
     apply leq_LBA.
@@ -4458,7 +4455,7 @@ Proof.
     destruct H6.
     subst.
     apply H3.
-    apply (lemma_1_of_1_2_12 Formula LBA (TH bs) n' n H5 p (H4 p H6)).
+    apply (lemma_1_of_1_2_12 Formula (TH bs) n' n H5 p (H4 p H6)).
     exists n'.
     simpl.
     intro.
@@ -4467,7 +4464,7 @@ Proof.
     assert (n <= n').
       lia.
     subst.
-    apply (lemma_1_of_1_2_12 Formula LBA (TH bs) n n' H7 p H3).
+    apply (lemma_1_of_1_2_12 Formula (TH bs) n n' H7 p H3).
     apply (H4 p H6).
 Qed.
 
@@ -4481,7 +4478,7 @@ Definition isImplicationFaithful (bs : Ensemble Formula) : Prop :=
 
 Theorem theorem_1_3_10 :
   forall bs : Ensemble Formula,
-  isSubsetOf (TH bs) (MaximalConsistentSet bs) /\ equiconsistent Formula LBA (TH bs) (MaximalConsistentSet bs) /\ (forall p : Formula, member p (MaximalConsistentSet bs) <-> Infers (MaximalConsistentSet bs) p) /\ isMetaDN (MaximalConsistentSet bs) /\ isImplicationFaithful (MaximalConsistentSet bs).
+  isSubsetOf (TH bs) (MaximalConsistentSet bs) /\ equiconsistent Formula (TH bs) (MaximalConsistentSet bs) /\ (forall p : Formula, member p (MaximalConsistentSet bs) <-> Infers (MaximalConsistentSet bs) p) /\ isMetaDN (MaximalConsistentSet bs) /\ isImplicationFaithful (MaximalConsistentSet bs).
 Proof.
   intros bs.
   constructor.
@@ -4505,7 +4502,7 @@ Proof.
     subst.
     apply H1.
     intro.
-    apply (fact_5_of_1_2_8 Formula LBA (MaximalConsistentSet bs)).
+    apply (fact_5_of_1_2_8 Formula (MaximalConsistentSet bs)).
     apply theorem_1_2_14.
     apply lemma_1_of_1_3_8.
     apply TH_subset_Cl.
@@ -4513,7 +4510,7 @@ Proof.
     apply H.
   constructor.
   apply H.
-  assert (isComplete Formula LBA (MaximalConsistentSet bs)).
+  assert (isComplete Formula (MaximalConsistentSet bs)).
     apply theorem_1_2_14.
     apply lemma_1_of_1_3_8.
   assert (isMetaDN (MaximalConsistentSet bs)).
@@ -4527,7 +4524,7 @@ Proof.
       intro.
       apply UnionL.
       apply H2.
-    assert (isSubsetOf (insert p1 (MaximalConsistentSet bs)) (Cl Formula LBA (insert p1 (MaximalConsistentSet bs)))).
+    assert (isSubsetOf (insert p1 (MaximalConsistentSet bs)) (Cl Formula (insert p1 (MaximalConsistentSet bs)))).
       apply fact_3_of_1_2_8.
     unfold isSubsetOf in *.
     intuition.
@@ -4682,8 +4679,8 @@ Proof.
   intro.
   assert (forall p : Formula, satisfies (MaximalConsistentSet bs) p <-> Infers (MaximalConsistentSet bs) p).
     apply theorem_1_3_10.
-  assert (Infers (MaximalConsistentSet bs) ContradictionF <-> inconsistent Formula LBA (MaximalConsistentSet bs)).
-    assert (inconsistent Formula LBA (MaximalConsistentSet bs) <-> inconsistent Formula LBA (Cl Formula LBA (MaximalConsistentSet bs))).
+  assert (Infers (MaximalConsistentSet bs) ContradictionF <-> inconsistent Formula (MaximalConsistentSet bs)).
+    assert (inconsistent Formula (MaximalConsistentSet bs) <-> inconsistent Formula (Cl Formula (MaximalConsistentSet bs))).
       apply equiconsistent_property_1.
       apply theorem_1_2_14.
       apply lemma_1_of_1_3_8.
@@ -4693,30 +4690,30 @@ Proof.
     apply (extendInfers (MaximalConsistentSet bs) ContradictionF H1).
     apply fact_3_of_1_2_8.
     intro.
-    apply (extendInfers (Cl Formula LBA (MaximalConsistentSet bs)) ContradictionF H1).
+    apply (extendInfers (Cl Formula (MaximalConsistentSet bs)) ContradictionF H1).
     apply fact_5_of_1_2_8.
     apply theorem_1_2_14.
     apply lemma_1_of_1_3_8.
-    assert (Infers (MaximalConsistentSet bs) ContradictionF <-> inconsistent Formula LBA (Cl Formula LBA (MaximalConsistentSet bs))).
+    assert (Infers (MaximalConsistentSet bs) ContradictionF <-> inconsistent Formula (Cl Formula (MaximalConsistentSet bs))).
       apply inconsistent_property_1.
     intuition.
-  assert (~ inconsistent Formula LBA (MaximalConsistentSet bs)).
+  assert (~ inconsistent Formula (MaximalConsistentSet bs)).
     intro.
     apply H.
-    assert (inconsistent Formula LBA (TH bs)).
+    assert (inconsistent Formula (TH bs)).
       apply lemma_3_of_1_2_13.
       apply lemma_1_of_1_3_8.
       apply H2.
     assert (Infers (TH bs) ContradictionF).
       apply inconsistent_property_1.
-      apply (inconsistent_subset Formula LBA (TH bs) (Cl Formula LBA (TH bs))).
+      apply (inconsistent_subset Formula (TH bs) (Cl Formula (TH bs))).
       apply fact_3_of_1_2_8.
       apply H3.
     assert (member ContradictionF (TH (TH bs))).
       apply InTheory.
       apply H4.
     assert (member ContradictionF (TH bs)).
-      apply (fact_5_of_1_2_8 Formula LBA (TH bs)).
+      apply (fact_5_of_1_2_8 Formula (TH bs)).
       apply lemma_1_of_1_3_8.
       apply TH_subset_Cl.
       apply H5.
@@ -4952,4 +4949,4 @@ Qed.
 
 End Compactness.
 
-End PropositionalLogic.
+End PL.
