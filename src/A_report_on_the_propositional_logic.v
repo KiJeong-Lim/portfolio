@@ -1,7 +1,7 @@
-From Coq.Bool Require Export Bool.
-From Coq.Arith Require Export PeanoNat.
-From Coq.Lists Require Export List.
-From Coq.micromega Require Export Lia.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Arith.PeanoNat.
+From Coq Require Import Lists.List.
+From Coq Require Import micromega.Lia.
 
 Module Aux.
 
@@ -41,61 +41,6 @@ Proof with lia.
     cut (b * q + a mod b >= b * S (a / b) + a mod b)...
   }
   cut (q = a / b)...
-Qed.
-
-Lemma second_principle_of_finite_induction :
-  forall phi : nat -> Prop,
-  let phi' : nat -> Prop := fun k : nat => (forall i : nat, i < k -> phi i) in
-  (forall k : nat, phi' k -> phi k) ->
-  (forall n : nat, phi n).
-Proof with try firstorder.
-  intros phi phi' H.
-  cut (forall n : nat, phi n /\ phi' n)...
-  induction n.
-  - assert (phi' 0) by (unfold phi'; lia)...
-  - assert (phi' (S n))...
-    { intros i H0.
-      inversion H0...
-    }
-Qed.
-
-Fixpoint first_nat (p : nat -> bool) (n : nat) : nat :=
-  match n with
-  | 0 => 0
-  | S n' => if p (first_nat p n') then first_nat p n' else n
-  end
-.
-
-Theorem well_ordering_principle :
-  forall p : nat -> bool,
-  forall n : nat,
-  p n = true ->
-  let m := first_nat p n in
-  p m = true /\ (forall i : nat, p i = true -> i >= m).
-Proof with eauto. (* Improved By Clare Jang *)
-  intros p n H3 m.
-  assert (forall x : nat, p x = true -> p (first_nat p x) = true).
-  { induction x...
-    simpl.
-    destruct (p (first_nat p x)) eqn:H0...
-  }
-  split...
-  intros i H4.
-  enough (forall x : nat, first_nat p x <= x).
-  enough (forall x : nat, p (first_nat p x) = true -> (forall y : nat, x < y -> first_nat p x = first_nat p y)).
-  enough (forall x : nat, forall y : nat, p y = true -> first_nat p x <= y)...
-  - intros x y H2.
-    destruct (Compare_dec.le_lt_dec x y).
-    + eapply Nat.le_trans...
-    + replace (first_nat p x) with (first_nat p y)...
-  - intros x H1 y H2.
-    induction H2; simpl.
-    + rewrite H1...
-    + rewrite <- IHle.
-      rewrite H1...
-  - induction x...
-    simpl.
-    destruct (p (first_nat p x)) eqn: H0...
 Qed.
 
 End NaturalNumber.
@@ -152,6 +97,8 @@ Proof with (lia || eauto).
       simpl. rewrite H1. rewrite <- H0...
 Qed.
 
+Local Hint Resolve cantor_pairing_is_surjective : core.
+
 Lemma cantor_pairing_is_injective :
   forall n : nat,
   forall x : nat,
@@ -174,17 +121,23 @@ Proof with (lia || eauto).
       repeat (rewrite H1)...
 Qed.
 
-Lemma cantor_pairing_is :
+Local Hint Resolve cantor_pairing_is_injective : core.
+
+Theorem cantor_pairing_is :
   forall n : nat,
   forall x : nat,
   forall y : nat,
   cantor_pairing n = (x, y) <-> n = sum_from_0_to (x + y) + y.
-Proof with eauto using cantor_pairing_is_injective, cantor_pairing_is_surjective.
+Proof with eauto.
   intros n x y. split...
   intros; subst...
 Qed.
 
 End CantorPairing.
+
+#[export] Hint Resolve cantor_pairing_is : core.
+
+Create HintDb NaiveSetTheory_hints.
 
 Section Ensembles.
 
@@ -192,24 +145,22 @@ Definition Ensemble : Type -> Type :=
   fun A : Type => A -> Prop
 .
 
-Local Hint Unfold Ensemble : core.
-
 Definition member {A : Type} : A -> Ensemble A -> Prop :=
   fun x : A => fun xs : Ensemble A => xs x
 .
 
-Local Hint Unfold member : Core.
+Local Hint Unfold member : core.
 
 Definition isSubsetOf {A : Type} : Ensemble A -> Ensemble A -> Prop :=
   fun xs1 : Ensemble A => fun xs2 : Ensemble A => forall x : A, member x xs1 -> member x xs2
 .
 
-Local Hint Unfold isSubsetOf : Core.
+Local Hint Unfold isSubsetOf : core.
 
 Inductive empty {A : Type} : Ensemble A :=
 .
 
-Local Hint Constructors empty : Core.
+Local Hint Constructors empty : core.
 
 Inductive singleton {A : Type} : A -> Ensemble A :=
 | Singleton :
@@ -217,7 +168,7 @@ Inductive singleton {A : Type} : A -> Ensemble A :=
   member x (singleton x)
 .
 
-Local Hint Constructors singleton : Core.
+Local Hint Constructors singleton : NaiveSetTheory_hints.
 
 Inductive union {A : Type} : Ensemble A -> Ensemble A -> Ensemble A :=
 | UnionL :
@@ -234,31 +185,31 @@ Inductive union {A : Type} : Ensemble A -> Ensemble A -> Ensemble A :=
   member x (union xs1 xs2)
 .
 
-Local Hint Constructors union : Core.
+Local Hint Constructors union : core.
 
 Definition insert {A : Type} (x1 : A) (xs2 : Ensemble A) : Ensemble A :=
   union xs2 (singleton x1)
 .
 
-Local Hint Unfold insert : Core.
+Local Hint Unfold insert : core.
 
 Definition intersection {A : Type} (xs1 : Ensemble A) (xs2 : Ensemble A) : Ensemble A :=
   fun x : A => member x xs1 /\ member x xs2
 .
 
-Local Hint Unfold intersection : Core.
+Local Hint Unfold intersection : core.
 
 Definition difference {A : Type} (xs1 : Ensemble A) (xs2 : Ensemble A) : Ensemble A :=
   fun x : A => member x xs1 /\ ~ member x xs2
 .
 
-Local Hint Unfold difference : Core.
+Local Hint Unfold difference : core.
 
 Definition delete {A : Type} (x1 : A) (xs2 : Ensemble A) : Ensemble A :=
   fun x : A => member x (difference xs2 (singleton x1))
 .
 
-Local Hint Unfold delete : Core.
+Local Hint Unfold delete : core.
 
 Lemma isSubsetOf_insert {A : Type} :
   forall x1 : A,
@@ -266,7 +217,7 @@ Lemma isSubsetOf_insert {A : Type} :
   forall xs3 : Ensemble A,
   isSubsetOf xs2 xs3 ->
   isSubsetOf (insert x1 xs2) (insert x1 xs3).
-Proof with eauto.
+Proof with firstorder.
   unfold isSubsetOf, insert.
   firstorder.
   inversion H0; subst.
@@ -298,9 +249,7 @@ Proof with firstorder.
   intros.
   rewrite in_app_iff.
   split...
-  - apply UnionL...
-  - apply UnionR...
-  - inversion H1; subst...
+  inversion H1; subst...
 Qed.
 
 Lemma subset_remove {A : Type} :
@@ -339,6 +288,24 @@ Proof with firstorder.
 Qed.
 
 End Ensembles.
+
+#[export] Hint Unfold member : NaiveSetTheory_hints.
+#[export] Hint Unfold isSubsetOf : NaiveSetTheory_hints.
+#[export] Hint Constructors empty : NaiveSetTheory_hints.
+#[export] Hint Constructors singleton : NaiveSetTheory_hints.
+#[export] Hint Constructors union : NaiveSetTheory_hints.
+#[export] Hint Unfold insert : NaiveSetTheory_hints.
+#[export] Hint Unfold intersection : NaiveSetTheory_hints.
+#[export] Hint Unfold difference : NaiveSetTheory_hints.
+#[export] Hint Resolve isSubsetOf_insert : NaiveSetTheory_hints.
+#[export] Hint Resolve subset_append : NaiveSetTheory_hints.
+#[export] Hint Resolve in_append_iff_member_union : NaiveSetTheory_hints.
+#[export] Hint Resolve subset_remove : NaiveSetTheory_hints.
+#[export] Hint Resolve in_remove_iff_member_delete : NaiveSetTheory_hints.
+
+Ltac naive_set_theory :=
+  firstorder with NaiveSetTheory_hints || eauto with NaiveSetTheory_hints
+.
 
 End Aux.
 
@@ -388,6 +355,37 @@ Class CountableBooleanAlgebra (B : Type) : Type :=
 
 End DefinitionOfCBA.
 
+Create HintDb cba_hints.
+
+#[export] Hint Resolve eqB_refl : cba_hints.
+#[export] Hint Resolve eqB_symm : cba_hints.
+#[export] Hint Resolve eqB_trans : cba_hints.
+#[export] Hint Resolve trueB_preserves_eqB : cba_hints.
+#[export] Hint Resolve falseB_preserves_eqB : cba_hints.
+#[export] Hint Resolve negB_preserves_eqB : cba_hints.
+#[export] Hint Resolve andB_preserves_eqB : cba_hints.
+#[export] Hint Resolve or_preserves_eqB : cba_hints.
+#[export] Hint Resolve andB_associative : cba_hints.
+#[export] Hint Resolve orB_associative : cba_hints.
+#[export] Hint Resolve andB_idempotent : cba_hints.
+#[export] Hint Resolve orB_idempotent : cba_hints.
+#[export] Hint Resolve andB_commutative : cba_hints.
+#[export] Hint Resolve orB_commutative : cba_hints.
+#[export] Hint Resolve andB_distribute_orB : cba_hints.
+#[export] Hint Resolve orB_distribute_andB : cba_hints.
+#[export] Hint Resolve absorption_andB_orB : cba_hints.
+#[export] Hint Resolve absorption_orB_andB : cba_hints.
+#[export] Hint Resolve falseB_zero_andB : cba_hints.
+#[export] Hint Resolve trueB_zero_orB : cba_hints.
+#[export] Hint Resolve falseB_unit_orB : cba_hints.
+#[export] Hint Resolve trueB_unit_andB : cba_hints.
+#[export] Hint Resolve andB_negB : cba_hints.
+#[export] Hint Resolve orB_negB : cba_hints.
+
+Ltac cool_cba :=
+  eauto with cba_hints
+.
+
 Section TheoryOfCBA.
 
 Notation "b1 == b2" := (eqB b1 b2) (at level 80).
@@ -399,9 +397,8 @@ Variable B : Type.
 Lemma leq_CBA_refl `{cba : CountableBooleanAlgebra B} :
   forall b1 : B,
   b1 =< b1.
-Proof.
-  intros b1.
-  apply andB_idempotent.
+Proof with cool_cba.
+  intros...
 Qed.
 
 Lemma leq_CBA_refl' `{cba : CountableBooleanAlgebra B} :
@@ -409,15 +406,8 @@ Lemma leq_CBA_refl' `{cba : CountableBooleanAlgebra B} :
   forall b2 : B,
   b1 == b2 ->
   b1 =< b2.
-Proof.
-  intros b1 b2 H.
-  apply eqB_symm.
-  apply (eqB_trans b1 (andB b1 b1) (andB b1 b2)).
-  apply eqB_symm.
-  apply andB_idempotent.
-  apply andB_preserves_eqB.
-  apply eqB_refl.
-  apply H.
+Proof with cool_cba.
+  intros...
 Qed.
 
 Lemma leq_CBA_asym `{cba : CountableBooleanAlgebra B} :
@@ -426,14 +416,8 @@ Lemma leq_CBA_asym `{cba : CountableBooleanAlgebra B} :
   b1 =< b2 ->
   b2 =< b1 ->
   b1 == b2.
-Proof.
-  intros b1 b2 H1 H2.
-  apply (eqB_trans b1 (andB b1 b2) b2).
-  apply eqB_symm.
-  apply H1.
-  apply (eqB_trans (andB b1 b2) (andB b2 b1) b2).
-  apply andB_commutative.
-  apply H2.
+Proof with cool_cba.
+  intros...
 Qed.
 
 Lemma leq_CBA_trans `{cba : CountableBooleanAlgebra B} :
@@ -443,23 +427,9 @@ Lemma leq_CBA_trans `{cba : CountableBooleanAlgebra B} :
   b1 =< b2 ->
   b2 =< b3 ->
   b1 =< b3.
-Proof.
+Proof with cool_cba.
   intros b1 b2 b3 H1 H2.
-  apply (eqB_trans (andB b1 b3) (andB (andB b1 b2) b3) b1).
-  apply andB_preserves_eqB.
-  apply eqB_symm.
-  apply H1.
-  apply eqB_refl.
-  apply eqB_symm.
-  apply (eqB_trans b1 (andB b1 (andB b2 b3)) (andB (andB b1 b2) b3)).
-  apply (eqB_trans b1 (andB b1 b2) (andB b1 (andB b2 b3))).
-  apply eqB_symm.
-  apply H1.
-  apply andB_preserves_eqB.
-  apply eqB_refl.
-  apply eqB_symm.
-  apply H2.
-  apply andB_associative.
+  apply (eqB_trans (andB b1 b3) (andB (andB b1 b2) b3) b1)...
 Qed.
 
 Lemma leq_CBA_andB `{cba : CountableBooleanAlgebra B} :
@@ -470,94 +440,48 @@ Lemma leq_CBA_andB `{cba : CountableBooleanAlgebra B} :
   b1 =< b2 ->
   b1' =< b2' ->
   andB b1 b1' =< andB b2 b2'.
-Proof.
+Proof with cool_cba.
   intros b1 b1' b2 b2' H1 H2.
   assert (andB b1 b1' =< andB b2 b1').
-    apply eqB_symm.
-    apply (eqB_trans (andB b1 b1') (andB (andB b1 b2) b1') (andB (andB b1 b1') (andB b2 b1'))).
-    apply andB_preserves_eqB.
-    apply eqB_symm.
-    apply H1.
-    apply eqB_refl.
-    apply (eqB_trans (andB (andB b1 b2) b1') (andB b1 (andB b2 b1')) (andB (andB b1 b1') (andB b2 b1'))).
-    apply eqB_symm.
-    apply andB_associative.
+  { apply eqB_symm.
+    apply (eqB_trans (andB b1 b1') (andB (andB b1 b2) b1') (andB (andB b1 b1') (andB b2 b1'))); [cool_cba | ..].
+    apply (eqB_trans (andB (andB b1 b2) b1') (andB b1 (andB b2 b1')) (andB (andB b1 b1') (andB b2 b1'))); [cool_cba | ..].
     apply (eqB_trans (andB b1 (andB b2 b1')) (andB b1 (andB b1' (andB b2 b1'))) (andB (andB b1 b1') (andB b2 b1'))).
-    apply andB_preserves_eqB.
-    apply eqB_refl.
-    apply (eqB_trans (andB b2 b1') (andB b2 (andB b1' b1')) (andB b1' (andB b2 b1'))).
-    apply andB_preserves_eqB.
-    apply eqB_refl.
-    apply eqB_symm.
-    apply leq_CBA_refl.
-    apply eqB_symm.
-    apply (eqB_trans (andB b1' (andB b2 b1')) (andB (andB b2 b1') b1') (andB b2 (andB b1' b1'))).
-    apply (eqB_trans (andB b1' (andB b2 b1')) (andB (andB b1' b2) b1') (andB (andB b2 b1') b1')).
-    apply andB_associative.
-    apply andB_preserves_eqB.
-    apply andB_commutative.
-    apply eqB_refl.
-    apply eqB_symm.
-    apply andB_associative.
-    apply andB_associative.
+    - apply andB_preserves_eqB.
+      apply eqB_refl.
+      apply (eqB_trans (andB b2 b1') (andB b2 (andB b1' b1')) (andB b1' (andB b2 b1'))).
+      + apply andB_preserves_eqB...
+      + apply eqB_symm...
+    - apply eqB_symm...
+  }
   assert (andB b2 b1' =< andB b2 b2').
-    apply eqB_symm.
-    apply (eqB_trans (andB b2 b1') (andB b2 (andB b1' b2')) (andB (andB b2 b1') (andB b2 b2'))).
-    apply andB_preserves_eqB.
-    apply eqB_refl.
-    apply eqB_symm.
-    apply H2.
+  { apply eqB_symm.
+    apply (eqB_trans (andB b2 b1') (andB b2 (andB b1' b2')) (andB (andB b2 b1') (andB b2 b2'))); [cool_cba | ..].
     apply (eqB_trans (andB b2 (andB b1' b2')) (andB (andB b2 b2) (andB b1' b2')) (andB (andB b2 b1') (andB b2 b2'))).
-    apply andB_preserves_eqB.
-    apply eqB_symm.
-    apply leq_CBA_refl.
-    apply eqB_refl.
-    apply (eqB_trans (andB (andB b2 b2) (andB b1' b2')) (andB b2 (andB b2 (andB b1' b2'))) (andB (andB b2 b1') (andB b2 b2'))).
-    apply eqB_symm.
-    apply andB_associative.
-    apply (eqB_trans (andB b2 (andB b2 (andB b1' b2'))) (andB b2 (andB (andB b2 b1') b2')) (andB (andB b2 b1') (andB b2 b2'))).
-    apply andB_preserves_eqB.
-    apply eqB_refl.
-    apply andB_associative.
-    apply (eqB_trans (andB b2 (andB (andB b2 b1') b2')) (andB b2 (andB (andB b1' b2) b2')) (andB (andB b2 b1') (andB b2 b2'))).
-    apply andB_preserves_eqB.
-    apply eqB_refl.
-    apply andB_preserves_eqB.
-    apply andB_commutative.
-    apply eqB_refl.
-    apply (eqB_trans (andB b2 (andB (andB b1' b2) b2')) (andB b2 (andB b1' (andB b2 b2'))) (andB (andB b2 b1') (andB b2 b2'))).
-    apply andB_preserves_eqB.
-    apply eqB_refl.
-    apply eqB_symm.
-    apply andB_associative.
-    apply andB_associative.
-    apply (leq_CBA_trans (andB b1 b1') (andB b2 b1') (andB b2 b2') H H0).
+    - apply andB_preserves_eqB...
+    - apply (eqB_trans (andB (andB b2 b2) (andB b1' b2')) (andB b2 (andB b2 (andB b1' b2'))) (andB (andB b2 b1') (andB b2 b2'))); [cool_cba | ..].
+      apply (eqB_trans (andB b2 (andB b2 (andB b1' b2'))) (andB b2 (andB (andB b2 b1') b2')) (andB (andB b2 b1') (andB b2 b2'))); [cool_cba | ..].
+      apply (eqB_trans (andB b2 (andB (andB b2 b1') b2')) (andB b2 (andB (andB b1' b2) b2')) (andB (andB b2 b1') (andB b2 b2'))); [cool_cba | ..].
+      apply (eqB_trans (andB b2 (andB (andB b1' b2) b2')) (andB b2 (andB b1' (andB b2 b2'))) (andB (andB b2 b1') (andB b2 b2')))...
+  }
+  apply (leq_CBA_trans (andB b1 b1') (andB b2 b1') (andB b2 b2') H H0).
 Qed.
 
 Lemma andBs_CBA `{cba : CountableBooleanAlgebra B} :
   forall ps1 : list B,
   forall ps2 : list B,
   fold_right andB trueB (ps1 ++ ps2) == andB (fold_right andB trueB ps1) (fold_right andB trueB ps2).
-Proof.
+Proof with cool_cba.
   intros ps1.
   induction ps1.
   - intros ps.
-    simpl.
-    apply eqB_symm.
-    apply (eqB_trans (andB trueB (fold_right andB trueB ps)) (andB (fold_right andB trueB ps) trueB) (fold_right andB trueB ps)).
-    apply andB_commutative.
-    apply trueB_unit_andB.
+    simpl...
   - intros ps2.
-    simpl.
-    apply (eqB_trans (andB a (fold_right andB trueB (ps1 ++ ps2))) (andB a (andB (fold_right andB trueB ps1) (fold_right andB trueB ps2))) (andB (andB a (fold_right andB trueB ps1)) (fold_right andB trueB ps2))).
-    apply andB_preserves_eqB.
-    apply eqB_refl.
-    apply IHps1.
-    apply andB_associative.
+    simpl...
 Qed.
 
-Definition isFilter `{cba : CountableBooleanAlgebra B} (filter : Ensemble B) : Prop :=
-  (exists b0 : B, member b0 filter) /\ (forall b1 : B, forall b2 : B, member b1 filter -> b1 =< b2 -> member b2 filter) /\ (forall b1 : B, forall b2 : B, forall b : B, member b1 filter -> member b2 filter -> b == andB b1 b2 -> member b filter)
+Definition isFilter `{cba : CountableBooleanAlgebra B} : Ensemble B -> Prop :=
+  fun filter : Ensemble B => (exists b0 : B, member b0 filter) /\ (forall b1 : B, forall b2 : B, member b1 filter -> b1 =< b2 -> member b2 filter) /\ (forall b1 : B, forall b2 : B, forall b : B, member b1 filter -> member b2 filter -> b == andB b1 b2 -> member b filter)
 .
 
 Lemma isFilter_refl' `{cba : CountableBooleanAlgebra B} :
@@ -567,26 +491,14 @@ Lemma isFilter_refl' `{cba : CountableBooleanAlgebra B} :
   isSubsetOf bs1 bs2 ->
   isSubsetOf bs2 bs1 ->
   isFilter bs2.
-Proof.
+Proof with eauto.
   intros bs1 H0 bs2 H1 H2.
   destruct H0.
   destruct H0.
-  constructor.
-  destruct H as [b1].
-  exists b1.
-  apply (H1 b1 H).
-  constructor.
-  intros b1 b2 H4 H5.
-  apply (H1 b2).
-  apply (H0 b1 b2).
-  apply (H2 b1 H4).
-  apply H5.
-  intros b1 b2 b H4 H5 H6.
-  apply (H1 b).
-  apply (H3 b1 b2 b).
-  apply (H2 b1 H4).
-  apply (H2 b2 H5).
-  apply H6.
+  split.
+  - destruct H as [b1].
+    exists b1...
+  - split...
 Qed.
 
 Inductive Cl `{cba : CountableBooleanAlgebra B} : Ensemble B -> Ensemble B :=
@@ -599,20 +511,20 @@ Inductive Cl `{cba : CountableBooleanAlgebra B} : Ensemble B -> Ensemble B :=
   member b (Cl bs)
 .
 
-Definition inconsistent `{cba : CountableBooleanAlgebra B} (bs1 : Ensemble B) : Prop :=
-  exists b : B, member b bs1 /\ b == falseB
+Definition inconsistent `{cba : CountableBooleanAlgebra B} : Ensemble B -> Prop :=
+  fun bs1 : Ensemble B => exists b : B, member b bs1 /\ b == falseB
 .
 
-Definition equiconsistent `{cba : CountableBooleanAlgebra B} (bs1 : Ensemble B) (bs2 : Ensemble B) : Prop :=
-  inconsistent bs1 <-> inconsistent bs2
+Definition equiconsistent `{cba : CountableBooleanAlgebra B} : Ensemble B -> Ensemble B -> Prop :=
+  fun bs1 : Ensemble B => fun bs2 : Ensemble B => inconsistent bs1 <-> inconsistent bs2
 .
 
-Definition isElementComplete `{cba : CountableBooleanAlgebra B} (bs1 : Ensemble B) (b2 : B) : Prop :=
-  equiconsistent bs1 (Cl (insert b2 bs1)) -> member b2 bs1
+Definition isElementComplete `{cba : CountableBooleanAlgebra B} : Ensemble B -> B -> Prop :=
+  fun bs1 : Ensemble B => fun b2 : B => equiconsistent bs1 (Cl (insert b2 bs1)) -> member b2 bs1
 .
 
-Definition isComplete `{cba : CountableBooleanAlgebra B} (bs1 : Ensemble B) : Prop :=
-  forall b2 : B, isElementComplete bs1 b2
+Definition isComplete `{cba : CountableBooleanAlgebra B} : Ensemble B -> Prop :=
+  fun bs1 : Ensemble B => forall b2 : B, isElementComplete bs1 b2
 .
 
 Lemma inconsistent_subset `{cba : CountableBooleanAlgebra B} :
@@ -621,92 +533,65 @@ Lemma inconsistent_subset `{cba : CountableBooleanAlgebra B} :
   isSubsetOf bs1 bs2 ->
   inconsistent bs1 ->
   inconsistent bs2.
-Proof.
-  intros bs1 bs2.
-  intro.
-  intro.
+Proof with eauto.
+  intros.
   destruct H0 as [b'].
   destruct H0.
-  exists b'.
-  constructor.
-  apply (H b' H0).
-  apply H1.
+  exists b'...
 Qed.
 
 Lemma fact_1_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter (Cl bs).
-Proof.
+Proof with eauto.
   intros bs.
-  constructor.
-  exists trueB.
-  apply (Closure []).
-  intros p.
-  intro.
-  inversion H.
-  simpl.
-  apply leq_CBA_refl.
-  constructor.
-  intros b1 b H1 H2.
-  inversion H1.
-  subst.
-  apply (Closure ps).
-  apply H.
-  apply (leq_CBA_trans (fold_right andB trueB ps) b1 b H0 H2).
-  intros b1 b2 b H1 H2 H3.
-  destruct H1.
-  destruct H2.
-  apply (Closure (ps ++ ps0)).
-  intros p.
-  intro.
-  destruct (in_app_or ps ps0 p H4).
-  apply (H p H5).
-  apply (H1 p H5).
-  assert (fold_right andB trueB (ps ++ ps0) == andB (fold_right andB trueB ps) (fold_right andB trueB ps0)).
-    apply andBs_CBA.
-  apply (leq_CBA_trans (fold_right andB trueB (ps ++ ps0)) (andB b0 b1) b).
-  apply (leq_CBA_trans (fold_right andB trueB (ps ++ ps0)) (andB (fold_right andB trueB ps) (fold_right andB trueB ps0)) (andB b0 b1)).
-  apply (leq_CBA_refl' (fold_right andB trueB (ps ++ ps0)) (andB (fold_right andB trueB ps) (fold_right andB trueB ps0)) H4).
-  apply (leq_CBA_andB (fold_right andB trueB ps) (fold_right andB trueB ps0) b0 b1).
-  apply H0.
-  apply H2.
-  apply (leq_CBA_refl' (andB b0 b1) b).
-  apply eqB_symm.
-  apply H3.
+  split.
+  - exists trueB.
+    apply (Closure []).
+    + simpl.
+      firstorder.
+    + apply leq_CBA_refl.
+  - split.
+    + intros b1 b H1 H2.
+      inversion H1; subst.
+      apply (Closure ps)...
+      apply (leq_CBA_trans (fold_right andB trueB ps) b1 b)...
+    + intros b1 b2 b H1 H2 H3.
+      destruct H1.
+      destruct H2.
+      apply (Closure (ps ++ ps0)).
+      * intros p H4.
+        rewrite in_app_iff in H4.
+        firstorder.
+      * assert (fold_right andB trueB (ps ++ ps0) == andB (fold_right andB trueB ps) (fold_right andB trueB ps0)) by apply andBs_CBA.
+        apply (leq_CBA_trans (fold_right andB trueB (ps ++ ps0)) (andB b0 b1) b); [ | cool_cba].
+        apply (leq_CBA_trans (fold_right andB trueB (ps ++ ps0)) (andB (fold_right andB trueB ps) (fold_right andB trueB ps0)) (andB b0 b1)); [cool_cba | ].
+        apply (leq_CBA_andB (fold_right andB trueB ps) (fold_right andB trueB ps0) b0 b1)...
 Qed.
 
 Lemma fact_2_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   member trueB bs.
-Proof.
-  intros bs.
-  intro.
+Proof with eauto.
+  intros bs H.
   destruct H.
   destruct H0.
   destruct H as [b].
-  apply (H0 b trueB).
-  apply H.
-  apply trueB_unit_andB.
+  apply (H0 b trueB)...
+  cool_cba.
 Qed.
 
 Lemma fact_3_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isSubsetOf bs (Cl bs).
-Proof.
-  intros bs.
-  intros b.
-  intro.
+Proof with eauto.
+  intros bs b H.
   apply (Closure [b]).
-  intros p.
-  intro.
-  inversion H0.
-  subst.
-  apply H.
-  inversion H1.
-  simpl.
-  apply leq_CBA_refl'.
-  apply trueB_unit_andB.
+  - intros p H0.
+    inversion H0; subst...
+    inversion H1.
+  - cool_cba.
 Qed.
 
 Lemma fact_4_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
@@ -714,27 +599,18 @@ Lemma fact_4_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
   forall bs2 : Ensemble B,
   isSubsetOf bs1 bs2 ->
   isSubsetOf (Cl bs1) (Cl bs2).
-Proof.
-  intros bs1 bs2.
-  intro.
-  intros b.
-  intro.
+Proof with eauto.
+  intros bs1 bs2 H b H0.
   destruct H0.
-  apply (Closure ps).
-  intros p.
-  intro.
-  apply (H p).
-  apply (H0 p H2).
-  apply H1.
+  apply (Closure ps)...
 Qed.
 
 Lemma fact_5_of_1_2_8 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   isSubsetOf (Cl bs) bs.
-Proof.
-  intros bs.
-  intro.
+Proof with eauto.
+  intros bs H.
   destruct H.
   destruct H0.
   cut (
@@ -742,33 +618,17 @@ Proof.
     (forall b : B, In b ps -> member b bs) ->
     member (fold_right andB trueB ps) bs
   ).
-    intro.
-    intros p.
-    intro.
-    destruct H3.
-    apply (H0 (fold_right andB trueB ps) b).
-    apply H2.
-    apply H3.
-    apply H4.
-  intros ps.
-  induction ps.
-  - intro.
-    simpl in *.
+  { intros H2 p H3.
+    destruct H3...
+  }
+  induction ps; simpl.
+  - intros H2.
     destruct H as [b'].
-    apply (H0 b' trueB).
-    apply H.
-    apply trueB_unit_andB.
-  - intro.
-    simpl in *.
-    apply (H1 a (fold_right andB trueB ps) (andB a (fold_right andB trueB ps))).
-    apply (H2 a).
-    tauto.
-    apply IHps.
-    intros b.
-    intro.
-    apply H2.
-    tauto.
-    apply eqB_refl.
+    apply (H0 b' trueB)...
+    cool_cba.
+  - intros H2.
+    apply (H1 a (fold_right andB trueB ps) (andB a (fold_right andB trueB ps)))...
+    cool_cba.
 Qed.
 
 Lemma proposition_1_of_1_2_9 `{cba : CountableBooleanAlgebra B} :
@@ -779,19 +639,12 @@ Lemma proposition_1_of_1_2_9 `{cba : CountableBooleanAlgebra B} :
   forall b2 : B,
   b1 == b2 ->
   member b2 bs.
-Proof.
-  intros bs.
-  intro.
+Proof with eauto.
+  intros.
   destruct H.
-  destruct H0.
-  intros b1.
-  intro.
-  intros b2.
-  intro.
-  apply (H0 b1 b2).
-  apply H2.
-  apply leq_CBA_refl'.
-  apply H3.
+  destruct H2.
+  apply (H2 b1 b2)...
+  cool_cba.
 Qed.
 
 Inductive Insert `{cba : CountableBooleanAlgebra B} : Ensemble B -> nat -> Ensemble B :=
@@ -816,15 +669,10 @@ Lemma lemma_1_of_1_2_11 `{cba : CountableBooleanAlgebra B} :
   isFilter bs ->
   forall n : nat,
   isFilter (improveFilter bs n).
-Proof.
-  intros bs.
-  intro.
-  intros n.
-  induction n.
-  - simpl.
-    apply H.
-  - simpl.
-    apply fact_1_of_1_2_8.
+Proof with eauto.
+  intros bs H n.
+  induction n...
+  apply fact_1_of_1_2_8.
 Qed.
 
 Lemma lemma_1_of_1_2_12 `{cba : CountableBooleanAlgebra B} :
@@ -833,25 +681,13 @@ Lemma lemma_1_of_1_2_12 `{cba : CountableBooleanAlgebra B} :
   forall n2 : nat,
   n1 <= n2 ->
   isSubsetOf (improveFilter bs n1) (improveFilter bs n2).
-Proof.
-  intros bs n1 n2.
-  intro.
-  induction H.
-  - unfold isSubsetOf.
-    intuition.
-  - assert (isSubsetOf (improveFilter bs m) (improveFilter bs (S m))).
-      assert (isSubsetOf (union (improveFilter bs m) (Insert (improveFilter bs m) m)) (Cl (union (improveFilter bs m) (Insert (improveFilter bs m) m)))).
-        apply fact_3_of_1_2_8.
-      intros p.
-      intro.
-      apply H0.
-      apply UnionL.
-      apply H1.
-    intros p.
-    intro.
-    apply H0.
-    apply IHle.
-    apply H1.
+Proof with eauto.
+  unfold isSubsetOf.
+  intros bs n1 n2 H.
+  induction H...
+  assert (isSubsetOf (improveFilter bs m) (improveFilter bs (S m)))...
+  assert (isSubsetOf (union (improveFilter bs m) (Insert (improveFilter bs m) m)) (Cl (union (improveFilter bs m) (Insert (improveFilter bs m) m)))) by apply fact_3_of_1_2_8.
+  naive_set_theory.
 Qed.
 
 Lemma lemma_1_of_1_2_13 `{cba : CountableBooleanAlgebra B} :
@@ -859,131 +695,84 @@ Lemma lemma_1_of_1_2_13 `{cba : CountableBooleanAlgebra B} :
   isFilter bs ->
   forall n : nat,
   equiconsistent bs (improveFilter bs n).
-Proof.
-  intros bs.
-  intro HHH.
-  intros n.
-  induction n.
-  - simpl.
-    unfold equiconsistent.
+Proof with eauto.
+  intros bs HHH.
+  induction n; simpl.
+  - unfold equiconsistent.
     intuition.
-  - constructor.
-    unfold inconsistent.
-    intro.
-    destruct H as [b'].
-    destruct H.
-    exists b'.
-    constructor.
-    apply (lemma_1_of_1_2_12 bs 0 (S n)).
-    lia.
-    simpl.
-    apply H.
-    apply H0.
-    intro.
-    cut (
-      forall ps : list B,
-      (forall p : B, In p ps -> member p (union (improveFilter bs n) (Insert (improveFilter bs n) n))) ->
-      member (fold_right andB trueB ps) (improveFilter bs n) \/ (exists p' : B, In p' ps /\ member p' (Insert (improveFilter bs n) n))
-    ).
-      intro.
+  - split.
+    + unfold inconsistent.
+      intros H.
       destruct H as [b'].
       destruct H.
-      inversion H.
-      subst.
-      destruct (H0 ps H2).
-      apply (proj2 IHn).
-      exists (fold_right andB trueB ps).
-      constructor.
-      apply H4.
-      apply leq_CBA_asym.
-      apply (leq_CBA_trans (fold_right andB trueB ps) b' falseB).
-      apply H3.
-      apply leq_CBA_refl'.
-      apply H1.
-      apply (eqB_trans (andB falseB (fold_right andB trueB ps)) (andB (fold_right andB trueB ps) falseB) falseB).
-      apply andB_commutative.
-      apply falseB_zero_andB.
-      destruct H4 as [p'].
-      destruct H4.
-      assert (member p' (union (improveFilter bs n) (Insert (improveFilter bs n) n))).
-        apply (H2 p' H4).
-      assert (member falseB (Cl (union (improveFilter bs n) (Insert (improveFilter bs n) n)))).
-        apply (Closure ps).
-        apply H2.
-        apply (leq_CBA_trans (fold_right andB trueB ps) b' falseB).
-        apply H3.
-        apply leq_CBA_refl'.
-        apply H1.
-      inversion H5.
-      subst.
-      apply (proj2 IHn).
-      apply (proj2 H8).
-      exists falseB.
-      constructor.
-      assert (isSubsetOf (union (improveFilter bs n) (Insert (improveFilter bs n) n)) (insert (enumB n) (improveFilter bs n))).
-        intros p.
-        intro.
-        inversion H9.
-        subst.
-        apply UnionL.
-        apply H10.
-        subst.
-        inversion H10.
-        subst.
-        apply UnionR.
-        apply Singleton.
-      assert (isSubsetOf (Cl (union (improveFilter bs n) (Insert (improveFilter bs n) n))) (Cl (insert (enumB n) (improveFilter bs n)))).
-        apply fact_4_of_1_2_8.
-        apply H9.
-      apply H10.
-      apply H7.
-      apply eqB_refl.
-    intros ps.
-    induction ps.
-    * simpl in *.
-      intro.
-      apply or_introl.
-      apply fact_2_of_1_2_8.
-      apply lemma_1_of_1_2_11.
-      apply HHH.
-    * simpl in *.
-      intro.
-      assert (
-        forall p : B,
-        In p ps ->
-        member p (union (improveFilter bs n) (Insert (improveFilter bs n) n))
+      exists b'.
+      split...
+      apply (lemma_1_of_1_2_12 bs 0 (S n))...
+      lia.
+    + intros H0.
+      cut (
+        forall ps : list B,
+        (forall p : B, In p ps -> member p (union (improveFilter bs n) (Insert (improveFilter bs n) n))) ->
+        member (fold_right andB trueB ps) (improveFilter bs n) \/ (exists p' : B, In p' ps /\ member p' (Insert (improveFilter bs n) n))
       ).
-        intros p.
-        intro.
-        apply (H0 p).
-        tauto.
-      assert (member a (union (improveFilter bs n) (Insert (improveFilter bs n) n))).
-        apply H0.
-        tauto.
-      assert (isFilter (improveFilter bs n)).
-        apply lemma_1_of_1_2_11.
-        apply HHH.
-      destruct (IHps H1).
-      inversion H2.
-      subst.
-      destruct H3.
-      destruct H6.
-      apply or_introl.
-      apply (H7 a (fold_right andB trueB ps)).
-      apply H5.
-      apply H4.
-      apply eqB_refl.
-      subst.
-      apply or_intror.
-      exists a.
-      tauto.
-      apply or_intror.
-      destruct H4 as [p'].
-      exists p'.
-      destruct H4.
-      constructor.
-      tauto.
-      apply H5.
+      { intros H.
+        destruct H0 as [b'].
+        destruct H0.
+        inversion H0; subst.
+        destruct (H ps H2).
+        - apply (proj2 IHn).
+          exists (fold_right andB trueB ps).
+          split...
+          cool_cba.
+        - destruct H4 as [p'].
+          destruct H4.
+          assert (member p' (union (improveFilter bs n) (Insert (improveFilter bs n) n))) by apply (H2 p' H4).
+          assert (member falseB (Cl (union (improveFilter bs n) (Insert (improveFilter bs n) n)))).
+          { apply (Closure ps)...
+            cool_cba.
+          }
+          inversion H5; subst.
+          apply (proj2 IHn).
+          apply (proj2 H8).
+          exists falseB.
+          split.
+          assert (isSubsetOf (union (improveFilter bs n) (Insert (improveFilter bs n) n)) (insert (enumB n) (improveFilter bs n))).
+          { intros p H9.
+            inversion H9; subst.
+            - apply UnionL...
+            - inversion H10; subst.
+              apply UnionR.
+              apply Singleton.
+          }
+          assert (isSubsetOf (Cl (union (improveFilter bs n) (Insert (improveFilter bs n) n))) (Cl (insert (enumB n) (improveFilter bs n)))) by now apply fact_4_of_1_2_8...
+          cool_cba.
+      }
+      induction ps; simpl.
+      { intros H.
+        left.
+        apply fact_2_of_1_2_8.
+        apply lemma_1_of_1_2_11...
+      }
+      { intros H.
+        assert (
+          forall p : B,
+          In p ps ->
+          member p (union (improveFilter bs n) (Insert (improveFilter bs n) n))
+        ) by eauto.
+        assert (member a (union (improveFilter bs n) (Insert (improveFilter bs n) n))) by eauto.
+        assert (isFilter (improveFilter bs n)) by now apply lemma_1_of_1_2_11.
+        destruct (IHps H1).
+        - inversion H2; subst.
+          + destruct H3.
+            destruct H6.
+            left.
+            apply (H7 a (fold_right andB trueB ps))...
+            cool_cba.
+          + right.
+            exists a...
+        - right.
+          firstorder.
+      }
 Qed.
 
 Lemma lemma_2_of_1_2_13 `{cba : CountableBooleanAlgebra B} :
@@ -992,16 +781,11 @@ Lemma lemma_2_of_1_2_13 `{cba : CountableBooleanAlgebra B} :
   forall n1 : nat,
   forall n2 : nat,
   equiconsistent (improveFilter bs n1) (improveFilter bs n2).
-Proof.
+Proof with intuition.
   intros bs HHH n1 n2.
-  assert (equiconsistent bs (improveFilter bs n1)).
-    apply lemma_1_of_1_2_13.
-    apply HHH.
-  assert (equiconsistent bs (improveFilter bs n2)).
-    apply lemma_1_of_1_2_13.
-    apply HHH.
-  unfold equiconsistent in *.
-  intuition.
+  assert (equiconsistent bs (improveFilter bs n1)) by now apply lemma_1_of_1_2_13.
+  assert (equiconsistent bs (improveFilter bs n2)) by now apply lemma_1_of_1_2_13.
+  unfold equiconsistent in *...
 Qed.
 
 Inductive CompleteFilter `{cba : CountableBooleanAlgebra B} : Ensemble B -> Ensemble B :=
@@ -1017,255 +801,173 @@ Lemma lemma_3_of_1_2_13 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   equiconsistent bs (CompleteFilter bs).
-Proof.
+Proof with eauto.
   intros bs HHH.
-  constructor.
-  intro.
-  destruct H as [p'].
-  destruct H.
-  exists p'.
-  constructor.
-  apply (InCompleteFilter 0).
-  simpl.
-  apply H.
-  apply H0.
-  intro.
-  destruct H as [p'].
-  destruct H.
-  inversion H.
-  subst.
-  assert (equiconsistent bs (improveFilter bs n)).
-    apply lemma_1_of_1_2_13.
-    apply HHH.
-  apply (proj2 H2).
-  exists p'.
-  tauto.
+  split.
+  - intros H.
+    destruct H as [p'].
+    destruct H.
+    exists p'.
+    split...
+    apply (InCompleteFilter 0)...
+  - intros H.
+    destruct H as [p'].
+    destruct H.
+    inversion H; subst.
+    assert (equiconsistent bs (improveFilter bs n)) by now apply lemma_1_of_1_2_13.
+    apply (proj2 H2).
+    exists p'...
 Qed.
 
 Theorem theorem_1_2_14 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   isSubsetOf bs (CompleteFilter bs) /\ isFilter (CompleteFilter bs) /\ isComplete (CompleteFilter bs) /\ equiconsistent bs (CompleteFilter bs).
-Proof.
+Proof with eauto.
   intros bs HHH.
   assert (isSubsetOf bs (CompleteFilter bs)).
-    intros p.
-    intro.
-    apply (InCompleteFilter 0).
-    simpl.
-    apply H.
-  constructor.
-  apply H.
-  constructor.
-  inversion HHH.
-  destruct H0 as [b0].
-  constructor.
-  exists b0.
-  apply H.
-  apply H0.
-  constructor.
-  intros b1 b2.
-  intro.
-  intro.
-  inversion H2.
-  subst.
-  assert (isFilter (improveFilter bs n)).
-    apply lemma_1_of_1_2_11.
-    apply HHH.
-  destruct H5.
-  destruct H6.
-  apply (InCompleteFilter n).
-  apply (H6 b1 b2 H4 H3).
-  intros b1 b2 b.
-  intro.
-  intro.
-  intro.
-  inversion H2.
-  subst.
-  inversion H3.
-  subst.
-  assert (n >= n0 \/ n0 >= n).
-    lia.
-  destruct H7.
-  assert (isFilter (improveFilter bs n)).
-    apply lemma_1_of_1_2_11.
-    apply HHH.
-  destruct H8.
-  destruct H9.
-  apply (InCompleteFilter n).
-  apply (H10 b1 b2 b).
-  apply H5.
-  assert (isSubsetOf (improveFilter bs n0) (improveFilter bs n)).
-    apply lemma_1_of_1_2_12.
-    lia.
-  apply H11.
-  apply H6.
-  apply H4.
-  assert (isFilter (improveFilter bs n0)).
-    apply lemma_1_of_1_2_11.
-    apply HHH.
-  destruct H8.
-  destruct H9.
-  apply (InCompleteFilter n0).
-  apply (H10 b1 b2 b).
-  assert (isSubsetOf (improveFilter bs n) (improveFilter bs n0)).
-    apply lemma_1_of_1_2_12.
-    lia.
-  apply H11.
-  apply H5.
-  apply H6.
-  apply H4.
-  constructor.
-  intros b.
-  intro.
-  destruct (enumB_surjective b) as [n].
-  cut (equiconsistent (improveFilter bs n) (Cl (union (improveFilter bs n) (singleton b)))).
-    intro.
-    apply (InCompleteFilter (S n)).
-    simpl.
-    apply (Closure [b]).
-    intros p.
-    intro.
-    inversion H3.
-    subst.
-    apply UnionR.
-    apply Insertion.
-    apply H2.
-    inversion H4.
-    simpl.
-    apply leq_CBA_refl'.
-    apply trueB_unit_andB.
-  constructor.
-  intro.
-  destruct H2 as [b'].
-  destruct H2.
-  exists b'.
-  constructor.
-  apply (Closure [b']).
-  intros p.
-  intro.
-  inversion H4.
-  subst.
-  apply UnionL.
-  apply H2.
-  inversion H5.
-  simpl.
-  apply leq_CBA_refl'.
-  apply trueB_unit_andB.
-  apply H3.
-  intro.
-  cut (inconsistent (Cl (insert b (CompleteFilter bs)))).
-    assert (equiconsistent bs (improveFilter bs n)).
-      apply lemma_1_of_1_2_13.
-      apply HHH.
-    assert (equiconsistent bs (CompleteFilter bs)).
-      apply lemma_3_of_1_2_13.
-      apply HHH.
-    unfold equiconsistent in *.
-    tauto.
-  destruct H2 as [b'].
-  destruct H2.
-  exists b'.
-  constructor.
-  assert (isSubsetOf (Cl (union (improveFilter bs n) (singleton b))) (Cl (insert b (CompleteFilter bs)))).
-    apply fact_4_of_1_2_8.
-    intros p.
-    intro.
-    inversion H4.
-    subst.
-    apply UnionL.
-    apply (InCompleteFilter n).
-    apply H5.
-    subst.
-    apply UnionR.
-    apply H5.
-  apply H4.
-  apply H2.
-  apply H3.
-  apply lemma_3_of_1_2_13.
-  apply HHH.
+  { intros p H.
+    apply (InCompleteFilter 0)...
+  }
+  split...
+  split.
+  - inversion HHH.
+    destruct H0 as [b0].
+    split.
+    + exists b0...
+    + split.
+      { intros b1 b2 H2 H3.
+        inversion H2; subst.
+        assert (isFilter (improveFilter bs n)) by now apply lemma_1_of_1_2_11.
+        destruct H5.
+        destruct H6.
+        apply (InCompleteFilter n)...
+      }
+      { intros.
+        inversion H2; subst.
+        inversion H3; subst.
+        assert (n >= n0 \/ n0 >= n) by lia.
+        destruct H7.
+        - assert (isFilter (improveFilter bs n)) by now apply lemma_1_of_1_2_11...
+          destruct H8.
+          destruct H9.
+          apply (InCompleteFilter n)...
+          assert (isSubsetOf (improveFilter bs n0) (improveFilter bs n))...
+          apply lemma_1_of_1_2_12.
+          lia.
+        - assert (isFilter (improveFilter bs n0)) by now apply lemma_1_of_1_2_11.
+          destruct H8.
+          destruct H9.
+          apply (InCompleteFilter n0)...
+          assert (isSubsetOf (improveFilter bs n) (improveFilter bs n0))...
+          apply lemma_1_of_1_2_12.
+          lia.
+      }
+  - split.
+    + intros b H0.
+      destruct (enumB_surjective b) as [n].
+      cut (equiconsistent (improveFilter bs n) (Cl (union (improveFilter bs n) (singleton b)))).
+      { intros.
+        apply (InCompleteFilter (S n)).
+        simpl.
+        apply (Closure [b]).
+        - intros.
+          inversion H3; subst.
+          + apply UnionR.
+            apply Insertion...
+          + inversion H4.
+        - simpl.
+          cool_cba.
+      }
+      split.
+      { intros.
+        destruct H2 as [b'].
+        destruct H2.
+        exists b'.
+        split...
+        apply (Closure [b']).
+        - intros.
+          inversion H4; subst.
+          apply UnionL... 
+          inversion H5.
+        - simpl.
+          cool_cba.
+      }
+      { intros.
+        cut (inconsistent (Cl (insert b (CompleteFilter bs)))).
+        { assert (equiconsistent bs (improveFilter bs n)) by now apply lemma_1_of_1_2_13.
+          assert (equiconsistent bs (CompleteFilter bs)) by now apply lemma_3_of_1_2_13.
+          unfold equiconsistent in *.
+          tauto.
+        }
+        destruct H2 as [b'].
+        destruct H2.
+        exists b'.
+        split...
+        assert (isSubsetOf (Cl (union (improveFilter bs n) (singleton b))) (Cl (insert b (CompleteFilter bs))))...
+        apply fact_4_of_1_2_8.
+        intros p H4.
+        inversion H4; subst; naive_set_theory.
+        apply UnionL.
+        apply (InCompleteFilter n)...
+      } 
+  + apply lemma_3_of_1_2_13...
 Qed.
 
-Definition isUltraFilter `{cba : CountableBooleanAlgebra B} (bs : Ensemble B) :=
-  isFilter bs /\ (forall bs' : Ensemble B, isFilter bs' -> equiconsistent bs bs' -> isSubsetOf bs bs' -> isSubsetOf bs' bs)
+Definition isUltraFilter `{cba : CountableBooleanAlgebra B} : Ensemble B -> Prop :=
+  fun bs : Ensemble B => isFilter bs /\ (forall bs' : Ensemble B, isFilter bs' -> equiconsistent bs bs' -> isSubsetOf bs bs' -> isSubsetOf bs' bs)
 .
 
 Corollary corollary_1_2_16 `{cba : CountableBooleanAlgebra B} :
   forall bs : Ensemble B,
   isFilter bs ->
   isUltraFilter (CompleteFilter bs).
-Proof.
+Proof with eauto.
   intros bs HHH.
   destruct (theorem_1_2_14 bs HHH).
   destruct H0.
   destruct H1.
-  constructor.
-  apply H0.
-  intros bs' HHH'.
-  intro.
-  intro.
-  intros b.
-  intro.
+  split...
+  intros bs' H3 H4 H5 b H6.
   cut (
     equiconsistent (CompleteFilter bs) (Cl (insert b (CompleteFilter bs)))
   ).
-    intro.
-    apply H1.
-    apply H6.
-  constructor.
-  intro.
-  destruct H6 as [b'].
-  destruct H6.
-  exists b'.
-  constructor.
-  apply fact_3_of_1_2_8.
-  apply UnionL.
-  apply H6.
-  apply H7.
-  intro.
-  apply (proj2 H3).
-  assert (inconsistent (Cl (insert b bs'))).
-    assert (isSubsetOf (insert b (CompleteFilter bs)) (insert b bs')).
-      intros p.
-      intro.
-      inversion H7.
-      subst.
-      apply UnionL.
-      apply H4.
-      apply H8.
-      subst.
-      apply UnionR.
-      apply H8.
-    destruct H6 as [b'].
-    destruct H6.
+  { intros.
+    apply H1...
+  }
+  split.
+  - intros H7.
+    destruct H7 as [b'].
+    destruct H7.
     exists b'.
-    constructor.
-    assert (isSubsetOf (Cl (insert b (CompleteFilter bs))) (Cl (insert b bs'))).
-      apply fact_4_of_1_2_8.
-      apply H7.
-    apply H9.
-    apply H6.
-    apply H8.
-  destruct H7 as [b'].
-  destruct H7.
-  exists b'.
-  constructor.
-  apply fact_5_of_1_2_8.
-  apply HHH'.
-  assert (isSubsetOf (Cl (insert b bs')) (Cl bs')).
+    split...
+    apply fact_3_of_1_2_8.
+    apply UnionL...
+  - intros H7.
+    apply (proj2 H4).
+    assert (inconsistent (Cl (insert b bs'))).
+    { assert (isSubsetOf (insert b (CompleteFilter bs)) (insert b bs')).
+      { intros p H8.
+        inversion H8; subst.
+        - apply UnionL...
+        - apply UnionR...
+      }
+      destruct H7 as [b'].
+      destruct H7.
+      exists b'.
+      split...
+      assert (isSubsetOf (Cl (insert b (CompleteFilter bs))) (Cl (insert b bs'))) by now apply fact_4_of_1_2_8...
+    }
+    destruct H8 as [b'].
+    destruct H8.
+    exists b'.
+    split...
+    apply fact_5_of_1_2_8...
+    assert (isSubsetOf (Cl (insert b bs')) (Cl bs'))...
     apply fact_4_of_1_2_8.
-    intros p.
-    intro.
-    inversion H9.
-    subst.
-    apply H10.
-    subst.
-    inversion H10.
-    subst.
-    apply H5.
-  apply H9.
-  apply H7.
-  apply H8.
+    intros p H10.
+    inversion H10; subst...
+    inversion H11; subst...
 Qed.
 
 End TheoryOfCBA.
@@ -1299,263 +1001,23 @@ Inductive Formula : Set :=
 Proposition eq_Formula_dec :
   forall p1 p2 : Formula,
   {p1 = p2} + {p1 <> p2}.
-Proof.
-  intros p1.
-  induction p1.
-  - intros p2.
-    destruct p2.
-    * destruct (Nat.eq_dec i i0).
-      + intuition.
-      + assert (AtomF i <> AtomF i0).
-          intro.
-          inversion H.
-          intuition.
-        intuition.
-    * assert (AtomF i <> ContradictionF).
-        intro.
-        inversion H.
-      intuition.
-    * assert (AtomF i <> NegationF p2).
-        intro.
-        inversion H.
-      intuition.
-    * assert (AtomF i <> ConjunctionF p2_1 p2_2).
-        intro.
-        inversion H.
-      intuition.
-    * assert (AtomF i <> DisjunctionF p2_1 p2_2).
-        intro.
-        inversion H.
-      intuition.
-    * assert (AtomF i <> ImplicationF p2_1 p2_2).
-        intro.
-        inversion H.
-      intuition.
-    * assert (AtomF i <> BiconditionalF p2_1 p2_2).
-        intro.
-        inversion H.
-      intuition.
-  - intros p2.
-    induction p2.
-    * assert (ContradictionF <> AtomF i).
-        intro.
-        inversion H.
-      intuition.
-    * intuition.
-    * assert (ContradictionF <> NegationF p2).
-        intro.
-        inversion H.
-      intuition.
-    * assert (ContradictionF <> ConjunctionF p2_1 p2_2).
-        intro.
-        inversion H.
-      intuition.
-    * assert (ContradictionF <> DisjunctionF p2_1 p2_2).
-        intro.
-        inversion H.
-      intuition.
-    * assert (ContradictionF <> ImplicationF p2_1 p2_2).
-        intro.
-        inversion H.
-      intuition.
-    * assert (ContradictionF <> BiconditionalF p2_1 p2_2).
-        intro.
-        inversion H.
-      intuition.
-  - intros p2.
-    destruct p2.
-    * assert (NegationF p1 <> AtomF i).
-        intro.
-        inversion H.
-      intuition.
-    * assert (NegationF p1 <> ContradictionF).
-        intro.
-        inversion H.
-      intuition.
-    * destruct (IHp1 p2).
-        subst.
-        tauto.
-        assert (NegationF p1 <> NegationF p2).
-          intro.
-          inversion H.
-          apply (n H1).
-        intuition.
-    * assert (NegationF p1 <> ConjunctionF p2_1 p2_2).
-        intro.
-        inversion H.
-      intuition.
-    * assert (NegationF p1 <> DisjunctionF p2_1 p2_2).
-        intro.
-        inversion H.
-      intuition.
-    * assert (NegationF p1 <> ImplicationF p2_1 p2_2).
-        intro.
-        inversion H.
-      intuition.
-    * assert (NegationF p1 <> BiconditionalF p2_1 p2_2).
-        intro.
-        inversion H.
-      intuition.
-  - intros p2.
-    destruct p2.
-    * assert (ConjunctionF p1_1 p1_2 <> AtomF i).
-        intro.
-        inversion H.
-      intuition.
-    * assert (ConjunctionF p1_1 p1_2 <> ContradictionF).
-        intro.
-        inversion H.
-      intuition.
-    * assert (ConjunctionF p1_1 p1_2 <> NegationF p2).
-        intro.
-        inversion H.
-      intuition.
-    * destruct (IHp1_1 p2_1).
-        destruct (IHp1_2 p2_2).
-          subst.
-          intuition.
-          assert (ConjunctionF p1_1 p1_2 <> ConjunctionF p2_1 p2_2).
-            intro.
-            inversion H.
-            tauto.
-          tauto.
-        assert (ConjunctionF p1_1 p1_2 <> ConjunctionF p2_1 p2_2).
-          intro.
-          inversion H.
-          tauto.
-        tauto.
-    * assert (ConjunctionF p1_1 p1_2 <> DisjunctionF p2_1 p2_2).
-        intro.
-        inversion H.
-      tauto.
-    * assert (ConjunctionF p1_1 p1_2 <> ImplicationF p2_1 p2_2).
-        intro.
-        inversion H.
-      tauto.
-    * assert (ConjunctionF p1_1 p1_2 <> BiconditionalF p2_1 p2_2).
-        intro.
-        inversion H.
-      tauto.
-  - intros p2.
-    destruct p2.
-    * assert (DisjunctionF p1_1 p1_2 <> AtomF i).
-        intro.
-        inversion H.
-      tauto.
-    * assert (DisjunctionF p1_1 p1_2 <> ContradictionF).
-        intro.
-        inversion H.
-      tauto.
-    * assert (DisjunctionF p1_1 p1_2 <> NegationF p2).
-        intro.
-        inversion H.
-      tauto.
-    * assert (DisjunctionF p1_1 p1_2 <> ConjunctionF p2_1 p2_2).
-        intro.
-        inversion H.
-      tauto.
-    * destruct (IHp1_1 p2_1).
-        destruct (IHp1_2 p2_2).
-          subst.
-          intuition.
-          assert (DisjunctionF p1_1 p1_2 <> DisjunctionF p2_1 p2_2).
-            intro.
-            inversion H.
-            tauto.
-          tauto.
-        assert (DisjunctionF p1_1 p1_2 <> DisjunctionF p2_1 p2_2).
-          intro.
-          inversion H.
-          tauto.
-        tauto.
-    * assert (DisjunctionF p1_1 p1_2 <> ImplicationF p2_1 p2_2).
-        intro.
-        inversion H.
-      tauto.
-    * assert (DisjunctionF p1_1 p1_2 <> BiconditionalF p2_1 p2_2).
-        intro.
-        inversion H.
-      tauto.
-  - intros p2.
-    induction p2.
-    * assert (ImplicationF p1_1 p1_2 <> AtomF i).
-        intro.
-        inversion H.
-      tauto.
-    * assert (ImplicationF p1_1 p1_2 <> ContradictionF).
-        intro.
-        inversion H.
-      tauto.
-    * assert (ImplicationF p1_1 p1_2 <> NegationF p2).
-        intro.
-        inversion H.
-      tauto.
-    * assert (ImplicationF p1_1 p1_2 <> ConjunctionF p2_1 p2_2).
-        intro.
-        inversion H.
-      tauto.
-    * assert (ImplicationF p1_1 p1_2 <> DisjunctionF p2_1 p2_2).
-        intro.
-        inversion H.
-      tauto.
-    * destruct (IHp1_1 p2_1).
-        destruct (IHp1_2 p2_2).
-          subst.
-          intuition.
-          assert (ImplicationF p1_1 p1_2 <> ImplicationF p2_1 p2_2).
-            intro.
-            inversion H.
-            tauto.
-          tauto.
-        assert (ImplicationF p1_1 p1_2 <> ImplicationF p2_1 p2_2).
-          intro.
-          inversion H.
-          tauto.
-        tauto.
-    * assert (ImplicationF p1_1 p1_2 <> BiconditionalF p2_1 p2_2).
-        intro.
-        inversion H.
-      tauto.
-  - intros p2.
-    destruct p2.
-    * assert (BiconditionalF p1_1 p1_2 <> AtomF i).
-        intro.
-        inversion H.
-      tauto.
-    * assert (BiconditionalF p1_1 p1_2 <> ContradictionF).
-        intro.
-        inversion H.
-      tauto.
-    * assert (BiconditionalF p1_1 p1_2 <> NegationF p2).
-        intro.
-        inversion H.
-      tauto.
-    * assert (BiconditionalF p1_1 p1_2 <> ConjunctionF p2_1 p2_2).
-        intro.
-        inversion H.
-      tauto.
-    * assert (BiconditionalF p1_1 p1_2 <> DisjunctionF p2_1 p2_2).
-        intro.
-        inversion H.
-      tauto.
-    * assert (BiconditionalF p1_1 p1_2 <> ImplicationF p2_1 p2_2).
-        intro.
-        inversion H.
-      tauto.
-    * destruct (IHp1_1 p2_1).
-        destruct (IHp1_2 p2_2).
-          subst.
-          intuition.
-          assert (BiconditionalF p1_1 p1_2 <> BiconditionalF p2_1 p2_2).
-            intro.
-            inversion H.
-            tauto.
-          tauto.
-        assert (BiconditionalF p1_1 p1_2 <> BiconditionalF p2_1 p2_2).
-          intro.
-          inversion H.
-          tauto.
-        tauto.
+Proof with ((right; intros H; inversion H; contradiction) || eauto).
+  induction p1; destruct p2...
+  - destruct (Nat.eq_dec i i0)...
+  - destruct (IHp1 p2)...
+    rewrite e...
+  - destruct (IHp1_1 p2_1)...
+    destruct (IHp1_2 p2_2)...
+    rewrite e, e0...
+  - destruct (IHp1_1 p2_1)...
+    destruct (IHp1_2 p2_2)...
+    rewrite e, e0...
+  - destruct (IHp1_1 p2_1)...
+    destruct (IHp1_2 p2_2)...
+    rewrite e, e0...
+  - destruct (IHp1_1 p2_1)...
+    destruct (IHp1_2 p2_2)...
+    rewrite e, e0...
 Qed.
 
 Fixpoint rankOfFormula (p : Formula) : nat :=
@@ -1603,203 +1065,139 @@ Lemma enum_formula_aux_property :
   rankOfFormula p <= rank ->
   exists seed : nat,
   enum_formula_aux rank seed = p.
-Proof.
+Proof with eauto.
   assert (
     forall x : nat,
     forall y : nat,
     forall z : nat,
     (y, z) = cantor_pairing x <-> x = sum_from_0_to (y + z) + z
   ).
-    intros x y z.
-    constructor.
-    intro.
-    apply cantor_pairing_is_injective.
-    intuition.
-    intro.
-    subst.
-    apply cantor_pairing_is_surjective.
-  intros p.
-  induction p.
-  - intros r.
-    simpl.
-    intro.
+  { intros.
+    now rewrite <- cantor_pairing_is.
+  }
+  induction p; simpl.
+  - intros r H0.
     destruct r.
-    * exists i.
-      simpl.
-      tauto.
+    * exists i...
     * assert (exists seed : nat, (0, S (S (S (S (S (S i)))))) = cantor_pairing seed).
-      exists (sum_from_0_to (0 + S (S (S (S (S (S i)))))) + S (S (S (S (S (S i)))))).
-      apply (proj2 (H (sum_from_0_to (0 + S (S (S (S (S (S i)))))) + S (S (S (S (S (S i)))))) 0 (S (S (S (S (S (S i))))))) eq_refl).
+      { exists (sum_from_0_to (0 + S (S (S (S (S (S i)))))) + S (S (S (S (S (S i)))))).
+        apply (proj2 (H (sum_from_0_to (0 + S (S (S (S (S (S i)))))) + S (S (S (S (S (S i)))))) 0 (S (S (S (S (S (S i))))))) eq_refl).
+      }
       destruct H1 as [seed H1].
       exists seed.
-      simpl.
-      rewrite <- H1.
-      tauto.
-  - intros r.
-    simpl.
-    intro.
+      simpl; now rewrite <- H1.
+  - intros r H0.
     inversion H0.
-      exists 0.
-      simpl.
-      tauto.
-      exists 0.
-      simpl.
-      tauto.
-  - intros r.
-    simpl.
-    intro.
+    * exists 0...
+    * exists 0...
+  - intros r H0.
     assert (exists rank : nat, r = S rank).
-      inversion H0.
-      exists (rankOfFormula p).
-      tauto.
-      exists m.
-      tauto.
+    { inversion H0.
+      - exists (rankOfFormula p)...
+      - exists m...
+    }
     destruct H1 as [rank H1].
     rewrite H1 in H0.
-    assert (rankOfFormula p <= rank).
-      lia.
+    assert (rankOfFormula p <= rank) by lia.
     subst.
     destruct (IHp rank H2) as [seed H1].
     exists (sum_from_0_to (seed + 1) + 1).
-    assert ((seed, 1) = cantor_pairing (sum_from_0_to (seed + 1) + 1)).
-      apply (H ((sum_from_0_to (seed + 1) + 1)) seed 1).
-      intuition.
-    simpl in *.
-    rewrite <- H3.
-    rewrite H1.
-    tauto.
-  - intros r.
-    simpl.
-    intro.
+    assert ((seed, 1) = cantor_pairing (sum_from_0_to (seed + 1) + 1)) by now apply (H ((sum_from_0_to (seed + 1) + 1)) seed 1).
+    simpl in *; rewrite <- H3.
+    rewrite H1...
+  - intros r H0.
     assert (exists rank : nat, r = S rank).
-      inversion H0.
-      exists (Init.Nat.max (rankOfFormula p1) (rankOfFormula p2)).
-      tauto.
-      exists m.
-      tauto.
+    { inversion H0.
+      - exists (Init.Nat.max (rankOfFormula p1) (rankOfFormula p2))...
+      - exists m...
+    }
     destruct H1 as [rank H1].
     rewrite H1 in H0.
-    assert ((Init.Nat.max (rankOfFormula p1) (rankOfFormula p2)) <= rank).
-      lia.
+    assert ((Init.Nat.max (rankOfFormula p1) (rankOfFormula p2)) <= rank) by lia.
     subst.
-    destruct (IHp1 rank) as [seed2 H3].
-      lia.
-    destruct (IHp2 rank) as [seed3 H4].
-      lia.
+    destruct (IHp1 rank) as [seed2 H3]; try lia.
+    destruct (IHp2 rank) as [seed3 H4]; try lia.
     assert (exists seed : nat, (sum_from_0_to (seed2 + seed3) + seed3, 2) = cantor_pairing seed).
-      exists (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 2) + 2).
-        apply (proj2 (H (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 2) + 2) (sum_from_0_to (seed2 + seed3) + seed3) 2)).
-        tauto.
+    { exists (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 2) + 2).
+      apply (proj2 (H (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 2) + 2) (sum_from_0_to (seed2 + seed3) + seed3) 2))...
+    }
     destruct H1 as [seed H1].
     exists (seed).
-    simpl.
-    rewrite <- H1.
-    assert ((seed2, seed3) = cantor_pairing (sum_from_0_to (seed2 + seed3) + seed3)).
-      apply (proj2 (H (sum_from_0_to (seed2 + seed3) + seed3) seed2 seed3)).
-      tauto.
+    simpl; rewrite <- H1.
+    assert ((seed2, seed3) = cantor_pairing (sum_from_0_to (seed2 + seed3) + seed3)) by now apply (proj2 (H (sum_from_0_to (seed2 + seed3) + seed3) seed2 seed3)).
     rewrite <- H5.
     rewrite H3.
-    rewrite H4.
-    tauto.
-  - intros r.
-    simpl.
-    intro.
+    rewrite H4...
+  - intros r H0.
     assert (exists rank : nat, r = S rank).
-      inversion H0.
-      exists (Init.Nat.max (rankOfFormula p1) (rankOfFormula p2)).
-      tauto.
-      exists m.
-      tauto.
+    { inversion H0.
+      - exists (Init.Nat.max (rankOfFormula p1) (rankOfFormula p2))...
+      - exists m...
+    }
     destruct H1 as [rank H1].
     rewrite H1 in H0.
-    assert ((Init.Nat.max (rankOfFormula p1) (rankOfFormula p2)) <= rank).
-      lia.
+    assert ((Init.Nat.max (rankOfFormula p1) (rankOfFormula p2)) <= rank) by lia.
     subst.
-    destruct (IHp1 rank) as [seed2 H3].
-      lia.
-    destruct (IHp2 rank) as [seed3 H4].
-      lia.
+    destruct (IHp1 rank) as [seed2 H3]; try lia.
+    destruct (IHp2 rank) as [seed3 H4]; try lia.
     assert (exists seed : nat, (sum_from_0_to (seed2 + seed3) + seed3, 3) = cantor_pairing seed).
-      exists (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 3) + 3).
-        apply (proj2 (H (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 3) + 3) (sum_from_0_to (seed2 + seed3) + seed3) 3)).
-        tauto.
+    { exists (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 3) + 3).
+      apply (proj2 (H (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 3) + 3) (sum_from_0_to (seed2 + seed3) + seed3) 3))...
+    }
     destruct H1 as [seed H1].
     exists (seed).
-    simpl.
-    rewrite <- H1.
-    assert ((seed2, seed3) = cantor_pairing (sum_from_0_to (seed2 + seed3) + seed3)).
-      apply (proj2 (H (sum_from_0_to (seed2 + seed3) + seed3) seed2 seed3)).
-      tauto.
+    simpl; rewrite <- H1.
+    assert ((seed2, seed3) = cantor_pairing (sum_from_0_to (seed2 + seed3) + seed3)) by now apply (proj2 (H (sum_from_0_to (seed2 + seed3) + seed3) seed2 seed3)).
     rewrite <- H5.
     rewrite H3.
-    rewrite H4.
-    tauto.
-  - intros r.
-    simpl.
-    intro.
+    rewrite H4...
+  - intros r H0.
     assert (exists rank : nat, r = S rank).
-      inversion H0.
-      exists (Init.Nat.max (rankOfFormula p1) (rankOfFormula p2)).
-      tauto.
-      exists m.
-      tauto.
+    { inversion H0.
+      - exists (Init.Nat.max (rankOfFormula p1) (rankOfFormula p2))...
+      - exists m...
+    }
     destruct H1 as [rank H1].
     rewrite H1 in H0.
-    assert ((Init.Nat.max (rankOfFormula p1) (rankOfFormula p2)) <= rank).
-      lia.
+    assert ((Init.Nat.max (rankOfFormula p1) (rankOfFormula p2)) <= rank) by lia.
     subst.
-    destruct (IHp1 rank) as [seed2 H3].
-      lia.
-    destruct (IHp2 rank) as [seed3 H4].
-      lia.
+    destruct (IHp1 rank) as [seed2 H3]; try lia.
+    destruct (IHp2 rank) as [seed3 H4]; try lia.
     assert (exists seed : nat, (sum_from_0_to (seed2 + seed3) + seed3, 4) = cantor_pairing seed).
-      exists (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 4) + 4).
-        apply (proj2 (H (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 4) + 4) (sum_from_0_to (seed2 + seed3) + seed3) 4)).
-        tauto.
+    { exists (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 4) + 4).
+      apply (proj2 (H (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 4) + 4) (sum_from_0_to (seed2 + seed3) + seed3) 4))...
+    }
     destruct H1 as [seed H1].
     exists (seed).
-    simpl.
-    rewrite <- H1.
-    assert ((seed2, seed3) = cantor_pairing (sum_from_0_to (seed2 + seed3) + seed3)).
-      apply (proj2 (H (sum_from_0_to (seed2 + seed3) + seed3) seed2 seed3)).
-      tauto.
+    simpl; rewrite <- H1.
+    assert ((seed2, seed3) = cantor_pairing (sum_from_0_to (seed2 + seed3) + seed3)) by now apply (proj2 (H (sum_from_0_to (seed2 + seed3) + seed3) seed2 seed3)).
     rewrite <- H5.
     rewrite H3.
-    rewrite H4.
-    tauto.
-  - intros r.
-    simpl.
-    intro.
+    rewrite H4...
+  - intros r H0.
     assert (exists rank : nat, r = S rank).
-      inversion H0.
-      exists (Init.Nat.max (rankOfFormula p1) (rankOfFormula p2)).
-      tauto.
-      exists m.
-      tauto.
+    { inversion H0.
+      - exists (Init.Nat.max (rankOfFormula p1) (rankOfFormula p2))...
+      - exists m...
+    }
     destruct H1 as [rank H1].
     rewrite H1 in H0.
-    assert ((Init.Nat.max (rankOfFormula p1) (rankOfFormula p2)) <= rank).
-      lia.
+    assert ((Init.Nat.max (rankOfFormula p1) (rankOfFormula p2)) <= rank) by lia.
     subst.
-    destruct (IHp1 rank) as [seed2 H3].
-      lia.
-    destruct (IHp2 rank) as [seed3 H4].
-      lia.
+    destruct (IHp1 rank) as [seed2 H3]; try lia.
+    destruct (IHp2 rank) as [seed3 H4]; try lia.
     assert (exists seed : nat, (sum_from_0_to (seed2 + seed3) + seed3, 5) = cantor_pairing seed).
-      exists (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 5) + 5).
-        apply (proj2 (H (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 5) + 5) (sum_from_0_to (seed2 + seed3) + seed3) 5)).
-        tauto.
+    { exists (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 5) + 5).
+      apply (proj2 (H (sum_from_0_to ((sum_from_0_to (seed2 + seed3) + seed3) + 5) + 5) (sum_from_0_to (seed2 + seed3) + seed3) 5))...
+    }
     destruct H1 as [seed H1].
     exists (seed).
     simpl.
     rewrite <- H1.
-    assert ((seed2, seed3) = cantor_pairing (sum_from_0_to (seed2 + seed3) + seed3)).
-      apply (proj2 (H (sum_from_0_to (seed2 + seed3) + seed3) seed2 seed3)).
-      tauto.
+    assert ((seed2, seed3) = cantor_pairing (sum_from_0_to (seed2 + seed3) + seed3)) by now apply (proj2 (H (sum_from_0_to (seed2 + seed3) + seed3) seed2 seed3)).
     rewrite <- H5.
     rewrite H3.
-    rewrite H4.
-    tauto.
+    rewrite H4...
 Qed.
 
 Definition enumerateFormula (n : nat) : Formula :=
@@ -1810,18 +1208,14 @@ Definition enumerateFormula (n : nat) : Formula :=
 Theorem Formula_is_enumerable : 
   forall p : Formula,
   exists n : nat, enumerateFormula n = p.
-Proof.
+Proof with eauto.
   intros p.
-  assert (exists seed : nat, enum_formula_aux (rankOfFormula p) seed = p).
-    apply (enum_formula_aux_property p (rankOfFormula p)).
-    lia.
+  assert (exists seed : nat, enum_formula_aux (rankOfFormula p) seed = p) by now apply (enum_formula_aux_property p (rankOfFormula p)).
   destruct H as [seed H].
   exists (sum_from_0_to (rankOfFormula p + seed) + seed).
-  assert ((rankOfFormula p, seed) = cantor_pairing (sum_from_0_to (rankOfFormula p + seed) + seed)).
-    apply cantor_pairing_is_surjective.
+  assert ((rankOfFormula p, seed) = cantor_pairing (sum_from_0_to (rankOfFormula p + seed) + seed)) by apply cantor_pairing_is_surjective.
   unfold enumerateFormula.
-  rewrite <- H0.
-  apply H.
+  rewrite <- H0...
 Qed.
 
 End Syntax.
@@ -1871,21 +1265,8 @@ Lemma extendEntails :
   forall hs2 : Ensemble Formula,
   isSubsetOf hs1 hs2 ->
   Entails hs2 c.
-Proof.
-  intros hs1 c.
-  intro.
-  intros hs2.
-  intro.
-  intros structure.
-  intro.
-  intro.
-  apply H.
-  apply H1.
-  intros h.
-  intro.
-  apply H2.
-  apply H0.
-  apply H3.
+Proof with naive_set_theory.
+  intros...
 Qed.
 
 End Semantics.
@@ -1995,27 +1376,24 @@ Inductive Infers : Ensemble Formula -> Formula -> Prop :=
   Infers hs a
 .
 
+Local Hint Constructors Infers : core.
+
 Example ExclusiveMiddle :
   forall p : Formula,
   Infers empty (DisjunctionF p (NegationF p)).
-Proof.
+Proof with naive_set_theory.
   intros p.
   apply (NegationE empty (DisjunctionF p (NegationF p))).
   apply (ContradictionI (insert (NegationF (DisjunctionF p (NegationF p))) empty) (DisjunctionF p (NegationF p))).
   apply (DisjunctionI2 (insert (NegationF (DisjunctionF p (NegationF p))) empty) p (NegationF p)).
-  apply (NegationI (insert (NegationF (DisjunctionF p (NegationF p))) empty) p).
-  apply (ContradictionI (insert p (insert (NegationF (DisjunctionF p (NegationF p))) empty)) (DisjunctionF p (NegationF p))).
-  apply (DisjunctionI1 (insert p (insert (NegationF (DisjunctionF p (NegationF p))) empty)) p (NegationF p)).
-  apply (ByAssumption (insert p (insert (NegationF (DisjunctionF p (NegationF p))) empty)) p).
-  apply UnionR.
-  apply Singleton.
-  apply (ByAssumption (insert p (insert (NegationF (DisjunctionF p (NegationF p))) empty)) (NegationF (DisjunctionF p (NegationF p)))).
-  apply UnionL.
-  apply UnionR.
-  apply Singleton.
-  apply (ByAssumption (insert (NegationF (DisjunctionF p (NegationF p))) empty) (NegationF (DisjunctionF p (NegationF p)))).
-  apply UnionR.
-  apply Singleton.
+  - apply (NegationI (insert (NegationF (DisjunctionF p (NegationF p))) empty) p).
+    apply (ContradictionI (insert p (insert (NegationF (DisjunctionF p (NegationF p))) empty)) (DisjunctionF p (NegationF p))).
+    + apply (DisjunctionI1 (insert p (insert (NegationF (DisjunctionF p (NegationF p))) empty)) p (NegationF p)).
+      apply (ByAssumption (insert p (insert (NegationF (DisjunctionF p (NegationF p))) empty)) p).
+      naive_set_theory...
+    + apply (ByAssumption (insert p (insert (NegationF (DisjunctionF p (NegationF p))) empty)) (NegationF (DisjunctionF p (NegationF p)))).
+      naive_set_theory...
+  - apply (ByAssumption (insert (NegationF (DisjunctionF p (NegationF p))) empty) (NegationF (DisjunctionF p (NegationF p))))...
 Qed.
 
 Lemma cut_property :
@@ -2025,13 +1403,9 @@ Lemma cut_property :
   Infers hs p1 ->
   Infers (insert p1 hs) p2 ->
   Infers hs p2.
-Proof.
-  intros hs p1 p2.
-  intro.
-  intro.
-  assert (Infers hs (ImplicationF p1 p2)).
-    apply (ImplicationI hs p1 p2 H0).
-  apply (ImplicationE hs p1 p2 H1 H).
+Proof with eauto.
+  intros.
+  assert (Infers hs (ImplicationF p1 p2))...
 Qed.
 
 End InferenceRules.
@@ -2045,116 +1419,77 @@ Lemma extendInfers :
   forall hs2 : Ensemble Formula,
   isSubsetOf hs1 hs2 ->
   Infers hs2 c.
-Proof.
-  intros hs1 c.
-  intro.
+Proof with eauto.
+  intros hs1 c H.
   induction H.
-  - intros hs2.
-    intro.
-    apply (ByAssumption hs2 h).
-    apply (H0 h H).
-  - intros hs2.
-    intro.
-    apply (ContradictionI hs2 a).
-    apply (IHInfers1 hs2 H1).
-    apply (IHInfers2 hs2 H1).
-  - intros hs2.
-    intro.
-    apply (ContradictionE hs2 a).
-    apply (IHInfers hs2 H0).
-  - intros hs2.
-    intro.
+  - intros.
+    apply (ByAssumption hs2 h)...
+  - intros.
+    apply (ContradictionI hs2 a)...
+  - intros.
+    apply (ContradictionE hs2 a)...
+  - intros.
     apply (NegationI hs2 a).
     apply (IHInfers (insert a hs2)).
-    apply isSubsetOf_insert.
-    apply H0.
-  - intros hs2.
-    intro.
+    naive_set_theory.
+  - intros.
     apply (NegationE hs2 a).
     apply (IHInfers (insert (NegationF a) hs2)).
-    apply isSubsetOf_insert.
-    apply H0.
-  - intros hs2.
-    intro.
-    apply (ConjunctionI hs2 a b).
-    apply (IHInfers1 hs2 H1).
-    apply (IHInfers2 hs2 H1).
-  - intros hs2.
-    intro.
-    apply (ConjunctionE1 hs2 a b).
-    apply (IHInfers hs2 H0).
-  - intros hs2.
-    intro.
-    apply (ConjunctionE2 hs2 a b).
-    apply (IHInfers hs2 H0).
-  - intros hs2.
-    intro.
-    apply (DisjunctionI1 hs2 a b).
-    apply (IHInfers hs2 H0).
-  - intros hs2.
-    intro.
-    apply (DisjunctionI2 hs2 a b).
-    apply (IHInfers hs2 H0).
-  - intros hs2.
-    intro.
+    naive_set_theory.
+  - intros.
+    apply (ConjunctionI hs2 a b)...
+  - intros.
+    apply (ConjunctionE1 hs2 a b)...
+  - intros.
+    apply (ConjunctionE2 hs2 a b)...
+  - intros.
+    apply (DisjunctionI1 hs2 a b)...
+  - intros.
+    apply (DisjunctionI2 hs2 a b)...
+  - intros.
     apply (DisjunctionE hs2 a b c).
-    apply (IHInfers1 hs2 H2).
-    apply (IHInfers2 (insert a hs2)).
-    apply isSubsetOf_insert.
-    apply H2.
-    apply (IHInfers3 (insert b hs2)).
-    apply isSubsetOf_insert.
-    apply H2.
-  - intros hs2.
-    intro.
+    + apply (IHInfers1 hs2 H2).
+    + apply (IHInfers2 (insert a hs2)).
+      naive_set_theory.
+    + apply (IHInfers3 (insert b hs2)).
+      naive_set_theory.
+  - intros.
     apply (ImplicationI hs2 a b).
     apply (IHInfers (insert a hs2)).
-    apply isSubsetOf_insert.
-    apply H0.
-  - intros hs2.
-    intro.
-    apply (ImplicationE hs2 a b).
-    apply (IHInfers1 hs2 H1).
-    apply (IHInfers2 hs2 H1).
-  - intros hs2.
-    intro.
+    naive_set_theory.
+  - intros.
+    apply (ImplicationE hs2 a b)...
+  - intros.
     apply (BiconditionalI hs2 a b).
-    apply (IHInfers1 (insert a hs2)).
-    apply isSubsetOf_insert.
-    apply H1.
-    apply (IHInfers2 (insert b hs2)).
-    apply isSubsetOf_insert.
-    apply H1.
-  - intros hs2.
-    intro.
-    apply (BiconditionalE1 hs2 a b).
-    apply (IHInfers1 hs2 H1).
-    apply (IHInfers2 hs2 H1).
-  - intros hs2.
-    intro.
-    apply (BiconditionalE2 hs2 a b).
-    apply (IHInfers1 hs2 H1).
-    apply (IHInfers2 hs2 H1).
+    + apply (IHInfers1 (insert a hs2)).
+      naive_set_theory.
+    + apply (IHInfers2 (insert b hs2)).
+      naive_set_theory.
+  - intros.
+    apply (BiconditionalE1 hs2 a b)...
+  - intros.
+    apply (BiconditionalE2 hs2 a b)...
 Qed.
+
+Create HintDb Soundness_hints.
 
 Lemma ByAssumption_preserves :
   forall hs : Ensemble Formula,
   forall a : Formula,
   member a hs ->
   Entails hs a.
-Proof.
+Proof with eauto.
   intros hs c H.
   apply (extendEntails (singleton c) c).
-  intros v.
-  intros.
-  apply H1.
-  apply Singleton.
-  intros h.
-  intro.
-  inversion H0.
-  subst.
-  apply H.
+  - unfold Entails, satisfies.
+    intros.
+    apply H1.
+    constructor.
+  - intros h H0.
+    inversion H0; subst...
 Qed.
+
+Local Hint Resolve ByAssumption_preserves : Soundness_hints.
 
 Lemma ContradictionI_preserves :
   forall hs : Ensemble Formula,
@@ -2162,93 +1497,75 @@ Lemma ContradictionI_preserves :
   Entails hs a ->
   Entails hs (NegationF a) ->
   Entails hs ContradictionF.
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesNegation v).
-    unfold isStructure in H1.
-    intuition.
-  assert (satisfies v a).
-    apply (H v H1 H2).
-  assert (satisfies v (NegationF a)).
-    apply (H0 v H1 H2).
+  rename structure into v.
+  assert (preservesNegation v) by now unfold isStructure in H1.
+  assert (satisfies v a) by apply (H v H1 H2).
+  assert (satisfies v (NegationF a)) by apply (H0 v H1 H2).
   contradiction (proj1 (H3 a)).
 Qed.
+
+Local Hint Resolve ContradictionI_preserves : Soundness_hints.
 
 Lemma ContradictionE_preserves :
   forall hs : Ensemble Formula,
   forall a : Formula,
   Entails hs ContradictionF ->
   Entails hs a.
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesContradiction v).
-    unfold isStructure in H0.
-    intuition.
-  assert (satisfies v ContradictionF).
-    apply (H v H0 H1).
+  rename structure into v.
+  assert (preservesContradiction v) by now unfold isStructure in H0.
+  assert (satisfies v ContradictionF) by apply (H v H0 H1).
   contradiction (proj1 H2).
 Qed.
+
+Local Hint Resolve ContradictionE_preserves : Soundness_hints.
 
 Lemma NegationI_preserves :
   forall hs : Ensemble Formula,
   forall a : Formula,
   Entails (insert a hs) ContradictionF ->
   Entails hs (NegationF a).
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesNegation v).
-    unfold isStructure in H0.
-    intuition.
-  assert (preservesContradiction v).
-    unfold isStructure in H0.
-    intuition.
+  rename structure into v.
+  assert (preservesNegation v) by now unfold isStructure in H0.
+  assert (preservesContradiction v) by now unfold isStructure in H0.
   apply (proj2 (H2 a)).
-  intro.
+  intros H4.
   assert (satisfies v ContradictionF).
-    apply (H v).
-    apply H0.
-    intros h.
-    intro.
-    inversion H5.
-    subst.
-    apply (H1 h H6).
-    subst.
-    inversion H6.
-    subst.
-    apply H4.
+  { apply (H v)...
+    intros h H5.
+    inversion H5; subst...
+    inversion H6; subst...
+  }
   contradiction (proj1 H3).
 Qed.
+
+Local Hint Resolve NegationI_preserves : Soundness_hints.
 
 Lemma NegationE_preserves :
   forall hs : Ensemble Formula,
   forall a : Formula,
   Entails (insert (NegationF a) hs) ContradictionF ->
   Entails hs a.
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesNegation v).
-    unfold isStructure in H0.
-    intuition.
-  assert (preservesContradiction v).
-    unfold isStructure in H0.
-    intuition.
-  assert (forall p1 : Formula, satisfies v (NegationF (NegationF p1)) -> satisfies v p1).
-    unfold isStructure in H0.
-    intuition.
+  rename structure into v.
+  assert (preservesNegation v) by now unfold isStructure in H0.
+  assert (preservesContradiction v) by now unfold isStructure in H0.
+  assert (forall p1 : Formula, satisfies v (NegationF (NegationF p1)) -> satisfies v p1) by now unfold isStructure in H0.
   apply (H4 a).
-  apply (NegationI_preserves hs (NegationF a)).
-  apply H.
-  apply H0.
-  apply H1.
+  apply (NegationI_preserves hs (NegationF a))...
 Qed.
+
+Local Hint Resolve NegationE_preserves : Soundness_hints.
 
 Lemma ConjunctionI_preserves :
   forall hs : Ensemble Formula,
@@ -2256,98 +1573,75 @@ Lemma ConjunctionI_preserves :
   Entails hs a ->
   Entails hs b ->
   Entails hs (ConjunctionF a b).
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesConjunction v).
-    unfold isStructure in H1.
-    intuition.
-  apply (proj2 (H3 a b)).
-  constructor.
-  apply H.
-  apply H1.
-  apply H2.
-  apply H0.
-  apply H1.
-  apply H2.
+  rename structure into v.
+  assert (preservesConjunction v) by now unfold isStructure in H1.
+  apply (proj2 (H3 a b))...
 Qed.
+
+Local Hint Resolve ConjunctionI_preserves : Soundness_hints.
 
 Lemma ConjunctionE1_preserves :
   forall hs : Ensemble Formula,
   forall a b : Formula,
   Entails hs (ConjunctionF a b) ->
   Entails hs a.
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesConjunction v).
-    unfold isStructure in H0.
-    intuition.
-  destruct (proj1 (H2 a b)).
-    apply H.
-    apply H0.
-    apply H1.
-  apply H3.
+  rename structure into v.
+  assert (preservesConjunction v) by now unfold isStructure in H0.
+  destruct (proj1 (H2 a b))...
 Qed.
+
+Local Hint Resolve ConjunctionE1_preserves : Soundness_hints.
 
 Lemma ConjunctionE2_preserves :
   forall hs : Ensemble Formula,
   forall a b : Formula,
   Entails hs (ConjunctionF a b) ->
   Entails hs b.
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesConjunction v).
-    unfold isStructure in H0.
-    intuition.
-  destruct (proj1 (H2 a b)).
-    apply H.
-    apply H0.
-    apply H1.
-  apply H4.
+  rename structure into v.
+  assert (preservesConjunction v) by now unfold isStructure in H0.
+  destruct (proj1 (H2 a b))...
 Qed.
+
+Local Hint Resolve ConjunctionE2_preserves : Soundness_hints.
 
 Lemma DisjunctionI1_preserves :
   forall hs : Ensemble Formula,
   forall a b : Formula,
   Entails hs a ->
   Entails hs (DisjunctionF a b).
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesDisjunction v).
-    unfold isStructure in H0.
-    intuition.
-  apply (proj2 (H2 a b)).
-  apply or_introl.
-  apply H.
-  apply H0.
-  apply H1.
+  rename structure into v.
+  assert (preservesDisjunction v) by now unfold isStructure in H0.
+  apply (proj2 (H2 a b))...
 Qed.
+
+Local Hint Resolve DisjunctionI1_preserves : Soundness_hints.
 
 Lemma DisjunctionI2_preserves :
   forall hs : Ensemble Formula,
   forall a b : Formula,
   Entails hs b ->
   Entails hs (DisjunctionF a b).
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesDisjunction v).
-    unfold isStructure in H0.
-    intuition.
-  apply (proj2 (H2 a b)).
-  apply or_intror.
-  apply H.
-  apply H0.
-  apply H1.
+  rename structure into v.
+  assert (preservesDisjunction v) by now unfold isStructure in H0.
+  apply (proj2 (H2 a b))...
 Qed.
+
+Local Hint Resolve DisjunctionI2_preserves : Soundness_hints.
 
 Lemma DisjunctionE_preserves :
   forall hs : Ensemble Formula,
@@ -2356,71 +1650,46 @@ Lemma DisjunctionE_preserves :
   Entails (insert a hs) c ->
   Entails (insert b hs) c ->
   Entails hs c.
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesDisjunction v).
-    unfold isStructure in H2.
-    intuition.
+  rename structure into v.
+  assert (preservesDisjunction v) by now unfold isStructure in H2.
   assert (satisfies v a \/ satisfies v b).
-    apply (proj1 (H4 a b)).
-    apply H.
-    apply H2.
-    apply H3.
+  { apply (proj1 (H4 a b))...
+  }
   destruct H5.
-  apply H0.
-  apply H2.
-  intros h.
-  intro.
-  inversion H6.
-  subst.
-  apply H3.
-  apply H7.
-  subst.
-  inversion H7.
-  subst.
-  apply H5.
-  apply H1.
-  apply H2.
-  intros h.
-  intro.
-  inversion H6.
-  subst.
-  apply H3.
-  apply H7.
-  subst.
-  inversion H7.
-  subst.
-  apply H5.
+  - apply H0...
+    intros h H6.
+    inversion H6; subst...
+    inversion H7; subst...
+  - apply H1... 
+    intros h H6.
+    inversion H6; subst...
+    inversion H7; subst...
 Qed.
+
+Local Hint Resolve DisjunctionE_preserves : Soundness_hints.
 
 Lemma ImplicationI_preserves :
   forall hs : Ensemble Formula,
   forall a b : Formula,
   Entails (insert a hs) b ->
   Entails hs (ImplicationF a b).
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesImplication v).
-    unfold isStructure in H0.
-    intuition.
+  rename structure into v.
+  assert (preservesImplication v) by now unfold isStructure in H0.
   apply (proj2 (H2 a b)).
-  intro.
-  apply H.
-  apply H0.
-  intros h.
-  intro.
-  inversion H4.
-  subst.
-  apply (H1 h).
-  apply H5.
-  inversion H5.
-  subst.
-  apply H3.
+  intros H3.
+  apply H...
+  intros h H4.
+  inversion H4; subst...
+  inversion H5; subst...
 Qed.
+
+Local Hint Resolve ImplicationI_preserves : Soundness_hints.
 
 Lemma ImplicationE_preserves :
   forall hs : Ensemble Formula,
@@ -2428,21 +1697,15 @@ Lemma ImplicationE_preserves :
   Entails hs (ImplicationF a b) ->
   Entails hs a ->
   Entails hs b.
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesImplication v).
-    unfold isStructure in H1.
-    intuition.
-  apply (proj1 (H3 a b)).
-  apply H.
-  apply H1.
-  apply H2.
-  apply H0.
-  apply H1.
-  apply H2.
+  rename structure into v.
+  assert (preservesImplication v) by now unfold isStructure in H1.
+  apply (proj1 (H3 a b))...
 Qed.
+
+Local Hint Resolve ImplicationE_preserves : Soundness_hints.
 
 Lemma BiconditionalI_preserves :
   forall hs : Ensemble Formula,
@@ -2450,40 +1713,26 @@ Lemma BiconditionalI_preserves :
   Entails (insert a hs) b ->
   Entails (insert b hs) a ->
   Entails hs (BiconditionalF a b).
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesBiconditional v).
-    unfold isStructure in H1.
-    intuition.
-  apply (proj2 (H3 a b)).
-  constructor.
-  intro.
-  apply H.
-  apply H1.
-  intros h.
-  intro.
-  inversion H5.
-  subst.
-  apply (H2 h).
-  apply H6.
-  inversion H6.
-  subst.
-  apply H4.
-  intro.
-  apply H0.
-  apply H1.
-  intros h.
-  intro.
-  inversion H5.
-  subst.
-  apply (H2 h).
-  apply H6.
-  inversion H6.
-  subst.
-  apply H4.
+  rename structure into v.
+  assert (preservesBiconditional v) by now unfold isStructure in H1.
+  apply (proj2 (H3 a b))...
+  split.
+  - intros H4.
+    apply H...
+    intros h H5.
+    inversion H5; subst...
+    inversion H6; subst...
+  - intros H4.
+    apply H0...
+    intros h H5.
+    inversion H5; subst...
+    inversion H6; subst...
 Qed.
+
+Local Hint Resolve BiconditionalI_preserves : Soundness_hints.
 
 Lemma BiconditionalE1_preserves :
   forall hs : Ensemble Formula,
@@ -2491,21 +1740,15 @@ Lemma BiconditionalE1_preserves :
   Entails hs (BiconditionalF a b) ->
   Entails hs a ->
   Entails hs b.
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesBiconditional v).
-    unfold isStructure in H1.
-    intuition.
-  apply (proj1 (H3 a b)).
-  apply H.
-  apply H1.
-  apply H2.
-  apply H0.
-  apply H1.
-  apply H2.
+  rename structure into v.
+  assert (preservesBiconditional v) by now unfold isStructure in H1.
+  apply (proj1 (H3 a b))...
 Qed.
+
+Local Hint Resolve BiconditionalE1_preserves : Soundness_hints.
 
 Lemma BiconditionalE2_preserves :
   forall hs : Ensemble Formula,
@@ -2513,46 +1756,24 @@ Lemma BiconditionalE2_preserves :
   Entails hs (BiconditionalF a b) ->
   Entails hs b ->
   Entails hs a.
-Proof.
+Proof with eauto.
+  unfold Entails.
   intros.
-  intros v.
-  intros.
-  assert (preservesBiconditional v).
-    unfold isStructure in H1.
-    intuition.
-  apply (proj1 (H3 a b)).
-  apply H.
-  apply H1.
-  apply H2.
-  apply H0.
-  apply H1.
-  apply H2.
+  rename structure into v.
+  assert (preservesBiconditional v) by now unfold isStructure in H1.
+  apply (proj1 (H3 a b))...
 Qed.
+
+Local Hint Resolve BiconditionalE2_preserves : Soundness_hints.
 
 Theorem Soundness :
   forall hs : Ensemble Formula,
   forall c : Formula,
   Infers hs c ->
   Entails hs c.
-Proof.
+Proof with eauto with Soundness_hints.
   intros hs c H.
-  induction H.
-  - apply (ByAssumption_preserves hs h H).
-  - apply (ContradictionI_preserves hs a IHInfers1 IHInfers2).
-  - apply (ContradictionE_preserves hs a IHInfers).
-  - apply (NegationI_preserves hs a IHInfers).
-  - apply (NegationE_preserves hs a IHInfers).
-  - apply (ConjunctionI_preserves hs a b IHInfers1 IHInfers2).
-  - apply (ConjunctionE1_preserves hs a b IHInfers).
-  - apply (ConjunctionE2_preserves hs a b IHInfers).
-  - apply (DisjunctionI1_preserves hs a b IHInfers).
-  - apply (DisjunctionI2_preserves hs a b IHInfers).
-  - apply (DisjunctionE_preserves hs a b c IHInfers1 IHInfers2 IHInfers3).
-  - apply (ImplicationI_preserves hs a b IHInfers).
-  - apply (ImplicationE_preserves hs a b IHInfers1 IHInfers2).
-  - apply (BiconditionalI_preserves hs a b IHInfers1 IHInfers2).
-  - apply (BiconditionalE1_preserves hs a b IHInfers1 IHInfers2).
-  - apply (BiconditionalE2_preserves hs a b IHInfers1 IHInfers2).
+  induction H...
 Qed.
 
 End Soundness.
