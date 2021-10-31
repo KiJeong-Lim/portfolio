@@ -1,0 +1,6 @@
+[submodule "ppap"]
+	path = ppap
+	url = https://github.com/KiJeong-Lim/ppap.git
+[submodule "DschingisKhan"]
+	path = DschingisKhan
+	url = https://github.com/KiJeong-Lim/DschingisKhan.git
