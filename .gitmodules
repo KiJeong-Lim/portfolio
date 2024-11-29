@@ -4,3 +4,6 @@
 [submodule "DschingisKhan"]
 	path = DschingisKhan
 	url = https://github.com/KiJeong-Lim/DschingisKhan.git
+[submodule "Fol-archived"]
+	path = Fol-archived
+	url = https://github.com/KiJeong-Lim/Fol-archived.git
