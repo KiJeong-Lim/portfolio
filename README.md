@@ -8,7 +8,7 @@
 
 ## Pdf
 
-- Pdf files
+- Pdf files: 1st Seminar of Haskell School, 4th Logic Day of Korea.
 
 ## ppap
 
