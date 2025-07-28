@@ -32,7 +32,6 @@
 \setbeamercolor{palette tertiary}{bg=yonseiblue,fg=yonseisilv}
 \setbeamercolor{frametitle}{bg=yonseisilv,fg=white}
 \setbeamercolor{progress bar in head/foot}{fg=yonseigold,bg=yonseisilv}
-% Title colors
 \setbeamercolor{title}{fg=yonseiblue}
 \setbeamercolor{subtitle}{fg=yonseiblue}
 
@@ -53,14 +52,11 @@
 %%────────────────────────────────────────────────
 %% Lists & Enumerations (enumitem overrides)
 \usepackage{enumitem}
-% Enumerate: numeric and alphanumeric
 \setlist[enumerate,1]{label=\arabic*.,ref=\arabic*}
 \setlist[enumerate,2]{label=\alph*),ref=\alph*}
-% Itemize: ensure default bullets
 \setlist[itemize,1]{label=\textbullet}
 \setlist[itemize,2]{label=\textbullet}
 \setlist[itemize,3]{label=\textbullet}
-% Beamer's itemize templates (circle style)
 \setbeamertemplate{itemize item}[circle]
 \setbeamertemplate{itemize subitem}[circle]
 \setbeamertemplate{itemize subsubitem}[circle]
@@ -92,14 +88,12 @@
 
 %%────────────────────────────────────────────────
 %% Hyperref & cleveref setup
-% Reinstate implicit hyperref anchors for cleveref
 \makeatletter
 \Hy@implicittrue
 \makeatother
 \usepackage{hyperref}
 \usepackage[capitalize,nameinlink]{cleveref}
 
-%% cleveref label format
 \crefdefaultlabelformat{#2\textbf{#1}#3}
 \crefname{section}{\textbf{Section}}{\textbf{Sections}}
 \Crefname{section}{\textbf{Section}}{\textbf{Sections}}
@@ -184,16 +178,26 @@
 }
 
 %%────────────────────────────────────────────────
+%% Custom Frame Title
+\setbeamertemplate{frametitle}{
+  \vskip-1pt
+  % Adjusted frametitle box height and depth to reduce gray area
+  \begin{beamercolorbox}[wd=\paperwidth,ht=3ex,dp=1ex,leftskip=1em,rightskip=1em]{frametitle}
+    \usebeamerfont{frametitle}\insertframetitle
+  \end{beamercolorbox}
+}
+
+%%────────────────────────────────────────────────
 %% C++ listing
 \lstset{
   language=C++,
-  backgroundcolor=\color{gray!10},   % Light gray background
-  commentstyle=\color{mygreen},      % Green comments
-  keywordstyle=\color{blue},         % Blue keywords
-  stringstyle=\color{red},           % Red strings
-  numberstyle=\tiny\color{mygray},    % Gray line numbers
-  identifierstyle=\color{black},     % Black identifiers
-  basicstyle=\ttfamily\footnotesize, % Basic font style
+  backgroundcolor=\color{gray!10},
+  commentstyle=\color{mygreen},
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  numberstyle=\tiny\color{mygray},
+  identifierstyle=\color{black},
+  basicstyle=\ttfamily\footnotesize,
   keepspaces=true,
   showstringspaces=false,
   numbers=left,
@@ -204,5 +208,12 @@
   frame=single,
   rulecolor=\color{black}
 }
+
+%%────────────────────────────────────────────────
+%% Make below blank
+\usepackage{etoolbox}
+\makeatletter
+\pretocmd{\beamer@@frametitle}{\vspace{-1em}}{}{}
+\makeatother
 
 \endinput
