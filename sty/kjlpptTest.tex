@@ -1,12 +1,12 @@
-\documentclass[serif,table,10pt,aspectratio=169]{beamer}
+\documentclass[serif,table,10pt,aspectratio=169]{beamer} % These option are important
 
 \usepackage{kjlppt}
 
-\title[]{\large
-PPT TEST
+\title{\large
+A Beamer Setting of FCAI Lab
 }
 \date[August, 2025]{July 28, 2025}
-\author[J.~Smith]{Presented by Kildong Hong}
+\author{Gijung Im}
 \institute{FCAI Lab \\Yonsei University}
 
 \begin{document}
@@ -17,7 +17,15 @@ PPT TEST
 
 \subsection{Subsection}
 
-\begin{frame}{Frame Title}
+\begin{frame}[fragile]
+\frametitle{Usage}
+
+Make your \texttt{.tex} begin with
+\begin{lstlisting}
+\documentclass[serif,table,10pt,aspectratio=169]{beamer}
+
+\usepackage{kjlppt}
+\end{lstlisting}
 
 \end{frame}
 
