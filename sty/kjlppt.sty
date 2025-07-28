@@ -13,6 +13,22 @@
 \setbeamertemplate{caption}[numbered]
 
 %%────────────────────────────────────────────────
+%% Custom Frame Title
+\setbeamertemplate{frametitle}{
+  \vspace{-0.8ex}
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.4ex,dp=1ex,leftskip=1em,rightskip=1em]{frametitle}
+    \usebeamerfont{frametitle}\insertframetitle
+  \end{beamercolorbox}
+}
+
+%%────────────────────────────────────────────────
+%% Make below blank
+\usepackage{etoolbox}
+\makeatletter
+\pretocmd{\beamer@@frametitle}{\vspace{-1em}}{}{}
+\makeatother
+
+%%────────────────────────────────────────────────
 %% Yonsei University Official Colors
 \usepackage{xcolor}
 \definecolor{yonseiblue}{HTML}{003876}   % Primary Blue
@@ -178,15 +194,6 @@
 }
 
 %%────────────────────────────────────────────────
-%% Custom Frame Title
-\setbeamertemplate{frametitle}{
-  \vspace{-1ex}
-  \begin{beamercolorbox}[wd=\paperwidth,ht=2.2ex,dp=1ex,leftskip=1em,rightskip=1em]{frametitle}
-    \usebeamerfont{frametitle}\insertframetitle
-  \end{beamercolorbox}
-}
-
-%%────────────────────────────────────────────────
 %% C++ listing
 \lstset{
   language=C++,
@@ -207,12 +214,5 @@
   frame=single,
   rulecolor=\color{black}
 }
-
-%%────────────────────────────────────────────────
-%% Make below blank
-\usepackage{etoolbox}
-\makeatletter
-\pretocmd{\beamer@@frametitle}{\vspace{-1em}}{}{}
-\makeatother
 
 \endinput
