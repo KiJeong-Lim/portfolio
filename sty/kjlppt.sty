@@ -1,0 +1,207 @@
+% kjlppt.sty - Yonsei FCAI Lab Beamer Style
+% Provides a customized Beamer style using CambridgeUS theme,
+% Yonsei University official colors, navigation bars, and footer logos.
+
+\ProvidesPackage{kjlppt}
+
+%%────────────────────────────────────────────────
+%% Beamer Theme & Navigation Overrides
+\usetheme{CambridgeUS}
+\useoutertheme{infolines}        % Show section & subsection bars
+\beamertemplatenavigationsymbolsempty
+\setbeamertemplate{caption}[numbered]
+
+%%────────────────────────────────────────────────
+%% Yonsei University Official Colors
+\usepackage{xcolor}
+\definecolor{yonseiblue}{HTML}{003876}   % Primary Blue
+\definecolor{yonseisilv}{HTML}{939598}   % Secondary Silver
+\definecolor{yonseigold}{HTML}{B38C45}   % Accent Gold
+\definecolor{yonseilight}{HTML}{4169E1}
+
+% Navigation bar colors
+\setbeamercolor{section in head/foot}{bg=yonseisilv, fg=white}
+\setbeamercolor{subsection in head/foot}{bg=white, fg=yonseiblue}
+
+%%────────────────────────────────────────────────
+%% Theme palettes & frametitle
+\setbeamercolor{structure}{fg=yonseiblue}
+\setbeamercolor{palette primary}{bg=yonseiblue,fg=white}
+\setbeamercolor{palette secondary}{bg=white,fg=yonseisilv}
+\setbeamercolor{palette tertiary}{bg=yonseisilv,fg=yonseiblue}
+\setbeamercolor{frametitle}{bg=yonseiblue,fg=white}
+\setbeamercolor{progress bar in head/foot}{fg=yonseigold,bg=yonseisilv}
+% Title colors
+\setbeamercolor{title}{fg=yonseiblue}
+\setbeamercolor{subtitle}{fg=yonseiblue}
+
+%%────────────────────────────────────────────────
+%% Basic Packages and Fonts
+\usepackage[utf8]{inputenc}
+\usepackage{kotex}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{url}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{multicol}
+\usepackage{array}
+\usepackage{booktabs}
+
+%%────────────────────────────────────────────────
+%% Lists & Enumerations (enumitem overrides)
+\usepackage{enumitem}
+% Enumerate: numeric and alphanumeric
+\setlist[enumerate,1]{label=\arabic*.,ref=\arabic*}
+\setlist[enumerate,2]{label=\alph*),ref=\alph*}
+% Itemize: ensure default bullets
+\setlist[itemize,1]{label=\textbullet}
+\setlist[itemize,2]{label=\textbullet}
+\setlist[itemize,3]{label=\textbullet}
+% Beamer's itemize templates (circle style)
+\setbeamertemplate{itemize item}[circle]
+\setbeamertemplate{itemize subitem}[circle]
+\setbeamertemplate{itemize subsubitem}[circle]
+
+%%────────────────────────────────────────────────
+%% Math Packages
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{mathtools,nccmath}
+\usepackage{stmaryrd}
+\usepackage{proof}
+\usepackage{mathpartir}
+\usepackage{mismath}
+\DeclarePairedDelimiterX\set[1]{\lbrace}{\rbrace}{\def\mid{\;\delimsize\vert\;}#1}
+
+%%────────────────────────────────────────────────
+%% Algorithms
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+%%────────────────────────────────────────────────
+%% TikZ
+\usepackage{tikz}
+\usetikzlibrary{cd}
+\usepackage{tikz-cd}
+
+%%────────────────────────────────────────────────
+%% Code Listings
+\usepackage{listings}
+
+%%────────────────────────────────────────────────
+%% Hyperref & cleveref setup
+% Reinstate implicit hyperref anchors for cleveref
+\makeatletter
+\Hy@implicittrue
+\makeatother
+\usepackage{hyperref}
+\usepackage[capitalize,nameinlink]{cleveref}
+
+%% cleveref label format
+\crefdefaultlabelformat{#2\textbf{#1}#3}
+\crefname{section}{\textbf{Section}}{\textbf{Sections}}
+\Crefname{section}{\textbf{Section}}{\textbf{Sections}}
+\crefname{theorem}{\textbf{Theorem}}{\textbf{Theorems}}
+\Crefname{theorem}{\textbf{Theorem}}{\textbf{Theorems}}
+\crefname{definition}{\textbf{Definition}}{\textbf{Definitions}}
+\Crefname{definition}{\textbf{Definition}}{\textbf{Definitions}}
+\crefname{fact}{\textbf{Fact}}{\textbf{Facts}}
+\Crefname{fact}{\textbf{Fact}}{\textbf{Facts}}
+\crefname{lemma}{\textbf{Lemma}}{\textbf{Lemmas}}
+\Crefname{lemma}{\textbf{Lemma}}{\textbf{Lemmas}}
+\crefname{corollary}{\textbf{Corollary}}{\textbf{Corollaries}}
+\Crefname{corollary}{\textbf{Corollary}}{\textbf{Corollaries}}
+\crefname{axiom}{\textbf{Axiom}}{\textbf{Axioms}}
+\Crefname{axiom}{\textbf{Axiom}}{\textbf{Axioms}}
+\crefname{notation}{\textbf{Notation}}{\textbf{Notations}}
+\Crefname{notation}{\textbf{Notation}}{\textbf{Notations}}
+\crefname{remark}{\textbf{Remark}}{\textbf{Remarks}}
+\Crefname{remark}{\textbf{Remark}}{\textbf{Remarks}}
+
+%%────────────────────────────────────────────────
+%% Bibliography
+\usepackage[style=numeric]{biblatex}
+
+%%────────────────────────────────────────────────
+%% Miscellaneous Packages
+\usepackage{xparse}
+\usepackage{tcolorbox}
+\usepackage{pgfpages}
+\usepackage{arydshln}
+\usepackage{lipsum}
+
+%%────────────────────────────────────────────────
+%% Custom Column Type
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+\renewcommand{\arraystretch}{1.3}
+
+%%────────────────────────────────────────────────
+%% Symbol Font Fix
+\SetSymbolFont{stmry}{bold}{U}{stmry}{m}{n}
+
+%%────────────────────────────────────────────────
+%% Custom Commands & Environments
+\newcommand{\inlinedef}[1]{\emph{\textbf{#1}}}
+\newcommand{\embed}[1]{{\upharpoonleft} {#1}}
+\newcommand{\powerset}{\wp}
+\newcommand{\bnfeq}{\mathrel{\;{:}{:}{=}\ }}
+\newcommand{\bnfor}{\mathrel{\;\big|\;}}
+\newcommand{\Prop}{\mathbf{Prop}}
+\newcommand{\Set}{\mathbf{Set}}
+\newcommand{\Type}{\mathbf{Type}}
+\newcommand{\FV}{\mathrm{FV}}
+\newcommand{\arr}{\mathrel{\dot{\to}}}
+\newcommand{\oeq}{\mathrel{\dot{=}}}
+\newcommand{\hei}{\mathop{\mathtt{height}}}
+\newcommand{\EQ}{\mathrel{\dot{=}}}
+\newcommand{\BOT}{\mathop{\dot{\bot}}}
+\newcommand{\NEG}{\mathop{\dot{\neg}}}
+\newcommand{\AND}{\mathrel{\dot{\land}}}
+\newcommand{\OR}{\mathrel{\dot{\lor}}}
+\newcommand{\IMP}{\mathrel{\dot{\to}}}
+\newcommand{\IFF}{\mathrel{\dot{\leftrightarrow}}}
+\newcommand{\ALL}[1]{\dot{\forall}#1\,}
+\newcommand{\EXS}[1]{\dot{\exists}#1\,}
+\newcommand{\concat}{\ensuremath{+\!\!\!\!+\,}}
+\newcommand{\listunit}[1]{[#1]}
+\newcommand{\proves}[2]{\mathtt{proof}\ #1\ #2}
+
+\newenvironment{mkparagraph}[1][]
+{ \noindent \textbf{{#1}.} }
+{ \hfill $ \dashv $ }
+
+%%────────────────────────────────────────────────
+%% Custom Footline (two logos at bottom corners)
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=1.5ex,dp=2ex,leftskip=1em,rightskip=1em]{author in head/foot}%
+    \includegraphics[height=0.8cm]{pics/YonseiUniversityEmblem.png}%
+    \hfill
+    \includegraphics[height=0.8cm]{pics/fcai_lab_logo.png}%
+  \end{beamercolorbox}%
+}
+
+%%────────────────────────────────────────────────
+%% C++ listing
+\lstset{
+  language=C++,
+  backgroundcolor=\color{gray!10},   % Light gray background
+  commentstyle=\color{mygreen},      % Green comments
+  keywordstyle=\color{blue},         % Blue keywords
+  stringstyle=\color{red},           % Red strings
+  numberstyle=\tiny\color{mygray},    % Gray line numbers
+  identifierstyle=\color{black},     % Black identifiers
+  basicstyle=\ttfamily\footnotesize, % Basic font style
+  keepspaces=true,
+  showstringspaces=false,
+  numbers=left,
+  numbersep=5pt,
+  tabsize=4,
+  breaklines=true,
+  captionpos=b,
+  frame=single,
+  rulecolor=\color{black}
+}
+
+\endinput
