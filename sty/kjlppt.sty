@@ -5,12 +5,30 @@
 \ProvidesPackage{kjlppt}
 
 %%────────────────────────────────────────────────
+%% Miscellaneous Packages
+\usepackage{xparse}
+\usepackage{tcolorbox}
+\usepackage{pgfpages}
+\usepackage{arydshln}
+
+%%────────────────────────────────────────────────
 %% Beamer Theme & Navigation Overrides
 % \PassOptionsToClass{aspectratio=169}{beamer}
 \usetheme{CambridgeUS}
 \useoutertheme{infolines}        % Show section & subsection bars
 \beamertemplatenavigationsymbolsempty
 \setbeamertemplate{caption}[numbered]
+
+%%────────────────────────────────────────────────
+%% Theme palettes & frametitle
+\setbeamercolor{structure}{fg=yonseiblue}
+\setbeamercolor{palette primary}{bg=yonseiblue,fg=white}
+\setbeamercolor{palette secondary}{bg=yonseiblue,fg=white}
+\setbeamercolor{palette tertiary}{bg=yonseiblue,fg=white}
+\setbeamercolor{frametitle}{bg=white,fg=yonseiblue}
+\setbeamercolor{progress bar in head/foot}{fg=yonseiblue,bg=yonseisilv}
+\setbeamercolor{title}{fg=yonseiblue}
+\setbeamercolor{subtitle}{fg=yonseiblue}
 
 %%────────────────────────────────────────────────
 %% Custom Frame Title
@@ -29,6 +47,21 @@
 \makeatother
 
 %%────────────────────────────────────────────────
+%% Custom Footline (two logos at bottom corners)
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.5ex,leftskip=1em,rightskip=1em]{author in head/foot}%
+    \includegraphics[height=0.8cm]{pics/YonseiUniversityEmblem.png}%
+    \hfill
+    \includegraphics[height=0.8cm]{pics/fcai_lab_logo.png}%
+    \newline
+    \usebeamerfont{author in head/foot}\insertshortauthor%
+    \hfill
+    \usebeamerfont{page number in head/foot}\insertframenumber{} / \inserttotalframenumber
+  \end{beamercolorbox}%
+}
+
+%%────────────────────────────────────────────────
 %% Yonsei University Official Colors
 \usepackage{xcolor}
 \definecolor{yonseiblue}{HTML}{003876}   % Primary Blue
@@ -44,17 +77,6 @@
 % Navigation bar colors
 \setbeamercolor{section in head/foot}{bg=yonseiblue, fg=white}
 \setbeamercolor{subsection in head/foot}{bg=white, fg=yonseiblue}
-
-%%────────────────────────────────────────────────
-%% Theme palettes & frametitle
-\setbeamercolor{structure}{fg=yonseiblue}
-\setbeamercolor{palette primary}{bg=yonseiblue,fg=white}
-\setbeamercolor{palette secondary}{bg=white,fg=yonseisilv}
-\setbeamercolor{palette tertiary}{bg=yonseiblue,fg=yonseisilv}
-\setbeamercolor{frametitle}{bg=yonseisilv,fg=white}
-\setbeamercolor{progress bar in head/foot}{fg=yonseigold,bg=yonseisilv}
-\setbeamercolor{title}{fg=yonseiblue}
-\setbeamercolor{subtitle}{fg=yonseiblue}
 
 %%────────────────────────────────────────────────
 %% Basic Packages and Fonts
@@ -106,6 +128,25 @@
 %%────────────────────────────────────────────────
 %% Code Listings
 \usepackage{listings}
+\lstset{
+  language=C++,
+  backgroundcolor=\color{gray!10},
+  commentstyle=\color{mygreen},
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  numberstyle=\tiny\color{mygray},
+  identifierstyle=\color{black},
+  basicstyle=\ttfamily\footnotesize,
+  keepspaces=true,
+  showstringspaces=false,
+  numbers=left,
+  numbersep=5pt,
+  tabsize=4,
+  breaklines=true,
+  captionpos=b,
+  frame=single,
+  rulecolor=\color{black}
+}
 
 %%────────────────────────────────────────────────
 %% Hyperref & cleveref setup
@@ -140,14 +181,6 @@
 \usepackage[style=numeric]{biblatex}
 
 %%────────────────────────────────────────────────
-%% Miscellaneous Packages
-\usepackage{xparse}
-\usepackage{tcolorbox}
-\usepackage{pgfpages}
-\usepackage{arydshln}
-\usepackage{listings}
-
-%%────────────────────────────────────────────────
 %% Custom Column Type
 \newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
 \renewcommand{\arraystretch}{1.3}
@@ -159,65 +192,12 @@
 %%────────────────────────────────────────────────
 %% Custom Commands & Environments
 \newcommand{\inlinedef}[1]{\emph{\textbf{#1}}}
-\newcommand{\embed}[1]{{\upharpoonleft} {#1}}
 \newcommand{\powerset}{\wp}
-\newcommand{\bnfeq}{\mathrel{\;{:}{:}{=}\ }}
-\newcommand{\bnfor}{\mathrel{\;\big|\;}}
-\newcommand{\Prop}{\mathbf{Prop}}
-\newcommand{\Set}{\mathbf{Set}}
-\newcommand{\Type}{\mathbf{Type}}
-\newcommand{\FV}{\mathrm{FV}}
-\newcommand{\arr}{\mathrel{\dot{\to}}}
-\newcommand{\oeq}{\mathrel{\dot{=}}}
-\newcommand{\hei}{\mathop{\mathtt{height}}}
-\newcommand{\EQ}{\mathrel{\dot{=}}}
-\newcommand{\BOT}{\mathop{\dot{\bot}}}
-\newcommand{\NEG}{\mathop{\dot{\neg}}}
-\newcommand{\AND}{\mathrel{\dot{\land}}}
-\newcommand{\OR}{\mathrel{\dot{\lor}}}
-\newcommand{\IMP}{\mathrel{\dot{\to}}}
-\newcommand{\IFF}{\mathrel{\dot{\leftrightarrow}}}
-\newcommand{\ALL}[1]{\dot{\forall}#1\,}
-\newcommand{\EXS}[1]{\dot{\exists}#1\,}
 \newcommand{\concat}{\ensuremath{+\!\!\!\!+\,}}
 \newcommand{\listunit}[1]{[#1]}
-\newcommand{\proves}[2]{\mathtt{proof}\ #1\ #2}
 
 \newenvironment{mkparagraph}[1][]
 { \noindent \textbf{{#1}.} }
 { \hfill $ \dashv $ }
-
-%%────────────────────────────────────────────────
-%% Custom Footline (two logos at bottom corners)
-\setbeamertemplate{footline}{%
-  \leavevmode%
-  \begin{beamercolorbox}[wd=\paperwidth,ht=0.ex,dp=2ex,leftskip=1em,rightskip=1em]{author in head/foot}%
-    \includegraphics[height=0.8cm]{pics/YonseiUniversityEmblem.png}%
-    \hfill
-    \includegraphics[height=0.8cm]{pics/fcai_lab_logo.png}%
-  \end{beamercolorbox}%
-}
-
-%%────────────────────────────────────────────────
-%% C++ listing
-\lstset{
-  language=C++,
-  backgroundcolor=\color{gray!10},
-  commentstyle=\color{mygreen},
-  keywordstyle=\color{blue},
-  stringstyle=\color{red},
-  numberstyle=\tiny\color{mygray},
-  identifierstyle=\color{black},
-  basicstyle=\ttfamily\footnotesize,
-  keepspaces=true,
-  showstringspaces=false,
-  numbers=left,
-  numbersep=5pt,
-  tabsize=4,
-  breaklines=true,
-  captionpos=b,
-  frame=single,
-  rulecolor=\color{black}
-}
 
 \endinput
