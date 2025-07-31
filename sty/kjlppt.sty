@@ -157,7 +157,9 @@
 
 % Navigation bar colors
 \setbeamercolor{section in head/foot}{bg=yonseiblue, fg=white}
+\setbeamerfont{section in head/foot}{size=\scriptsize}
 \setbeamercolor{subsection in head/foot}{bg=white, fg=yonseiblue}
+\setbeamerfont{subsection in head/foot}{size=\scriptsize}
 
 %%────────────────────────────────────────────────
 %% Custom Frame Title
@@ -179,8 +181,8 @@
 %% Custom Footline (two logos at bottom corners)
 \setbeamertemplate{footline}{%
   \leavevmode%
-  \begin{beamercolorbox}[wd=\paperwidth,ht=3.5ex,dp=1.5ex,leftskip=1em,rightskip=1em]{author in head/foot}%
-    \vspace{-0.5ex}
+  \begin{beamercolorbox}[wd=\paperwidth,ht=3.7ex,dp=1.5ex,leftskip=1em,rightskip=1em]{author in head/foot}%
+    \vspace{-0.7ex}
     \includegraphics[height=0.8cm]{pics/YonseiUniversityEmblem.png}%
     \hfill
     \includegraphics[height=0.8cm]{pics/fcai_lab_logo.png}%
@@ -188,7 +190,7 @@
     \footnotesize
     \usebeamerfont{author in head/foot}\insertshortauthor%
     \hfill
-    \usebeamerfont{page number in head/foot}\insertframenumber{} / \inserttotalframenumber
+    \usebeamerfont{page number in head/foot}\textbf{\insertframenumber{}} \textbf{/} \textbf{\inserttotalframenumber}
   \end{beamercolorbox}%
 }
 
