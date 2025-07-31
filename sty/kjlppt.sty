@@ -43,10 +43,6 @@
 \definecolor{mygray}{rgb}{0.4,0.4,0.4}
 \definecolor{mydarkblue}{rgb}{0.0,0.0,0.6}
 
-% Navigation bar colors
-\setbeamercolor{section in head/foot}{bg=yonseiblue, fg=white}
-\setbeamercolor{subsection in head/foot}{bg=white, fg=yonseiblue}
-
 %%────────────────────────────────────────────────
 %% Basic Packages and Fonts
 \usepackage[utf8]{inputenc}
@@ -159,17 +155,9 @@
 %% Symbol Font Fix
 \SetSymbolFont{stmry}{bold}{U}{stmry}{m}{n}
 
-%%────────────────────────────────────────────────
-%% Custom Commands & Environments
-\newcommand{\inlinedef}[1]{\emph{\textbf{#1}}}
-\newcommand{\powerset}{\wp}
-\newcommand{\concat}{\ensuremath{+\!\!\!\!+\,}}
-\newcommand{\listunit}[1]{[#1]}
-\newcommand{\bind}{\ensuremath{>\!>\!=}}
-
-\newenvironment{mkparagraph}[1][]
-{ \noindent \textbf{{#1}.} }
-{ \hfill $ \dashv $ }
+% Navigation bar colors
+\setbeamercolor{section in head/foot}{bg=yonseiblue, fg=white}
+\setbeamercolor{subsection in head/foot}{bg=white, fg=yonseiblue}
 
 %%────────────────────────────────────────────────
 %% Custom Frame Title
@@ -191,15 +179,29 @@
 %% Custom Footline (two logos at bottom corners)
 \setbeamertemplate{footline}{%
   \leavevmode%
-  \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.5ex,leftskip=1em,rightskip=1em]{author in head/foot}%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=3.5ex,dp=1.5ex,leftskip=1em,rightskip=1em]{author in head/foot}%
+    \vspace{-0.5ex}
     \includegraphics[height=0.8cm]{pics/YonseiUniversityEmblem.png}%
     \hfill
     \includegraphics[height=0.8cm]{pics/fcai_lab_logo.png}%
     \newline
+    \footnotesize
     \usebeamerfont{author in head/foot}\insertshortauthor%
     \hfill
     \usebeamerfont{page number in head/foot}\insertframenumber{} / \inserttotalframenumber
   \end{beamercolorbox}%
 }
+
+%%────────────────────────────────────────────────
+%% Custom Commands & Environments
+\newcommand{\inlinedef}[1]{\emph{\textbf{#1}}}
+\newcommand{\powerset}{\wp}
+\newcommand{\concat}{\ensuremath{+\!\!\!\!+\,}}
+\newcommand{\listunit}[1]{[#1]}
+\newcommand{\bind}{\ensuremath{>\!>\!=}}
+
+\newenvironment{mkparagraph}[1][]
+{ \noindent \textbf{{#1}.} }
+{ \hfill $ \dashv $ }
 
 \endinput
