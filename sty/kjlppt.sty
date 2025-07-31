@@ -5,13 +5,6 @@
 \ProvidesPackage{kjlppt}
 
 %%────────────────────────────────────────────────
-%% Miscellaneous Packages
-\usepackage{xparse}
-\usepackage{tcolorbox}
-\usepackage{pgfpages}
-\usepackage{arydshln}
-
-%%────────────────────────────────────────────────
 %% Beamer Theme & Navigation Overrides
 % \PassOptionsToClass{aspectratio=169}{beamer}
 \usetheme{CambridgeUS}
@@ -20,46 +13,22 @@
 \setbeamertemplate{caption}[numbered]
 
 %%────────────────────────────────────────────────
+%% Miscellaneous Packages
+\usepackage{xparse}
+\usepackage{tcolorbox}
+\usepackage{pgfpages}
+\usepackage{arydshln}
+
+%%────────────────────────────────────────────────
 %% Theme palettes & frametitle
 \setbeamercolor{structure}{fg=yonseiblue}
 \setbeamercolor{palette primary}{bg=yonseiblue,fg=white}
 \setbeamercolor{palette secondary}{bg=yonseiblue,fg=white}
 \setbeamercolor{palette tertiary}{bg=yonseiblue,fg=white}
-\setbeamercolor{frametitle}{bg=white,fg=yonseiblue}
+\setbeamercolor{frametitle}{bg=yonseisilv,fg=white}
 \setbeamercolor{progress bar in head/foot}{fg=yonseiblue,bg=yonseisilv}
 \setbeamercolor{title}{fg=yonseiblue}
 \setbeamercolor{subtitle}{fg=yonseiblue}
-
-%%────────────────────────────────────────────────
-%% Custom Frame Title
-\setbeamertemplate{frametitle}{
-  \vspace{-0.7ex}
-  \begin{beamercolorbox}[wd=\paperwidth,ht=2.3ex,dp=1ex,leftskip=1em,rightskip=1em]{frametitle}
-    \usebeamerfont{frametitle}\insertframetitle
-  \end{beamercolorbox}
-}
-
-%%────────────────────────────────────────────────
-%% Make below blank
-\usepackage{etoolbox}
-\makeatletter
-\pretocmd{\beamer@@frametitle}{\vspace{-1em}}{}{}
-\makeatother
-
-%%────────────────────────────────────────────────
-%% Custom Footline (two logos at bottom corners)
-\setbeamertemplate{footline}{%
-  \leavevmode%
-  \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.5ex,leftskip=1em,rightskip=1em]{author in head/foot}%
-    \includegraphics[height=0.8cm]{pics/YonseiUniversityEmblem.png}%
-    \hfill
-    \includegraphics[height=0.8cm]{pics/fcai_lab_logo.png}%
-    \newline
-    \usebeamerfont{author in head/foot}\insertshortauthor%
-    \hfill
-    \usebeamerfont{page number in head/foot}\insertframenumber{} / \inserttotalframenumber
-  \end{beamercolorbox}%
-}
 
 %%────────────────────────────────────────────────
 %% Yonsei University Official Colors
@@ -96,7 +65,8 @@
 %% Lists & Enumerations (enumitem overrides)
 \usepackage{enumitem}
 \setlist[enumerate,1]{label=\arabic*.,ref=\arabic*}
-\setlist[enumerate,2]{label=\alph*),ref=\alph*}
+\setlist[enumerate,2]{label=(\roman*),ref=\roman*}
+\setlist[enumerate,3]{label=\alph*),ref=\alph*}
 \setlist[itemize,1]{label=\textbullet}
 \setlist[itemize,2]{label=\textbullet}
 \setlist[itemize,3]{label=\textbullet}
@@ -112,7 +82,7 @@
 \usepackage{proof}
 \usepackage{mathpartir}
 \usepackage{mismath}
-\DeclarePairedDelimiterX\set[1]{\lbrace}{\rbrace}{\def\mid{\;\delimsize\vert\;}#1}
+\DeclarePairedDelimiterX\set[1]{\lbrace}{\rbrace}{\def\mid{\;\delimsize\vert\;}#1} % usage: \set*{ n \in \mathbb{N} \mid x < 3 }
 
 %%────────────────────────────────────────────────
 %% Algorithms
@@ -199,5 +169,36 @@
 \newenvironment{mkparagraph}[1][]
 { \noindent \textbf{{#1}.} }
 { \hfill $ \dashv $ }
+
+%%────────────────────────────────────────────────
+%% Custom Frame Title
+\setbeamertemplate{frametitle}{
+  \vspace{-0.7ex}
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.3ex,dp=1ex,leftskip=1em,rightskip=1em]{frametitle}
+    \usebeamerfont{frametitle}\insertframetitle
+  \end{beamercolorbox}
+}
+
+%%────────────────────────────────────────────────
+%% Make below blank
+\usepackage{etoolbox}
+\makeatletter
+\pretocmd{\beamer@@frametitle}{\vspace{-1em}}{}{}
+\makeatother
+
+%%────────────────────────────────────────────────
+%% Custom Footline (two logos at bottom corners)
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.5ex,leftskip=1em,rightskip=1em]{author in head/foot}%
+    \includegraphics[height=0.8cm]{pics/YonseiUniversityEmblem.png}%
+    \hfill
+    \includegraphics[height=0.8cm]{pics/fcai_lab_logo.png}%
+    \newline
+    \usebeamerfont{author in head/foot}\insertshortauthor%
+    \hfill
+    \usebeamerfont{page number in head/foot}\insertframenumber{} / \inserttotalframenumber
+  \end{beamercolorbox}%
+}
 
 \endinput
