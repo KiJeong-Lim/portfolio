@@ -14,11 +14,28 @@
 \setbeamertemplate{sections/subsections in toc}[square]
 
 %%────────────────────────────────────────────────
+%% Basic Packages and Fonts
+\usepackage[utf8]{inputenc}
+\usepackage{kotex}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{url}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{multicol}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{textcomp}
+\usepackage{hanging}
+
+%%────────────────────────────────────────────────
 %% Miscellaneous Packages
 \usepackage{xparse}
 \usepackage{tcolorbox}
 \usepackage{pgfpages}
 \usepackage{arydshln}
+\usepackage[style=numeric]{biblatex}
 
 %%────────────────────────────────────────────────
 %% Theme palettes & frametitle
@@ -43,20 +60,6 @@
 \definecolor{myblue}{rgb}{0,0,0.545}
 \definecolor{mygray}{rgb}{0.4,0.4,0.4}
 \definecolor{mydarkblue}{rgb}{0.0,0.0,0.6}
-
-%%────────────────────────────────────────────────
-%% Basic Packages and Fonts
-\usepackage[utf8]{inputenc}
-\usepackage{kotex}
-\usepackage{lmodern}
-\usepackage{graphicx}
-\usepackage{caption}
-\usepackage{url}
-\usepackage{setspace}
-\usepackage{indentfirst}
-\usepackage{multicol}
-\usepackage{array}
-\usepackage{booktabs}
 
 %%────────────────────────────────────────────────
 %% Lists & Enumerations (enumitem overrides)
@@ -93,17 +96,24 @@
 \usepackage{tikz-cd}
 
 %%────────────────────────────────────────────────
+%% Footnote
+\setbeamertemplate{footnote}{
+  \hspace{2.5em}\makebox[1em][l]{\insertfootnotemark}{\scriptsize\insertfootnotetext}\par
+}
+
+%%────────────────────────────────────────────────
 %% Code Listings
 \usepackage{listings}
-\lstset{
-  language=C++,
+\lstdefinestyle{py}{
+  language=Python,
   backgroundcolor=\color{gray!10},
   commentstyle=\color{mygreen},
   keywordstyle=\color{blue},
   stringstyle=\color{red},
   numberstyle=\tiny\color{mygray},
   identifierstyle=\color{black},
-  basicstyle=\ttfamily\footnotesize,
+  basicstyle=\ttfamily\footnotesize\linespread{0.6}\color{black},
+  operatorstyle=\color{black},
   keepspaces=true,
   showstringspaces=false,
   numbers=left,
@@ -112,8 +122,102 @@
   breaklines=true,
   captionpos=b,
   frame=single,
-  rulecolor=\color{black}
+  rulecolor=\color{black},
+  mathescape,       
+  showspaces=false,               
+  showstringspaces=false,
+  showtabs=false,
+  sensitive=true,
+  stepnumber=1,                   
+  tabsize=4,                     
+  title=\lstname,
+  xleftmargin=.02\textwidth,
+  xrightmargin=.02\textwidth,
 }
+\definecolor{rocqBG}{HTML}{FBFBFB}
+\definecolor{rocqFrame}{HTML}{E0E0E0}
+\definecolor{rocqComment}{rgb}{0,0.6,0}
+\definecolor{rocqString}{HTML}{A31515}
+\definecolor{rocqVernac}{HTML}{244a9b}
+\definecolor{rocqGallina}{HTML}{7A3E9D}
+\definecolor{rocqSort}{HTML}{0B5394}
+\definecolor{rocqTactic}{HTML}{000000}
+\definecolor{rocqEnd}{HTML}{244a9b}
+\lstdefinelanguage{Coq}{
+  sensitive=true,
+  alsoletter={'},              % allow x' identifiers
+  morecomment=[s]{(*}{*)},
+  morestring=[b]",
+  morekeywords=[1]{
+    Section,Module,End,Require,Import,Export,From,Load,Include,
+    Variable,Variables,Parameter,Parameters,Axiom,Axioms,Hypothesis,Hypotheses,
+    Definition,Let,Ltac,Fixpoint,CoFixpoint,Inductive,CoInductive,Record,Structure,Variant,
+    Class,Instance,Existing,Context,Local,Global,
+    Universe,Universes,Constraint,Polymorphic,Monomorphic,
+    Notation,Infix,Reserved,Scope,Open,Close,Bind,Delimit,Arguments,Implicit,Implicits,Generalizable,
+    Canonical,Coercion,Hint,Resolve,
+    Theorem,Lemma,Proposition,Corollary,Fact,Remark,Example,Goal,
+    Check,Compute,Eval,Print,Search,About,Locate
+  },
+  morekeywords=[2]{
+    forall,exists,exists2,fun,fix,cofix,struct,
+    match,with,end,as,in,return,let,if,then,else,for,of,is,where
+  },
+  morekeywords=[3]{Type,Prop,Set,SProp,true,false,unit,option},
+  morekeywords=[4]{
+    intro,intros,apply,eapply,exact,refine,assumption,trivial,
+    constructor,split,left,right,exists,
+    destruct,induction,case,elim,remember,revert,clear,subst,rename,pose,
+    assert,have,suff,suffices,cut,replace,change,unfold,fold,
+    simpl,cbn,cbv,hnf,compute,red,
+    repeat,try,now,
+    rewrite,erewrite,setoid_rewrite,autorewrite,
+    inversion,injection,congruence,discriminate,
+    auto,eauto,tauto,firstorder,
+    lia,nlia,omega,ring,field,
+    by,done
+  },
+  morekeywords=[5]{Proof,Qed,Defined,Admitted,Abort}
+}
+\lstdefinestyle{rocq}{
+  language=Coq,
+  backgroundcolor=\color{gray!10},
+  commentstyle=\color{rocqComment}\itshape,
+  stringstyle=\color{rocqString},
+  basicstyle=\ttfamily\footnotesize\linespread{0.6}\color{black},
+  identifierstyle=\ttfamily\color{black},
+  numberstyle=\tiny\color{mygray},
+  keywordstyle=[1]\color{rocqVernac}\bfseries,
+  keywordstyle=[2]\color{rocqGallina}\bfseries,
+  keywordstyle=[3]\color{rocqSort}\bfseries,
+  keywordstyle=[4]\color{rocqTactic},
+  keywordstyle=[5]\color{rocqEnd}\bfseries,
+  keepspaces=true,
+  showstringspaces=false,
+  numbers=left,
+  numbersep=5pt,
+  tabsize=4,
+  breaklines=true,
+  captionpos=b,
+  frame=single,
+  rulecolor=\color{black},
+  mathescape,    
+  showspaces=false,               
+  showstringspaces=false,
+  showtabs=false,
+  sensitive=true,
+  stepnumber=1,                   
+  tabsize=4,                     
+  title=\lstname,
+  xleftmargin=.02\textwidth,
+  xrightmargin=.02\textwidth,
+}
+\makeatletter
+\let\c@algocf\c@lstlisting
+\makeatother
+\makeatletter
+\let\c@algorithm\c@lstlisting
+\makeatother
 
 %%────────────────────────────────────────────────
 %% Hyperref & cleveref setup
@@ -123,25 +227,31 @@
 \usepackage{hyperref}
 \usepackage[capitalize,nameinlink]{cleveref}
 
-\crefdefaultlabelformat{#2\textbf{#1}#3}
-\crefname{section}{\textbf{Section}}{\textbf{Sections}}
-\Crefname{section}{\textbf{Section}}{\textbf{Sections}}
-\crefname{theorem}{\textbf{Theorem}}{\textbf{Theorems}}
-\Crefname{theorem}{\textbf{Theorem}}{\textbf{Theorems}}
-\crefname{definition}{\textbf{Definition}}{\textbf{Definitions}}
-\Crefname{definition}{\textbf{Definition}}{\textbf{Definitions}}
-\crefname{fact}{\textbf{Fact}}{\textbf{Facts}}
-\Crefname{fact}{\textbf{Fact}}{\textbf{Facts}}
-\crefname{lemma}{\textbf{Lemma}}{\textbf{Lemmas}}
-\Crefname{lemma}{\textbf{Lemma}}{\textbf{Lemmas}}
-\crefname{corollary}{\textbf{Corollary}}{\textbf{Corollaries}}
-\Crefname{corollary}{\textbf{Corollary}}{\textbf{Corollaries}}
-\crefname{axiom}{\textbf{Axiom}}{\textbf{Axioms}}
-\Crefname{axiom}{\textbf{Axiom}}{\textbf{Axioms}}
-\crefname{notation}{\textbf{Notation}}{\textbf{Notations}}
-\Crefname{notation}{\textbf{Notation}}{\textbf{Notations}}
-\crefname{remark}{\textbf{Remark}}{\textbf{Remarks}}
-\Crefname{remark}{\textbf{Remark}}{\textbf{Remarks}}
+\crefdefaultlabelformat{#2{#1}#3}
+\crefname{table}{{Table}}{{Tables}}
+\Crefname{table}{{Table}}{{Tables}}
+\crefname{section}{{Section}}{{Sections}}
+\Crefname{section}{{Section}}{{Sections}}
+\crefname{theorem}{{Theorem}}{{Theorems}}
+\Crefname{theorem}{{Theorem}}{{Theorems}}
+\crefname{definition}{{Definition}}{{Definitions}}
+\Crefname{definition}{{Definition}}{{Definitions}}
+\crefname{fact}{{Fact}}{{Facts}}
+\Crefname{fact}{{Fact}}{{Facts}}
+\crefname{lemma}{{Lemma}}{{Lemmas}}
+\Crefname{lemma}{{Lemma}}{{Lemmas}}
+\crefname{corollary}{{Corollary}}{{Corollaries}}
+\Crefname{corollary}{{Corollary}}{{Corollaries}}
+\crefname{axiom}{{Axiom}}{{Axioms}}
+\Crefname{axiom}{{Axiom}}{{Axioms}}
+\crefname{notation}{{Notation}}{{Notations}}
+\Crefname{notation}{{Notation}}{{Notations}}
+\crefname{remark}{{Remark}}{{Remarks}}
+\Crefname{remark}{{Remark}}{{Remarks}}
+\crefname{lstlisting}{{Listing}}{{Listings}}
+\Crefname{lstlisting}{{Listing}}{{Listings}}
+\newcommand{\boldref}[1]{\textbf{\cref{#1}}}
+\newcommand{\pptref}[1]{\color{yonseiblue}{\cref{#1}}}
 
 %%────────────────────────────────────────────────
 %% Bibliography
@@ -166,7 +276,7 @@
 %% Custom Frame Title
 \setbeamertemplate{frametitle}{
   \vspace{-0.7ex}
-  \begin{beamercolorbox}[wd=\paperwidth,ht=2.3ex,dp=1ex,leftskip=1em,rightskip=1em]{frametitle}
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.3ex,dp=1ex,leftskip=0.5em,rightskip=0.5em]{frametitle}
     \usebeamerfont{frametitle}\insertframetitle
   \end{beamercolorbox}
 }
@@ -188,7 +298,7 @@
     \includegraphics[height=0.8cm]{pics/fcai_lab_logo.png}%
     \newline
     \footnotesize
-    \usebeamerfont{author in head/foot}\insertshortauthor%
+    \usebeamerfont{author in head/foot}\textbf{\insertshortauthor}%
     \hfill
     \usebeamerfont{page number in head/foot}\textbf{\insertframenumber{}} \textbf{/} \textbf{\inserttotalframenumber}
   \end{beamercolorbox}%
@@ -196,8 +306,17 @@
 
 %%────────────────────────────────────────────────
 %% Custom Commands & Environments
+\renewcommand*{\bibfont}{\small}
+\newcommand{\makereferences}{
+  \nocite{*}
+  \begingroup
+  \setlength\bibitemsep{0pt}
+  \printbibliography
+  \endgroup
+}
+
 \newcommand{\inlinedef}[1]{\emph{\textbf{#1}}}
-\newcommand{\powerset}{\wp}
+\newcommand{\powerset}{\mathcal{P}}
 \newcommand{\concat}{\ensuremath{+\!\!\!\!+\,}}
 \newcommand{\listunit}[1]{[#1]}
 \newcommand{\bind}{\ensuremath{>\!\!>\!=}}
@@ -205,5 +324,34 @@
 \newenvironment{mkparagraph}[1][]
 { \noindent \textbf{{#1}.} }
 { \hfill $ \dashv $ }
+
+%%────────────────────────────────────────────────
+%% Listing Highlighting
+\makeatletter
+
+% (A) 구두점 색상 누수 방지: other-char도 currstyle이 없으면 identifierstyle 적용
+\patchcmd{\lst@OutputOther}
+  {\let\lst@thestyle\lst@currstyle}{\ifx\lst@currstyle\relax \let\lst@thestyle\lst@identifierstyle \else \let\lst@thestyle\lst@currstyle\fi}{}{\PackageWarning{kjlppt}{Failed to patch \string\lst@OutputOther}}
+
+% (B) escape 시작 직전의 "현재 스타일" 저장 (문자열 안이면 stringstyle이 들어옴)
+\let\lst@kjl@preescstyle\relax
+\patchcmd{\lst@Escape}
+  {\lst@TrackNewLines\lst@OutputLostSpace \lst@XPrintToken}{\global\let\lst@kjl@preescstyle\lst@currstyle \lst@TrackNewLines\lst@OutputLostSpace \lst@XPrintToken}{}{\PackageWarning{kjlppt}{Failed to patch \string\lst@Escape}}
+
+\lst@AddToHook{SelectCharTable}{%
+  \lst@ifmathescape
+    \lst@Escape{\$}{\$}%
+      {%
+        \setbox\@tempboxa=\hbox\bgroup
+          \ifx\lst@kjl@preescstyle\relax
+            \let\lst@kjl@preescstyle\lst@identifierstyle
+          \fi
+          \lst@kjl@preescstyle\bgroup$%
+      }%
+      {%
+        $\egroup \egroup \lst@CalcLostSpaceAndOutput
+      }%
+  \fi}
+\makeatother
 
 \endinput
