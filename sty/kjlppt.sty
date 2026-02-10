@@ -96,6 +96,13 @@
 \usepackage{tikz-cd}
 
 %%────────────────────────────────────────────────
+%% Make below blank
+\usepackage{etoolbox}
+\makeatletter
+\pretocmd{\beamer@@frametitle}{\vspace{-0.7em}}{}{}
+\makeatother
+
+%%────────────────────────────────────────────────
 %% Footnote
 \setbeamertemplate{footnote}{
   \hspace{2.5em}\makebox[1em][l]{\insertfootnotemark}{\scriptsize\insertfootnotetext}\par
@@ -218,6 +225,27 @@
 \makeatletter
 \let\c@algorithm\c@lstlisting
 \makeatother
+\makeatletter
+\patchcmd{\lst@OutputOther}
+  {\let\lst@thestyle\lst@currstyle}{\ifx\lst@currstyle\relax \let\lst@thestyle\lst@identifierstyle \else \let\lst@thestyle\lst@currstyle\fi}{}{\PackageWarning{kjlppt}{Failed to patch \string\lst@OutputOther}}
+\let\lst@kjl@preescstyle\relax
+\patchcmd{\lst@Escape}
+  {\lst@TrackNewLines\lst@OutputLostSpace \lst@XPrintToken}{\global\let\lst@kjl@preescstyle\lst@currstyle \lst@TrackNewLines\lst@OutputLostSpace \lst@XPrintToken}{}{\PackageWarning{kjlppt}{Failed to patch \string\lst@Escape}}
+\lst@AddToHook{SelectCharTable}{%
+  \lst@ifmathescape
+    \lst@Escape{\$}{\$}%
+      {%
+        \setbox\@tempboxa=\hbox\bgroup
+          \ifx\lst@kjl@preescstyle\relax
+            \let\lst@kjl@preescstyle\lst@identifierstyle
+          \fi
+          \lst@kjl@preescstyle\bgroup$%
+      }%
+      {%
+        $\egroup \egroup \lst@CalcLostSpaceAndOutput
+      }%
+  \fi}
+\makeatother
 
 %%────────────────────────────────────────────────
 %% Hyperref & cleveref setup
@@ -282,13 +310,6 @@
 }
 
 %%────────────────────────────────────────────────
-%% Make below blank
-\usepackage{etoolbox}
-\makeatletter
-\pretocmd{\beamer@@frametitle}{\vspace{-0.7em}}{}{}
-\makeatother
-
-%%────────────────────────────────────────────────
 %% Custom Footline (two logos at bottom corners)
 \setbeamertemplate{footline}{%
   \leavevmode%
@@ -324,34 +345,5 @@
 \newenvironment{mkparagraph}[1][]
 { \noindent \textbf{{#1}.} }
 { \hfill $ \dashv $ }
-
-%%────────────────────────────────────────────────
-%% Listing Highlighting
-\makeatletter
-
-% (A) 구두점 색상 누수 방지: other-char도 currstyle이 없으면 identifierstyle 적용
-\patchcmd{\lst@OutputOther}
-  {\let\lst@thestyle\lst@currstyle}{\ifx\lst@currstyle\relax \let\lst@thestyle\lst@identifierstyle \else \let\lst@thestyle\lst@currstyle\fi}{}{\PackageWarning{kjlppt}{Failed to patch \string\lst@OutputOther}}
-
-% (B) escape 시작 직전의 "현재 스타일" 저장 (문자열 안이면 stringstyle이 들어옴)
-\let\lst@kjl@preescstyle\relax
-\patchcmd{\lst@Escape}
-  {\lst@TrackNewLines\lst@OutputLostSpace \lst@XPrintToken}{\global\let\lst@kjl@preescstyle\lst@currstyle \lst@TrackNewLines\lst@OutputLostSpace \lst@XPrintToken}{}{\PackageWarning{kjlppt}{Failed to patch \string\lst@Escape}}
-
-\lst@AddToHook{SelectCharTable}{%
-  \lst@ifmathescape
-    \lst@Escape{\$}{\$}%
-      {%
-        \setbox\@tempboxa=\hbox\bgroup
-          \ifx\lst@kjl@preescstyle\relax
-            \let\lst@kjl@preescstyle\lst@identifierstyle
-          \fi
-          \lst@kjl@preescstyle\bgroup$%
-      }%
-      {%
-        $\egroup \egroup \lst@CalcLostSpaceAndOutput
-      }%
-  \fi}
-\makeatother
 
 \endinput
