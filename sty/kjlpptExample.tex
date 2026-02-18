@@ -1,11 +1,13 @@
 \documentclass[serif,table,10pt,aspectratio=169]{beamer}
 
 \usepackage{kjlppt}
+\renewcommand*{\bibfont}{\normalsize}
+\addbibresource{ref.bib}
 
 \title{\large
 A Beamer Style of FCAI Lab
 }
-\date[August, 2025]{July 28, 2025}
+\date[Febuary, 2026]{Feb 10, 2025}
 \author[G.~Im]{Gijung Im}
 \institute{FCAI Lab \\Yonsei University}
 
@@ -15,6 +17,7 @@ A Beamer Style of FCAI Lab
 
 \begin{frame}
 \tableofcontents
+% \begin{multicols}{2} \tableofcontents \end{multicols} % if you want double column, use this!
 \end{frame}
 
 \section{Section}
@@ -24,12 +27,47 @@ A Beamer Style of FCAI Lab
 \begin{frame}[fragile]
 \frametitle{Usage}
 
-Your \texttt{.tex} should begin with:
-\begin{lstlisting}
+Your \texttt{.tex}\footnote[frame]{A footnote.} should begin with:
+\begin{lstlisting}[style=py,caption={Beamer Template}]
 \documentclass[serif,table,10pt,aspectratio=169]{beamer}
 
 \usepackage{kjlppt}
+% \addbibresource{ref.bib} % If you want add references, uncomment me!
 \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Rocq Listing}
+
+
+\begin{lstlisting}[style=rocq,caption={A Specification of \texttt{prog}},label=lst:wpprog,firstnumber=1]
+Lemma wp_prog
+  : {{{ True }}} prog {{{ v, RET v; $\lceil$v = #0$\rceil$ $\lor$ $\lceil$v = #1$\rceil$ }}}.
+Proof.
+  iIntros "%$\Phi$ _ H$\Phi$".
+  rewrite /prog.
+  wp_alloc l as "Hl".
+  wp_pures.
+  (**
+    Fork does not have its own tactic. Instead, we use its specification.
+    This specification forces us to split our resources between the threads.
+  *)
+  wp_apply (wp_fork with "[Hl]").
+  - iModIntro. wp_store. iModIntro. done.
+  - wp_pures. Fail wp_load.
+Abort.
+\end{lstlisting}
+
+    
+\end{frame}
+
+\section*{References}
+
+\begin{frame}[fragile]
+\frametitle{References}
+
+\makereferences
 
 \end{frame}
 
