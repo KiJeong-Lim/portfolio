@@ -116,7 +116,7 @@
 \lstdefinestyle{py}{
   language=Python,
   backgroundcolor=\color{gray!10},
-  commentstyle=\color{mygreen},
+  commentstyle=\color{mygreen}\itshape,
   keywordstyle=\color{blue},
   stringstyle=\color{red},
   numberstyle=\tiny\color{mygray},
@@ -148,7 +148,7 @@
 \definecolor{rocqString}{HTML}{BB1515}
 \lstdefinelanguage{Coq}{
   sensitive=true,
-  alsoletter={'},
+  alsoletter={'},              % allow x' identifiers
   morecomment=[s]{(*}{*)},
   morestring=[b]",
   morekeywords=[1]{
@@ -165,9 +165,9 @@
   morekeywords=[2]{
     forall,exists,exists2,fun,fix,cofix,struct,
     match,with,end,as,in,return,let,if,then,else,for,of,is,where,
-    by,repeat,try,now,first
+    by,repeat,try,now,first,do
   },
-  morekeywords=[3]{Type,Prop,Set,SProp,true,false,unit,option},
+  morekeywords=[3]{Type,Prop,Set,SProp},
   morekeywords=[4]{
     intro,intros,apply,eapply,exact,refine,assumption,trivial,
     constructor,split,left,right,exists,
