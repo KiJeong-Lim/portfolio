@@ -1,8 +1,8 @@
 \documentclass[serif,table,10pt,aspectratio=169]{beamer}
 
 \usepackage{kjlppt}
-\renewcommand*{\bibfont}{\normalsize}
-\addbibresource{ref.bib}
+%\renewcommand*{\bibfont}{\normalsize}
+%\addbibresource{ref.bib}
 
 \title{\large
 A Beamer Style of FCAI Lab
@@ -40,7 +40,6 @@ Your \texttt{.tex}\footnote[frame]{A footnote.} should begin with:
 \begin{frame}[fragile]
 \frametitle{Rocq Listing}
 
-
 \begin{lstlisting}[style=rocq,caption={A Specification of \texttt{prog}},label=lst:wpprog,firstnumber=1]
 Lemma wp_prog
   : {{{ True }}} prog {{{ v, RET v; $\lceil$v = #0$\rceil$ $\lor$ $\lceil$v = #1$\rceil$ }}}.
@@ -67,7 +66,7 @@ Abort.
 \begin{frame}[fragile]
 \frametitle{References}
 
-\makereferences
+%\makereferences
 
 \end{frame}
 
